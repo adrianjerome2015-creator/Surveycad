@@ -39,7 +39,7 @@ canvas{position:absolute;left:0;top:0;touch-action:none}
 <div id="menu">
 <label><b>Projects (work saves automatically)</b><select id="pj"></select><input id="pn" type="text" placeholder="Project name" style="flex:1 1 120px;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text"><button id="pnew">New</button><button id="prn">Rename</button><button id="pdel">Delete project</button></label>
 <label><b>Project file: backup, or move to another phone</b><button id="psave">Save project file</button><input type="file" id="pf" accept=".json,application/json,text/plain"></label>
-<label><b>Snap to (tap to turn on or off)</b><button data-s="e">Endpoint</button><button data-s="m">Midpoint</button><button data-s="c">Center</button><button data-s="i">Intersection</button><button data-s="n">Nearest</button></label>
+<label><b>Snap to (tap to turn on or off)</b><button data-s="e">Endpoint</button><button data-s="m">Midpoint</button><button data-s="c">Center</button><button data-s="i">Intersection</button><button data-s="n">Nearest</button><button data-s="h">Show points</button></label>
 <label><b>Project coordinate system</b><select id="pc"></select></label>
 <label><b>Import CSV (name,E,N or id,E,N; Lat/Lon = lat,lon)</b><select id="icrs"></select><select id="imode"><option value="pts">as points</option><option value="pl">as polyline</option><option value="pg">as polygon</option></select><input type="file" id="cf" accept=".csv,.txt,text/csv,text/plain"></label>
 <label><b>Export CSV in</b><select id="ecrs"></select><button id="ecsv">Save CSV</button></label>
@@ -135,6 +135,8 @@ var on=(sel&&!sel.r&&sel.i==k)||jl.indexOf(k)>=0;ctx.strokeStyle=on?css('--ac'):
 if(e.t=='T'&&e.n){var q=S(e.p);ctx.fillStyle=css('--fg');ctx.fillText(e.n,q[0]+7,q[1]-5)}});
 if(sel&&sel.r&&rs[sel.i]){var r=rs[sel.i],c=[[0,0],[r.img.width,0],[r.img.width,-r.img.height],[0,-r.img.height]].map(function(u){return S(r2w(r,u))});ctx.strokeStyle=css('--ac');ctx.lineWidth=3;ctx.beginPath();c.forEach(function(q,j){if(j)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1])});ctx.closePath();ctx.stroke()}
 if(tool=='VMOVE'||tool=='VDEL'){ctx.fillStyle=css('--ac');ents.forEach(function(e,k){var L=layers[e.l],P=vpts(e);if(!L||!L.on||!P)return;P.forEach(function(q,j){var z=S(q),h=vh&&vh.k==k&&vh.j==j?7:3;ctx.fillRect(z[0]-h,z[1]-h,2*h,2*h)})})}
+if(SN.h&&tool&&/^(POINT|LINE|PLINE|POLY|CURVE|CIRCLE|CIRC3|ARC|MEAS|MOVE|COPY|ROT|SCALE|ALIGN|GEOREF)$/.test(tool)){var cn=0;ctx.globalAlpha=.7;ents.forEach(function(e){var L=layers[e.l];if(!L||!L.on||cn>400)return;kpts(e).forEach(function(c){cn++;mark(c.q,c.k,0,1)})});ctx.globalAlpha=1}
+if(hv){var HM=hmarks(hv);HM.m.forEach(function(c){mark(c.q,c.k,0)});if(HM.b)mark(HM.b,HM.k,1)}
 ctx.strokeStyle=css('--ac');ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();
 tmp.forEach(function(t,j){var q=S(t);if(j)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1])});ctx.stroke();ctx.setLineDash([]);
 ctx.fillStyle=css('--ac');tmp.forEach(function(t){var q=S(t);ctx.fillRect(q[0]-4,q[1]-4,8,8)});
@@ -239,7 +241,8 @@ var n=tool;setTool(null);save();draw();say(n=='ALIGN'?'Aligned.':'Image georefer
 if(last&&tool!='MEAS')say((tool=='POINT'?'Point '+ents[ents.length-1].n+' at ':'Last point: ')+f3(last[0])+', '+f3(last[1])+(SK?'  (snapped to '+SK+')':''));
 ask();save();draw()}
 function kp(e){return e.t=='L'?[e.a,e.b]:(e.t=='P'||e.t=='S')?e.p:e.t=='T'?[e.p]:[e.c]}
-var SN={e:1,m:1,c:1,i:1,n:0},SK='';
+var SN={e:1,m:1,c:1,i:1,n:0,h:1},SK='',hv=null,raf=0;
+function req(){if(!raf)raf=requestAnimationFrame(function(){raf=0;draw()})}
 function prim(e){var q,o=[],i;
 if(e.t=='L')return{s:[[e.a,e.b]]};
 if(e.t=='P'||e.t=='S'){q=e.t=='S'?spl(e.p):e.p;for(i=0;i<q.length-1;i++)o.push([q[i],q[i+1]]);if(e.z&&q.length>2)o.push([q[q.length-1],q[0]]);return{s:o}}
@@ -248,18 +251,34 @@ function inArc(c,a){if(c.t!='A')return true;var T=6.283185307,x=((a-c.s)%T+T)%T,
 function ss(a,b,c,d){var r=[b[0]-a[0],b[1]-a[1]],q=[d[0]-c[0],d[1]-c[1]],k=r[0]*q[1]-r[1]*q[0];if(Math.abs(k)<1e-12)return[];var t=((c[0]-a[0])*q[1]-(c[1]-a[1])*q[0])/k,u=((c[0]-a[0])*r[1]-(c[1]-a[1])*r[0])/k;return(t>=0&&t<=1&&u>=0&&u<=1)?[[a[0]+t*r[0],a[1]+t*r[1]]]:[]}
 function sc(a,b,c){var dx=b[0]-a[0],dy=b[1]-a[1],fx=a[0]-c.c[0],fy=a[1]-c.c[1],A=dx*dx+dy*dy,B=2*(fx*dx+fy*dy),C=fx*fx+fy*fy-c.r*c.r,D=B*B-4*A*C,o=[];if(A<1e-18||D<0)return o;D=Math.sqrt(D);[(-B-D)/(2*A),(-B+D)/(2*A)].forEach(function(t){if(t>=0&&t<=1){var p=[a[0]+t*dx,a[1]+t*dy];if(inArc(c,Math.atan2(p[1]-c.c[1],p[0]-c.c[0])))o.push(p)}});return o}
 function cc(c1,c2){var d=dist(c1.c,c2.c),o=[];if(d<1e-12||d>c1.r+c2.r||d<Math.abs(c1.r-c2.r))return o;var a=(c1.r*c1.r-c2.r*c2.r+d*d)/(2*d),h=Math.sqrt(Math.max(0,c1.r*c1.r-a*a)),ux=(c2.c[0]-c1.c[0])/d,uy=(c2.c[1]-c1.c[1])/d,mx=c1.c[0]+a*ux,my=c1.c[1]+a*uy;[[mx-h*uy,my+h*ux],[mx+h*uy,my-h*ux]].forEach(function(p){if(inArc(c1,Math.atan2(p[1]-c1.c[1],p[0]-c1.c[0]))&&inArc(c2,Math.atan2(p[1]-c2.c[1],p[0]-c2.c[0])))o.push(p)});return o}
-function snap(p){var t=16/v.s,C=[],ne=[];SK='';
+function kpts(e){var o=[];function a(q,k){o.push({q:q,k:k})}
+if(SN.e){if(e.t=='T')a(e.p,'endpoint');else if(e.t=='L'){a(e.a,'endpoint');a(e.b,'endpoint')}else if(e.t=='P'||e.t=='S')e.p.forEach(function(q){a(q,'endpoint')});else if(e.t=='A'){a([e.c[0]+e.r*Math.cos(e.s),e.c[1]+e.r*Math.sin(e.s)],'endpoint');a([e.c[0]+e.r*Math.cos(e.e),e.c[1]+e.r*Math.sin(e.e)],'endpoint')}}
+if(SN.c&&e.c)a(e.c,'center');
+if(SN.m&&(e.t=='L'||e.t=='P'))(prim(e).s||[]).forEach(function(g){a([(g[0][0]+g[1][0])/2,(g[0][1]+g[1][1])/2],'midpoint')});
+return o}
+function snapAll(p,t){var C=[],ne=[];
 function add(q,k,w){var d=dist(p,q);if(d<t)C.push({q:q,k:k,d:d*w})}
-ents.forEach(function(e){var L=layers[e.l];if(!L||!L.on)return;var pr=prim(e);
-if(SN.e){if(e.t=='T')add(e.p,'endpoint',1);else if(e.t=='L'){add(e.a,'endpoint',1);add(e.b,'endpoint',1)}else if(e.t=='P'||e.t=='S')e.p.forEach(function(q){add(q,'endpoint',1)});else if(e.t=='A'){add([e.c[0]+e.r*Math.cos(e.s),e.c[1]+e.r*Math.sin(e.s)],'endpoint',1);add([e.c[0]+e.r*Math.cos(e.e),e.c[1]+e.r*Math.sin(e.e)],'endpoint',1)}}
-if(SN.c&&e.c)add(e.c,'center',1);
-if(SN.m&&(e.t=='L'||e.t=='P'))(pr.s||[]).forEach(function(g){add([(g[0][0]+g[1][0])/2,(g[0][1]+g[1][1])/2],'midpoint',1.15)});
-if(hit(e,p)<t)ne.push(pr)});
+ents.forEach(function(e){var L=layers[e.l];if(!L||!L.on)return;
+kpts(e).forEach(function(c){add(c.q,c.k,c.k=='midpoint'?1.15:1)});
+if(hit(e,p)<t)ne.push(prim(e))});
 if(SN.i){for(var a=0;a<ne.length;a++)for(var b=a+1;b<ne.length;b++){var A=ne[a],B=ne[b];
 (A.s||[]).forEach(function(s1){(B.s||[]).forEach(function(s2){ss(s1[0],s1[1],s2[0],s2[1]).forEach(function(q){add(q,'intersection',1)})});(B.c||[]).forEach(function(c){sc(s1[0],s1[1],c).forEach(function(q){add(q,'intersection',1)})})});
 (A.c||[]).forEach(function(c1){(B.s||[]).forEach(function(s2){sc(s2[0],s2[1],c1).forEach(function(q){add(q,'intersection',1)})});(B.c||[]).forEach(function(c2){cc(c1,c2).forEach(function(q){add(q,'intersection',1)})})})}}
 if(SN.n)ne.forEach(function(pr){(pr.s||[]).forEach(function(g){var dx=g[1][0]-g[0][0],dy=g[1][1]-g[0][1],l=dx*dx+dy*dy,u=l?Math.max(0,Math.min(1,((p[0]-g[0][0])*dx+(p[1]-g[0][1])*dy)/l)):0;add([g[0][0]+u*dx,g[0][1]+u*dy],'nearest',2.5)});(pr.c||[]).forEach(function(c){var d=dist(p,c.c);if(d>1e-12&&inArc(c,Math.atan2(p[1]-c.c[1],p[0]-c.c[0])))add([c.c[0]+c.r*(p[0]-c.c[0])/d,c.c[1]+c.r*(p[1]-c.c[1])/d],'nearest',2.5)})});
-if(!C.length)return p;C.sort(function(a,b){return a.d-b.d});SK=C[0].k;return C[0].q}
+return C}
+function snap(p){SK='';var C=snapAll(p,16/v.s);if(!C.length)return p;C.sort(function(a,b){return a.d-b.d});SK=C[0].k;return C[0].q}
+function hmarks(p){var t=14/v.s,m=[];
+ents.forEach(function(e){var L=layers[e.l];if(!L||!L.on)return;var k=kpts(e),h=hit(e,p)<t;if(!h)k.forEach(function(c){if(dist(c.q,p)<t*1.5)h=true});if(h)m=m.concat(k)});
+snapAll(p,40/v.s).forEach(function(c){if(c.k=='intersection'||c.k=='nearest')m.push(c)});
+var b=snap(p);return{m:m,b:SK?b:null,k:SK}}
+function mark(q,k,big,sm){var z=S(q),r=big?9:sm?4:6,col={endpoint:'#30a46c',midpoint:'#f5a524',center:'#3e63dd',intersection:'#e5484d',nearest:'#ab4aba'}[k]||'#888';
+ctx.strokeStyle=col;ctx.lineWidth=big?3:2;ctx.beginPath();
+if(k=='endpoint')ctx.rect(z[0]-r,z[1]-r,2*r,2*r);
+else if(k=='midpoint'){ctx.moveTo(z[0],z[1]-r);ctx.lineTo(z[0]+r,z[1]+r);ctx.lineTo(z[0]-r,z[1]+r);ctx.closePath()}
+else if(k=='center'){ctx.arc(z[0],z[1],r,0,6.2832);ctx.moveTo(z[0]-r,z[1]);ctx.lineTo(z[0]+r,z[1]);ctx.moveTo(z[0],z[1]-r);ctx.lineTo(z[0],z[1]+r)}
+else if(k=='intersection'){ctx.moveTo(z[0]-r,z[1]-r);ctx.lineTo(z[0]+r,z[1]+r);ctx.moveTo(z[0]+r,z[1]-r);ctx.lineTo(z[0]-r,z[1]+r)}
+else{ctx.moveTo(z[0],z[1]-r);ctx.lineTo(z[0]+r,z[1]);ctx.lineTo(z[0],z[1]+r);ctx.lineTo(z[0]-r,z[1]);ctx.closePath()}
+ctx.stroke();if(big){ctx.fillStyle=col;ctx.font='bold 12px sans-serif';ctx.fillText(k,z[0]+r+4,z[1]-r)}}
 function sg(p,a,b){var dx=b[0]-a[0],dy=b[1]-a[1],l=dx*dx+dy*dy,t=l?Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/l)):0;return dist(p,[a[0]+t*dx,a[1]+t*dy])}
 function hit(e,p){var i,m=1e18,n;
 if(e.t=='L')return sg(p,e.a,e.b);
@@ -451,16 +470,17 @@ $('ldel').onclick=function(){if(cur==0){say('The first layer cannot be deleted.'
 var Pt={},cnt=0,mv=0,sp0=null,pd=0;
 function pos(e){var r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]}
 cv.addEventListener('pointerdown',function(e){try{cv.setPointerCapture(e.pointerId)}catch(x){}
-Pt[e.pointerId]=pos(e);cnt=Object.keys(Pt).length;if(cnt==1){mv=0;sp0=pos(e)}if(cnt==2){mv=1;var k=Object.keys(Pt);pd=dist(Pt[k[0]],Pt[k[1]])||1}});
+Pt[e.pointerId]=pos(e);cnt=Object.keys(Pt).length;if(cnt==1){mv=0;sp0=pos(e);hv=Wd(sp0[0],sp0[1]);draw()}if(cnt==2){mv=1;var k=Object.keys(Pt);pd=dist(Pt[k[0]],Pt[k[1]])||1}});
 cv.addEventListener('pointermove',function(e){
-if(!Pt[e.pointerId])return;var n=pos(e),o=Pt[e.pointerId];
-if(cnt==1){v.x-=(n[0]-o[0])/v.s;v.y+=(n[1]-o[1])/v.s;if(dist(n,sp0)>8)mv=1;Pt[e.pointerId]=n;draw()}
-else if(cnt==2){Pt[e.pointerId]=n;var k=Object.keys(Pt),a=Pt[k[0]],b=Pt[k[1]],d=dist(a,b)||1,m=[(a[0]+b[0])/2,(a[1]+b[1])/2],w0=Wd(m[0],m[1]);
+if(!Pt[e.pointerId]){if(e.pointerType!='touch'){var q1=pos(e);hv=Wd(q1[0],q1[1]);req()}return}var n=pos(e),o=Pt[e.pointerId];
+if(cnt==1){v.x-=(n[0]-o[0])/v.s;v.y+=(n[1]-o[1])/v.s;if(dist(n,sp0)>8){mv=1;hv=null}Pt[e.pointerId]=n;draw()}
+else if(cnt==2){hv=null;Pt[e.pointerId]=n;var k=Object.keys(Pt),a=Pt[k[0]],b=Pt[k[1]],d=dist(a,b)||1,m=[(a[0]+b[0])/2,(a[1]+b[1])/2],w0=Wd(m[0],m[1]);
 v.s=Math.max(0.0001,Math.min(1e7,v.s*d/pd));pd=d;var w1=Wd(m[0],m[1]);v.x+=w0[0]-w1[0];v.y+=w0[1]-w1[1];draw()}});
 cv.addEventListener('pointerup',function(e){if(!Pt[e.pointerId])return;
 if(cnt==1&&!mv){var q=pos(e),w=Wd(q[0],q[1]);if(tool=='TRIM')trimAt(w);else if(tool=='EXTEND')extAt(w);else if(tool=='JOIN')joinPick(w);else if(tool=='VMOVE'||tool=='VADD'||tool=='VDEL')vtap(w);else if(tool)feed({pt:snap(w)});else pick(w)}
-delete Pt[e.pointerId];cnt=Object.keys(Pt).length});
-cv.addEventListener('pointercancel',function(e){delete Pt[e.pointerId];cnt=Object.keys(Pt).length});
+delete Pt[e.pointerId];cnt=Object.keys(Pt).length;if(e.pointerType=='touch'){hv=null;draw()}});
+cv.addEventListener('pointercancel',function(e){delete Pt[e.pointerId];cnt=Object.keys(Pt).length;hv=null;draw()});
+cv.addEventListener('pointerleave',function(e){if(e.pointerType!='touch'&&!cnt){hv=null;draw()}});
 (function(){var b=document.querySelectorAll('[data-s]');for(var i=0;i<b.length;i++){(function(x){var k=x.getAttribute('data-s');x.className=SN[k]?'on':'';x.onclick=function(){SN[k]=SN[k]?0:1;x.className=SN[k]?'on':'';say('Snap '+x.textContent+(SN[k]?' on':' off'))}})(b[i])}})();
 $('pj').onchange=function(){put();openP(this.value)};
 $('pnew').onclick=function(){if(!db){say('Projects need browser storage, which is not available.');return}var n=$('pn').value.trim()||'Project '+(plist.length+1);$('pn').value='';newP(n)};
