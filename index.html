@@ -13,8 +13,13 @@
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--fg);font:14px -apple-system,Helvetica,Arial,sans-serif;display:flex;flex-direction:column;overflow:hidden;-webkit-user-select:none;user-select:none}
 .row{display:flex;flex-wrap:wrap;gap:6px;padding:6px;background:var(--bar);border-bottom:1px solid var(--bd)}
-#tools{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
-#tools button{flex:none}
+#top button{flex:1;min-width:0;padding:6px 4px}
+#tools{display:none;position:absolute;left:6px;right:6px;top:6px;max-height:calc(100% - 12px);overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bar);border:1px solid var(--bd);border-radius:12px;padding:4px 10px 10px;box-shadow:0 6px 24px rgba(0,0,0,.35);z-index:5}
+#tools.open{display:block}
+#tools h4{margin:10px 0 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+.g{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+#tools button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px;min-height:52px;font-size:12px;line-height:1.1}
+#tools i{font-style:normal;font-size:20px;line-height:1}
 button,select,input{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:6px 9px;min-height:34px}
 button.on{background:var(--ac);color:var(--bg);border-color:var(--ac)}
 select{flex:1;min-width:80px}
@@ -29,9 +34,7 @@ canvas{position:absolute;left:0;top:0;touch-action:none}
 #st{font-size:12px;opacity:.8;margin:0 0 6px}
 #in{flex:1;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text}
 </style></head><body>
-<div class="row" id="tools">
-<button data-t="LINE">Line</button><button data-t="PLINE">Polyline</button><button data-t="POLY">Polygon</button><button data-t="CURVE">Curve</button><button data-t="CIRCLE">Circle</button><button data-t="CIRC3">Circle 3P</button><button data-t="ARC">Arc</button><button data-t="MEAS">Measure</button><button data-t="MOVE">Move</button><button data-t="SCALE">Scale</button><button data-t="ROT">Rotate</button><button data-t="TRIM">Trim</button><button data-t="EXTEND">Extend</button><button data-t="JOIN">Join</button><button data-o="z">Explode</button><button data-t="VMOVE">Move vtx</button><button data-t="VADD">Add vtx</button><button data-t="VDEL">Del vtx</button><button data-t="ALIGN">Align</button><button id="done">Done</button><button id="undo">Undo</button><button data-o="x">Delete</button><button id="fit">Fit</button><button data-o="f">Front</button><button data-o="u">Forward</button><button data-o="d">Backward</button><button data-o="b">Back</button><button data-o="l">To layer</button>
-</div>
+<div class="row" id="top"><button id="tb">Tools &#9662;</button><button id="done">Done</button><button id="undo">Undo</button><button id="dl2">Delete</button><button id="fit">Fit</button></div>
 <div class="row"><select id="ly"></select><input id="ln" type="text" placeholder="New layer name" style="flex:1 1 100px;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text"><button id="addl">+ Layer</button><button id="vis">Hide</button><button id="mb">Menu</button></div>
 <div id="menu">
 <label><b>Projects (work saves automatically)</b><select id="pj"></select><input id="pn" type="text" placeholder="Project name" style="flex:1 1 120px;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text"><button id="pnew">New</button><button id="prn">Rename</button><button id="pdel">Delete project</button></label>
@@ -46,7 +49,7 @@ canvas{position:absolute;left:0;top:0;touch-action:none}
 <label><b>Plot to scale (centred on current view, units = metres)</b><input id="sc" type="text" inputmode="numeric" placeholder="1:500" style="width:90px"><select id="pp"><option value="l">A4 landscape</option><option value="p">A4 portrait</option></select><button id="pdfs">Save scaled PDF</button></label>
 <label><b>Export current view</b><button id="png">Save PNG</button><button id="pdf">Save PDF</button></label>
 </div>
-<div id="wrap"><canvas id="cv"></canvas></div>
+<div id="wrap"><canvas id="cv"></canvas><div id="tools"><h4>Draw</h4><div class="g"><button data-t="POINT"><i>✚</i>Point</button><button data-t="LINE"><i>╱</i>Line</button><button data-t="PLINE"><i>⌇</i>Polyline</button><button data-t="POLY"><i>△</i>Polygon</button><button data-t="CURVE"><i>∿</i>Curve</button><button data-t="CIRCLE"><i>○</i>Circle</button><button data-t="CIRC3"><i>◎</i>Circle 3P</button><button data-t="ARC"><i>◠</i>Arc</button></div><h4>Inspect</h4><div class="g"><button data-t="MEAS"><i>↔</i>Measure</button></div><h4>Modify</h4><div class="g"><button data-t="MOVE"><i>✥</i>Move</button><button data-t="COPY"><i>❐</i>Copy</button><button data-t="ROT"><i>↻</i>Rotate</button><button data-t="SCALE"><i>⇲</i>Scale</button><button data-t="ALIGN"><i>⇉</i>Align</button><button data-t="TRIM"><i>✂</i>Trim</button><button data-t="EXTEND"><i>⇥</i>Extend</button><button data-t="JOIN"><i>⊕</i>Join</button><button data-o="z"><i>✸</i>Explode</button></div><h4>Vertices</h4><div class="g"><button data-t="VMOVE"><i>◆</i>Move vtx</button><button data-t="VADD"><i>⊞</i>Add vtx</button><button data-t="VDEL"><i>⊟</i>Del vtx</button></div><h4>Arrange selected</h4><div class="g"><button data-o="f"><i>⇧</i>Front</button><button data-o="u"><i>↑</i>Forward</button><button data-o="d"><i>↓</i>Backward</button><button data-o="b"><i>⇩</i>Back</button><button data-o="l"><i>≡</i>To layer</button></div></div></div>
 <div id="bot">
 <p id="pr">Pick a tool</p>
 <p id="st">Tap the canvas or type a point: 100,200 / @10,5 / @25&lt;45. Tap an object with no tool to select it.</p>
@@ -60,7 +63,7 @@ var cv=document.getElementById('cv'),ctx=cv.getContext('2d'),wrap=document.getEl
 var PAL=['#e5484d','#f5a524','#30a46c','#3e63dd','#ab4aba','#12a594'];
 var layers=[{n:'0',c:PAL[0],on:1}],cur=0,ents=[],rs=[],sel=null,v={x:0,y:0,s:10},W=0,H=0,tool=null,step=0,tmp=[],last=null,dl=null;
 var DPR=window.devicePixelRatio||1;
-var PR={LINE:['Line: start point','Line: next point (Done to finish)'],VMOVE:['Move vertex: tap a vertex (squares), then tap its new position'],VADD:['Add vertex: tap a line, polyline, polygon or curve where the vertex goes'],VDEL:['Delete vertex: tap a vertex to remove'],TRIM:['Trim: tap the part to remove (it is cut at the nearest crossing objects)'],EXTEND:['Extend: tap near the end of an open line or polyline'],JOIN:['Join: tap lines or open polylines, then Done'],CURVE:['Curve: first point','Curve: next point (Done to finish)'],ROT:['Rotate: base point','Rotate: angle in degrees (CCW)'],PLINE:['Polyline: first point','Polyline: next point (Done to finish)'],POLY:['Polygon: first point','Polygon: next point (Done to close)'],CIRCLE:['Circle: center point','Circle: type the radius, or tap a point on the circle'],CIRC3:['Circle 3P: first point on the circle','Circle 3P: second point','Circle 3P: third point'],ARC:['Arc: center','Arc: radius','Arc: start angle (deg CCW from east)','Arc: end angle (deg)'],MEAS:['Measure: first point','Measure: second point'],MOVE:['Move: base point','Move: destination point'],SCALE:['Scale: base point','Scale: factor (e.g. 2)'],ALIGN:['Align: source point 1','Align: destination 1','Align: source point 2','Align: destination 2'],GEOREF:['Georeference: tap point 1 on the image','Point 1 real coordinates (x,y)','Tap point 2 on the image','Point 2 real coordinates (x,y)']};
+var PR={POINT:['Point: tap a location, or type x,y (or NAME x,y)'],COPY:['Copy: base point','Copy: destination (tap more for more copies, Done to finish)'],LINE:['Line: start point','Line: next point (Done to finish)'],VMOVE:['Move vertex: tap a vertex (squares), then tap its new position'],VADD:['Add vertex: tap a line, polyline, polygon or curve where the vertex goes'],VDEL:['Delete vertex: tap a vertex to remove'],TRIM:['Trim: tap the part to remove (it is cut at the nearest crossing objects)'],EXTEND:['Extend: tap near the end of an open line or polyline'],JOIN:['Join: tap lines or open polylines, then Done'],CURVE:['Curve: first point','Curve: next point (Done to finish)'],ROT:['Rotate: base point','Rotate: angle in degrees (CCW)'],PLINE:['Polyline: first point','Polyline: next point (Done to finish)'],POLY:['Polygon: first point','Polygon: next point (Done to close)'],CIRCLE:['Circle: center point','Circle: type the radius, or tap a point on the circle'],CIRC3:['Circle 3P: first point on the circle','Circle 3P: second point','Circle 3P: third point'],ARC:['Arc: center','Arc: radius','Arc: start angle (deg CCW from east)','Arc: end angle (deg)'],MEAS:['Measure: first point','Measure: second point'],MOVE:['Move: base point','Move: destination point'],SCALE:['Scale: base point','Scale: factor (e.g. 2)'],ALIGN:['Align: source point 1','Align: destination 1','Align: source point 2','Align: destination 2'],GEOREF:['Georeference: tap point 1 on the image','Point 1 real coordinates (x,y)','Tap point 2 on the image','Point 2 real coordinates (x,y)']};
 var CR={loc:['Local (no CRS)']};
 ['WGS84','Arc 1960'].forEach(function(d){[35,36].forEach(function(z){['N','S'].forEach(function(h){CR[(d[0]=='W'?'w':'a')+z+h]=[d+' UTM '+z+h,z,h=='S'?1:0,d[0]=='W'?'w':'a']})})});
 CR.ll=['Lat/Lon WGS84'];
@@ -85,7 +88,7 @@ if(a!='ll'){g=inv({e:A[3]=='a'?EA:EW,z:A[1],s:A[2]},p);if(A[3]=='a')g=sh(g,EA,EW
 if(b=='ll')return g;
 if(B[3]=='a')g=sh(g,EW,EA,[160,8,300]);
 return fwd({e:B[3]=='a'?EA:EW,z:B[1],s:B[2]},g)}
-var db=null,tm=0,pid=null,plist=[],pdc=0,hist=[],jl=[],vh=null;
+var db=null,tm=0,pid=null,plist=[],pdc=0,hist=[],jl=[],vh=null,pnm='';
 function idb(cb){try{var q=indexedDB.open('scad',1);q.onupgradeneeded=function(){q.result.createObjectStore('kv')};q.onsuccess=function(){db=q.result;cb()};q.onerror=function(){}}catch(x){}}
 function kv(m){return db.transaction('kv',m||'readonly').objectStore('kv')}
 function snapP(){return{l:layers,e:ents,c:cur,pc:$('pc').value,v:v,rs:rs.map(function(r){return{src:r.src,a:r.a,b:r.b,t:r.t,on:r.on,name:r.name}})}}
@@ -140,7 +143,7 @@ function r2w(r,u){return[r.a*u[0]-r.b*u[1]+r.t[0],r.b*u[0]+r.a*u[1]+r.t[1]]}
 function w2r(r,w){var z0=w[0]-r.t[0],z1=w[1]-r.t[1],d=r.a*r.a+r.b*r.b;return[(z0*r.a+z1*r.b)/d,(z1*r.a-z0*r.b)/d]}
 function say(m){$('st').textContent=m}
 function ask(){$('pr').textContent=tool?PR[tool][Math.min(step,PR[tool].length-1)]:'Pick a tool'}
-function setTool(t){tool=t;step=0;tmp=[];jl=[];vh=null;var b=document.querySelectorAll('#tools [data-t]');for(var i=0;i<b.length;i++)b[i].className=b[i].getAttribute('data-t')==t?'on':'';ask();draw()}
+function setTool(t){tool=t;step=0;tmp=[];jl=[];vh=null;var b=document.querySelectorAll('#tools [data-t]');for(var i=0;i<b.length;i++)b[i].className=b[i].getAttribute('data-t')==t?'on':'';ask();$('tb').textContent=(t&&document.querySelector('#tools [data-t="'+t+'"]')?document.querySelector('#tools [data-t="'+t+'"]').textContent.slice(1):'Tools')+' \u25BE';$('tb').className=t?'on':'';draw()}
 function parse(s){
 s=s.replace(/\s+/g,'');if(!s)return null;
 var m=/^(@?)(-?[\d.]+)<(-?[\d.]+)$/.exec(s);
@@ -182,7 +185,7 @@ function tgt(){return sel&&sel.r?rs[sel.i]:rs[rs.length-1]}
 function feed(r){
 if(!tool){say('Pick a tool first, or tap an object to select it.');return}
 if(!r){say('Not understood. Try 100,200 or @10,5 or @25<45');return}
-if((tool=='MOVE'||tool=='SCALE'||tool=='ROT'||tool=='ALIGN')&&!sel){say('Select an object first: tap it with no tool active.');return}
+if((tool=='MOVE'||tool=='COPY'||tool=='SCALE'||tool=='ROT'||tool=='ALIGN')&&!sel){say('Select an object first: tap it with no tool active.');return}
 if(tool=='GEOREF'&&!tgt()){say('Add an image first (Menu).');return}
 var pt=r.pt,num=r.num,b;
 if(tool=='LINE'){
@@ -191,6 +194,13 @@ if(step==0){tmp=[pt];step=1}else{ents.push({t:'L',a:tmp[0],b:pt,l:cur});tmp=[pt]
 last=pt}
 else if(tool=='PLINE'||tool=='POLY'||tool=='CURVE'){
 if(!pt){say('Needs a point.');return}tmp.push(pt);step=1;last=pt}
+else if(tool=='POINT'){
+if(!pt){say('Needs a point.');return}
+ents.push({t:'T',n:pnm||nextP(),p:pt,l:cur});pnm='';last=pt}
+else if(tool=='COPY'){
+if(!pt){say('Needs a point.');return}
+if(step==0){tmp=[pt];step=1}
+else{if(sel.r){say('Images cannot be copied.');return}var o=sel.i,c=JSON.parse(JSON.stringify(ents[o]));if(c.t=='T')c.n=nextP();ents.push(c);sel={r:0,i:ents.length-1};applyXf([1,0],[pt[0]-tmp[0][0],pt[1]-tmp[0][1]]);sel={r:0,i:o};save();draw();say('Copied. Tap another destination for more copies, or Done.');return}}
 else if(tool=='CIRC3'){
 if(!pt){say('Needs a point.');return}tmp.push(pt);last=pt;step=tmp.length;
 if(tmp.length==3){var a=tmp[0],b=tmp[1],c=tmp[2],d=2*(a[0]*(b[1]-c[1])+b[0]*(c[1]-a[1])+c[0]*(a[1]-b[1]));
@@ -226,7 +236,7 @@ if(tmp.length==4){var q=sim(tmp[0],tmp[1],tmp[2],tmp[3]);
 if(!q){say('The two points must be different.');setTool(tool);return}
 if(tool=='ALIGN')applyXf(q.M,q.T);else{var R=tgt();R.a=q.M[0];R.b=q.M[1];R.t=q.T}
 var n=tool;setTool(null);save();draw();say(n=='ALIGN'?'Aligned.':'Image georeferenced. Scale '+f3(Math.sqrt(q.M[0]*q.M[0]+q.M[1]*q.M[1]))+' units per pixel.');return}}
-if(last&&tool!='MEAS')say('Last point: '+f3(last[0])+', '+f3(last[1])+(SK?'  (snapped to '+SK+')':''));
+if(last&&tool!='MEAS')say((tool=='POINT'?'Point '+ents[ents.length-1].n+' at ':'Last point: ')+f3(last[0])+', '+f3(last[1])+(SK?'  (snapped to '+SK+')':''));
 ask();save();draw()}
 function kp(e){return e.t=='L'?[e.a,e.b]:(e.t=='P'||e.t=='S')?e.p:e.t=='T'?[e.p]:[e.c]}
 var SN={e:1,m:1,c:1,i:1,n:0},SK='';
@@ -347,10 +357,13 @@ for(i=0;i<Q.length-1;i++){var dx=Q[i+1][0]-Q[i][0],dy=Q[i+1][1]-Q[i][1],l=dx*dx+
 if(bi<0){say('Tap on a line, polyline, polygon or curve.');return}
 var e2=ents[bi];if(e2.t=='L')ents[bi]={t:'P',p:[e2.a,bp,e2.b],z:0,l:e2.l};else e2.p.splice(ins,0,bp);
 save();draw();say('Vertex added. Use Move vtx to reposition it.')}
-function submit(){var i=$('in');SK='';feed(parse(i.value));i.value=''}
+function nextP(){var m=0;ents.forEach(function(e){if(e.t=='T'){var x=/^P(\d+)$/.exec(e.n||'');if(x)m=Math.max(m,+x[1])}});return 'P'+(m+1)}
+function submit(){var i=$('in'),x=i.value;SK='';if(tool=='POINT'){var m=/^([A-Za-z][\w-]*)[\s:]+(\S.*)$/.exec(x.trim());if(m){pnm=m[1];x=m[2]}}feed(parse(x));i.value=''}
 $('ent').onclick=submit;
 $('in').onkeydown=function(e){if(e.keyCode==13){e.preventDefault();submit()}};
-$('tools').onclick=function(e){var t=e.target.getAttribute('data-t'),o=e.target.getAttribute('data-o');if(t)setTool(t);else if(o)ord(o)};
+$('tools').onclick=function(e){var b=e.target.closest?e.target.closest('button'):e.target;if(!b)return;var t=b.getAttribute('data-t'),o=b.getAttribute('data-o');if(t)setTool(t);else if(o)ord(o);else return;this.classList.remove('open')};
+$('tb').onclick=function(){$('tools').classList.toggle('open')};
+$('dl2').onclick=function(){ord('x')};
 function ord(m){
 if(m=='z'){explode();return}
 if(m=='x'){$('del').onclick();return}
