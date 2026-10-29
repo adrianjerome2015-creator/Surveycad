@@ -30,12 +30,13 @@ canvas{position:absolute;left:0;top:0;touch-action:none}
 #in{flex:1;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text}
 </style></head><body>
 <div class="row" id="tools">
-<button data-t="LINE">Line</button><button data-t="PLINE">Polyline</button><button data-t="POLY">Polygon</button><button data-t="CURVE">Curve</button><button data-t="CIRCLE">Circle</button><button data-t="ARC">Arc</button><button data-t="MEAS">Measure</button><button data-t="MOVE">Move</button><button data-t="SCALE">Scale</button><button data-t="ROT">Rotate</button><button data-t="ALIGN">Align</button><button id="done">Done</button><button id="undo">Undo</button><button data-o="x">Delete</button><button id="fit">Fit</button><button data-o="f">Front</button><button data-o="u">Forward</button><button data-o="d">Backward</button><button data-o="b">Back</button><button data-o="l">To layer</button>
+<button data-t="LINE">Line</button><button data-t="PLINE">Polyline</button><button data-t="POLY">Polygon</button><button data-t="CURVE">Curve</button><button data-t="CIRCLE">Circle</button><button data-t="CIRC3">Circle 3P</button><button data-t="ARC">Arc</button><button data-t="MEAS">Measure</button><button data-t="MOVE">Move</button><button data-t="SCALE">Scale</button><button data-t="ROT">Rotate</button><button data-t="TRIM">Trim</button><button data-t="EXTEND">Extend</button><button data-t="JOIN">Join</button><button data-o="z">Explode</button><button data-t="ALIGN">Align</button><button id="done">Done</button><button id="undo">Undo</button><button data-o="x">Delete</button><button id="fit">Fit</button><button data-o="f">Front</button><button data-o="u">Forward</button><button data-o="d">Backward</button><button data-o="b">Back</button><button data-o="l">To layer</button>
 </div>
 <div class="row"><select id="ly"></select><input id="ln" type="text" placeholder="New layer name" style="flex:1 1 100px;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text"><button id="addl">+ Layer</button><button id="vis">Hide</button><button id="mb">Menu</button></div>
 <div id="menu">
 <label><b>Projects (work saves automatically)</b><select id="pj"></select><input id="pn" type="text" placeholder="Project name" style="flex:1 1 120px;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text"><button id="pnew">New</button><button id="prn">Rename</button><button id="pdel">Delete project</button></label>
 <label><b>Project file: backup, or move to another phone</b><button id="psave">Save project file</button><input type="file" id="pf" accept=".json,application/json,text/plain"></label>
+<label><b>Snap to (tap to turn on or off)</b><button data-s="e">Endpoint</button><button data-s="m">Midpoint</button><button data-s="c">Center</button><button data-s="i">Intersection</button><button data-s="n">Nearest</button></label>
 <label><b>Project coordinate system</b><select id="pc"></select></label>
 <label><b>Import CSV (name,E,N or id,E,N; Lat/Lon = lat,lon)</b><select id="icrs"></select><select id="imode"><option value="pts">as points</option><option value="pl">as polyline</option><option value="pg">as polygon</option></select><input type="file" id="cf" accept=".csv,.txt,text/csv,text/plain"></label>
 <label><b>Export CSV in</b><select id="ecrs"></select><button id="ecsv">Save CSV</button></label>
@@ -59,7 +60,7 @@ var cv=document.getElementById('cv'),ctx=cv.getContext('2d'),wrap=document.getEl
 var PAL=['#e5484d','#f5a524','#30a46c','#3e63dd','#ab4aba','#12a594'];
 var layers=[{n:'0',c:PAL[0],on:1}],cur=0,ents=[],rs=[],sel=null,v={x:0,y:0,s:10},W=0,H=0,tool=null,step=0,tmp=[],last=null,dl=null;
 var DPR=window.devicePixelRatio||1;
-var PR={LINE:['Line: start point','Line: next point (Done to finish)'],CURVE:['Curve: first point','Curve: next point (Done to finish)'],ROT:['Rotate: base point','Rotate: angle in degrees (CCW)'],PLINE:['Polyline: first point','Polyline: next point (Done to finish)'],POLY:['Polygon: first point','Polygon: next point (Done to close)'],CIRCLE:['Circle: center','Circle: radius (number or tap)'],ARC:['Arc: center','Arc: radius','Arc: start angle (deg CCW from east)','Arc: end angle (deg)'],MEAS:['Measure: first point','Measure: second point'],MOVE:['Move: base point','Move: destination point'],SCALE:['Scale: base point','Scale: factor (e.g. 2)'],ALIGN:['Align: source point 1','Align: destination 1','Align: source point 2','Align: destination 2'],GEOREF:['Georeference: tap point 1 on the image','Point 1 real coordinates (x,y)','Tap point 2 on the image','Point 2 real coordinates (x,y)']};
+var PR={LINE:['Line: start point','Line: next point (Done to finish)'],TRIM:['Trim: tap the part to remove (it is cut at the nearest crossing objects)'],EXTEND:['Extend: tap near the end of an open line or polyline'],JOIN:['Join: tap lines or open polylines, then Done'],CURVE:['Curve: first point','Curve: next point (Done to finish)'],ROT:['Rotate: base point','Rotate: angle in degrees (CCW)'],PLINE:['Polyline: first point','Polyline: next point (Done to finish)'],POLY:['Polygon: first point','Polygon: next point (Done to close)'],CIRCLE:['Circle: center point','Circle: type the radius, or tap a point on the circle'],CIRC3:['Circle 3P: first point on the circle','Circle 3P: second point','Circle 3P: third point'],ARC:['Arc: center','Arc: radius','Arc: start angle (deg CCW from east)','Arc: end angle (deg)'],MEAS:['Measure: first point','Measure: second point'],MOVE:['Move: base point','Move: destination point'],SCALE:['Scale: base point','Scale: factor (e.g. 2)'],ALIGN:['Align: source point 1','Align: destination 1','Align: source point 2','Align: destination 2'],GEOREF:['Georeference: tap point 1 on the image','Point 1 real coordinates (x,y)','Tap point 2 on the image','Point 2 real coordinates (x,y)']};
 var CR={loc:['Local (no CRS)']};
 ['WGS84','Arc 1960'].forEach(function(d){[35,36].forEach(function(z){['N','S'].forEach(function(h){CR[(d[0]=='W'?'w':'a')+z+h]=[d+' UTM '+z+h,z,h=='S'?1:0,d[0]=='W'?'w':'a']})})});
 CR.ll=['Lat/Lon WGS84'];
@@ -84,15 +85,16 @@ if(a!='ll'){g=inv({e:A[3]=='a'?EA:EW,z:A[1],s:A[2]},p);if(A[3]=='a')g=sh(g,EA,EW
 if(b=='ll')return g;
 if(B[3]=='a')g=sh(g,EW,EA,[160,8,300]);
 return fwd({e:B[3]=='a'?EA:EW,z:B[1],s:B[2]},g)}
-var db=null,tm=0,pid=null,plist=[],pdc=0;
+var db=null,tm=0,pid=null,plist=[],pdc=0,hist=[],jl=[];
 function idb(cb){try{var q=indexedDB.open('scad',1);q.onupgradeneeded=function(){q.result.createObjectStore('kv')};q.onsuccess=function(){db=q.result;cb()};q.onerror=function(){}}catch(x){}}
 function kv(m){return db.transaction('kv',m||'readonly').objectStore('kv')}
-function snap(){return{l:layers,e:ents,c:cur,pc:$('pc').value,v:v,rs:rs.map(function(r){return{src:r.src,a:r.a,b:r.b,t:r.t,on:r.on,name:r.name}})}}
-function put(){if(!db||!pid)return;try{kv('readwrite').put(snap(),'p:'+pid)}catch(x){}}
+function snapP(){return{l:layers,e:ents,c:cur,pc:$('pc').value,v:v,rs:rs.map(function(r){return{src:r.src,a:r.a,b:r.b,t:r.t,on:r.on,name:r.name}})}}
+function put(){if(!db||!pid)return;try{kv('readwrite').put(snapP(),'p:'+pid)}catch(x){}}
 function putIdx(){try{kv('readwrite').put({cur:pid,list:plist},'idx')}catch(x){}}
-function save(){if(!db){try{localStorage.setItem('scad2',JSON.stringify({l:layers,e:ents,c:cur,p:$('pc').value}))}catch(x){}return}clearTimeout(tm);tm=setTimeout(put,400)}
+function save(){try{var hj=JSON.stringify(ents);if(hj!=hist[hist.length-1]){hist.push(hj);if(hist.length>40)hist.shift()}}catch(x){}
+if(!db){try{localStorage.setItem('scad2',JSON.stringify({l:layers,e:ents,c:cur,p:$('pc').value}))}catch(x){}return}clearTimeout(tm);tm=setTimeout(put,400)}
 function addImg(o){var im=new Image();im.onload=draw;im.src=o.src;rs.push({img:im,src:o.src,a:o.a,b:o.b,t:o.t,on:o.on,name:o.name})}
-function apply(d){layers=d.l&&d.l.length?d.l:[{n:'0',c:PAL[0],on:1}];ents=d.e||[];cur=Math.min(d.c||0,layers.length-1);$('pc').value=(CR[d.pc]&&d.pc!='ll')?d.pc:'loc';v=d.v||{x:0,y:0,s:10};rs=[];(d.rs||[]).forEach(addImg);sel=null;last=null;setTool(null);fillLy();draw()}
+function apply(d){layers=d.l&&d.l.length?d.l:[{n:'0',c:PAL[0],on:1}];ents=d.e||[];cur=Math.min(d.c||0,layers.length-1);$('pc').value=(CR[d.pc]&&d.pc!='ll')?d.pc:'loc';v=d.v||{x:0,y:0,s:10};rs=[];(d.rs||[]).forEach(addImg);hist=[JSON.stringify(ents)];jl=[];sel=null;last=null;setTool(null);fillLy();draw()}
 function pname(){var n=plist.filter(function(x){return x.id==pid})[0];return n?n.name:''}
 function fillP(){var e=$('pj');e.innerHTML='';plist.forEach(function(x){var o=document.createElement('option');o.value=x.id;o.textContent=x.name;e.appendChild(o)});e.value=pid}
 function openP(id){var g=kv().get('p:'+id);g.onsuccess=function(){pid=id;apply(g.result||{});putIdx();fillP();say('Project: '+pname())}}
@@ -126,7 +128,7 @@ ctx.stroke();
 p=S([0,0]);ctx.strokeStyle=css('--ac');ctx.beginPath();ctx.moveTo(p[0]-10,p[1]);ctx.lineTo(p[0]+10,p[1]);ctx.moveTo(p[0],p[1]-10);ctx.lineTo(p[0],p[1]+10);ctx.stroke();
 ctx.fillStyle=css('--fg');ctx.font='11px sans-serif';ctx.fillText('grid '+g+' units',6,H-6);
 ents.forEach(function(e,k){var L=layers[e.l];if(!L||!L.on)return;
-var on=sel&&!sel.r&&sel.i==k;ctx.strokeStyle=on?css('--ac'):L.c;ctx.lineWidth=on?4:2;path(e);ctx.stroke();
+var on=(sel&&!sel.r&&sel.i==k)||jl.indexOf(k)>=0;ctx.strokeStyle=on?css('--ac'):L.c;ctx.lineWidth=on?4:2;path(e);ctx.stroke();
 if(e.t=='T'&&e.n){var q=S(e.p);ctx.fillStyle=css('--fg');ctx.fillText(e.n,q[0]+7,q[1]-5)}});
 if(sel&&sel.r&&rs[sel.i]){var r=rs[sel.i],c=[[0,0],[r.img.width,0],[r.img.width,-r.img.height],[0,-r.img.height]].map(function(u){return S(r2w(r,u))});ctx.strokeStyle=css('--ac');ctx.lineWidth=3;ctx.beginPath();c.forEach(function(q,j){if(j)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1])});ctx.closePath();ctx.stroke()}
 ctx.strokeStyle=css('--ac');ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();
@@ -137,7 +139,7 @@ function r2w(r,u){return[r.a*u[0]-r.b*u[1]+r.t[0],r.b*u[0]+r.a*u[1]+r.t[1]]}
 function w2r(r,w){var z0=w[0]-r.t[0],z1=w[1]-r.t[1],d=r.a*r.a+r.b*r.b;return[(z0*r.a+z1*r.b)/d,(z1*r.a-z0*r.b)/d]}
 function say(m){$('st').textContent=m}
 function ask(){$('pr').textContent=tool?PR[tool][Math.min(step,PR[tool].length-1)]:'Pick a tool'}
-function setTool(t){tool=t;step=0;tmp=[];var b=document.querySelectorAll('#tools [data-t]');for(var i=0;i<b.length;i++)b[i].className=b[i].getAttribute('data-t')==t?'on':'';ask();draw()}
+function setTool(t){tool=t;step=0;tmp=[];jl=[];var b=document.querySelectorAll('#tools [data-t]');for(var i=0;i<b.length;i++)b[i].className=b[i].getAttribute('data-t')==t?'on':'';ask();draw()}
 function parse(s){
 s=s.replace(/\s+/g,'');if(!s)return null;
 var m=/^(@?)(-?[\d.]+)<(-?[\d.]+)$/.exec(s);
@@ -188,6 +190,12 @@ if(step==0){tmp=[pt];step=1}else{ents.push({t:'L',a:tmp[0],b:pt,l:cur});tmp=[pt]
 last=pt}
 else if(tool=='PLINE'||tool=='POLY'||tool=='CURVE'){
 if(!pt){say('Needs a point.');return}tmp.push(pt);step=1;last=pt}
+else if(tool=='CIRC3'){
+if(!pt){say('Needs a point.');return}tmp.push(pt);last=pt;step=tmp.length;
+if(tmp.length==3){var a=tmp[0],b=tmp[1],c=tmp[2],d=2*(a[0]*(b[1]-c[1])+b[0]*(c[1]-a[1])+c[0]*(a[1]-b[1]));
+if(Math.abs(d)<1e-12){say('The three points are in a line.');tmp=[];step=0;ask();draw();return}
+var a2=a[0]*a[0]+a[1]*a[1],b2=b[0]*b[0]+b[1]*b[1],c2=c[0]*c[0]+c[1]*c[1],ux=(a2*(b[1]-c[1])+b2*(c[1]-a[1])+c2*(a[1]-b[1]))/d,uy=(a2*(c[0]-b[0])+b2*(a[0]-c[0])+c2*(b[0]-a[0]))/d;
+ents.push({t:'C',c:[ux,uy],r:dist([ux,uy],a),l:cur});tmp=[];step=0}}
 else if(tool=='CIRCLE'){
 if(step==0){if(!pt){say('Give the center as a point.');return}tmp=[pt];last=pt;step=1}
 else{var rad=pt?dist(tmp[0],pt):num;if(!(rad>0)){say('Radius must be above 0.');return}
@@ -216,12 +224,30 @@ if(tmp.length==4){var q=sim(tmp[0],tmp[1],tmp[2],tmp[3]);
 if(!q){say('The two points must be different.');setTool(tool);return}
 if(tool=='ALIGN')applyXf(q.M,q.T);else{var R=tgt();R.a=q.M[0];R.b=q.M[1];R.t=q.T}
 var n=tool;setTool(null);save();draw();say(n=='ALIGN'?'Aligned.':'Image georeferenced. Scale '+f3(Math.sqrt(q.M[0]*q.M[0]+q.M[1]*q.M[1]))+' units per pixel.');return}}
-if(last&&tool!='MEAS')say('Last point: '+f3(last[0])+', '+f3(last[1]));
+if(last&&tool!='MEAS')say('Last point: '+f3(last[0])+', '+f3(last[1])+(SK?'  (snapped to '+SK+')':''));
 ask();save();draw()}
 function kp(e){return e.t=='L'?[e.a,e.b]:(e.t=='P'||e.t=='S')?e.p:e.t=='T'?[e.p]:[e.c]}
-function snap(p){var t=14/v.s,best=null,bd=t;
-ents.forEach(function(e){kp(e).forEach(function(q){var d=dist(p,q);if(d<bd){bd=d;best=q}})});
-return best||p}
+var SN={e:1,m:1,c:1,i:1,n:0},SK='';
+function prim(e){var q,o=[],i;
+if(e.t=='L')return{s:[[e.a,e.b]]};
+if(e.t=='P'||e.t=='S'){q=e.t=='S'?spl(e.p):e.p;for(i=0;i<q.length-1;i++)o.push([q[i],q[i+1]]);if(e.z&&q.length>2)o.push([q[q.length-1],q[0]]);return{s:o}}
+if(e.t=='C'||e.t=='A')return{c:[e]};return{}}
+function inArc(c,a){if(c.t!='A')return true;var T=6.283185307,x=((a-c.s)%T+T)%T,y=((c.e-c.s)%T+T)%T;return x<=y+1e-9}
+function ss(a,b,c,d){var r=[b[0]-a[0],b[1]-a[1]],q=[d[0]-c[0],d[1]-c[1]],k=r[0]*q[1]-r[1]*q[0];if(Math.abs(k)<1e-12)return[];var t=((c[0]-a[0])*q[1]-(c[1]-a[1])*q[0])/k,u=((c[0]-a[0])*r[1]-(c[1]-a[1])*r[0])/k;return(t>=0&&t<=1&&u>=0&&u<=1)?[[a[0]+t*r[0],a[1]+t*r[1]]]:[]}
+function sc(a,b,c){var dx=b[0]-a[0],dy=b[1]-a[1],fx=a[0]-c.c[0],fy=a[1]-c.c[1],A=dx*dx+dy*dy,B=2*(fx*dx+fy*dy),C=fx*fx+fy*fy-c.r*c.r,D=B*B-4*A*C,o=[];if(A<1e-18||D<0)return o;D=Math.sqrt(D);[(-B-D)/(2*A),(-B+D)/(2*A)].forEach(function(t){if(t>=0&&t<=1){var p=[a[0]+t*dx,a[1]+t*dy];if(inArc(c,Math.atan2(p[1]-c.c[1],p[0]-c.c[0])))o.push(p)}});return o}
+function cc(c1,c2){var d=dist(c1.c,c2.c),o=[];if(d<1e-12||d>c1.r+c2.r||d<Math.abs(c1.r-c2.r))return o;var a=(c1.r*c1.r-c2.r*c2.r+d*d)/(2*d),h=Math.sqrt(Math.max(0,c1.r*c1.r-a*a)),ux=(c2.c[0]-c1.c[0])/d,uy=(c2.c[1]-c1.c[1])/d,mx=c1.c[0]+a*ux,my=c1.c[1]+a*uy;[[mx-h*uy,my+h*ux],[mx+h*uy,my-h*ux]].forEach(function(p){if(inArc(c1,Math.atan2(p[1]-c1.c[1],p[0]-c1.c[0]))&&inArc(c2,Math.atan2(p[1]-c2.c[1],p[0]-c2.c[0])))o.push(p)});return o}
+function snap(p){var t=16/v.s,C=[],ne=[];SK='';
+function add(q,k,w){var d=dist(p,q);if(d<t)C.push({q:q,k:k,d:d*w})}
+ents.forEach(function(e){var L=layers[e.l];if(!L||!L.on)return;var pr=prim(e);
+if(SN.e){if(e.t=='T')add(e.p,'endpoint',1);else if(e.t=='L'){add(e.a,'endpoint',1);add(e.b,'endpoint',1)}else if(e.t=='P'||e.t=='S')e.p.forEach(function(q){add(q,'endpoint',1)});else if(e.t=='A'){add([e.c[0]+e.r*Math.cos(e.s),e.c[1]+e.r*Math.sin(e.s)],'endpoint',1);add([e.c[0]+e.r*Math.cos(e.e),e.c[1]+e.r*Math.sin(e.e)],'endpoint',1)}}
+if(SN.c&&e.c)add(e.c,'center',1);
+if(SN.m&&(e.t=='L'||e.t=='P'))(pr.s||[]).forEach(function(g){add([(g[0][0]+g[1][0])/2,(g[0][1]+g[1][1])/2],'midpoint',1.15)});
+if(hit(e,p)<t)ne.push(pr)});
+if(SN.i){for(var a=0;a<ne.length;a++)for(var b=a+1;b<ne.length;b++){var A=ne[a],B=ne[b];
+(A.s||[]).forEach(function(s1){(B.s||[]).forEach(function(s2){ss(s1[0],s1[1],s2[0],s2[1]).forEach(function(q){add(q,'intersection',1)})});(B.c||[]).forEach(function(c){sc(s1[0],s1[1],c).forEach(function(q){add(q,'intersection',1)})})});
+(A.c||[]).forEach(function(c1){(B.s||[]).forEach(function(s2){sc(s2[0],s2[1],c1).forEach(function(q){add(q,'intersection',1)})});(B.c||[]).forEach(function(c2){cc(c1,c2).forEach(function(q){add(q,'intersection',1)})})})}}
+if(SN.n)ne.forEach(function(pr){(pr.s||[]).forEach(function(g){var dx=g[1][0]-g[0][0],dy=g[1][1]-g[0][1],l=dx*dx+dy*dy,u=l?Math.max(0,Math.min(1,((p[0]-g[0][0])*dx+(p[1]-g[0][1])*dy)/l)):0;add([g[0][0]+u*dx,g[0][1]+u*dy],'nearest',2.5)});(pr.c||[]).forEach(function(c){var d=dist(p,c.c);if(d>1e-12&&inArc(c,Math.atan2(p[1]-c.c[1],p[0]-c.c[0])))add([c.c[0]+c.r*(p[0]-c.c[0])/d,c.c[1]+c.r*(p[1]-c.c[1])/d],'nearest',2.5)})});
+if(!C.length)return p;C.sort(function(a,b){return a.d-b.d});SK=C[0].k;return C[0].q}
 function sg(p,a,b){var dx=b[0]-a[0],dy=b[1]-a[1],l=dx*dx+dy*dy,t=l?Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/l)):0;return dist(p,[a[0]+t*dx,a[1]+t*dy])}
 function hit(e,p){var i,m=1e18,n;
 if(e.t=='L')return sg(p,e.a,e.b);
@@ -234,20 +260,89 @@ ents.forEach(function(e,i){var L=layers[e.l];if(!L||!L.on)return;var d=hit(e,w);
 if(bi>=0){sel={r:0,i:bi};say(info(ents[bi])+' | layer '+layers[ents[bi].l].n);draw();return}
 for(var i=rs.length-1;i>=0;i--){var r=rs[i];if(!r.on)continue;var u=w2r(r,w);if(u[0]>=0&&u[0]<=r.img.width&&u[1]<=0&&u[1]>=-r.img.height){sel={r:1,i:i};say('Image selected: '+r.name);draw();return}}
 sel=null;say('Nothing selected.');draw()}
-function submit(){var i=$('in');feed(parse(i.value));i.value=''}
+
+function others(i){var o=[];ents.forEach(function(e,k){var L=layers[e.l];if(k==i||!L||!L.on)return;var q=prim(e);if(q.s||q.c)o.push(q)});return o}
+function xs(g,O){var r=[];O.forEach(function(q){(q.s||[]).forEach(function(h){ss(g[0],g[1],h[0],h[1]).forEach(function(x){r.push(x)})});(q.c||[]).forEach(function(c){sc(g[0],g[1],c).forEach(function(x){r.push(x)})})});return r}
+function at(P,s){var i=Math.min(Math.floor(s),P.length-2),u=s-i;return[P[i][0]+u*(P[i+1][0]-P[i][0]),P[i][1]+u*(P[i+1][1]-P[i][1])]}
+function part(P,a,b){var o=[at(P,a)],i;for(i=Math.floor(a)+1;i<b;i++)if(i>a)o.push(P[i]);o.push(at(P,b));return o}
+function mk(P,l){if(P.length<2||plen(P,0)<1e-9)return null;return P.length==2?{t:'L',a:P[0],b:P[1],l:l}:{t:'P',p:P,z:0,l:l}}
+function near(p,ok){var t=20/v.s,bi=-1,bd=t;ents.forEach(function(e,k){var L=layers[e.l];if(!L||!L.on||!ok(e))return;var d=hit(e,p);if(d<bd){bd=d;bi=k}});return bi}
+function trimAt(p){
+var bi=near(p,function(e){return e.t=='L'||e.t=='P'||e.t=='C'||e.t=='A'});
+if(bi<0){say('Tap on a line, polyline, polygon, arc or circle.');return}
+var e=ents[bi],O=others(bi),out=[],T=6.283185307;
+if(e.t=='L'||e.t=='P'){
+var P=e.t=='L'?[e.a,e.b]:e.p.slice(),ring=e.t=='P'&&e.z,n,i,best=1e18,s0=0,xp=[];
+if(ring)P.push(P[0]);n=P.length;
+for(i=0;i<n-1;i++){var dx=P[i+1][0]-P[i][0],dy=P[i+1][1]-P[i][1],l=dx*dx+dy*dy,u=l?Math.max(0,Math.min(1,((p[0]-P[i][0])*dx+(p[1]-P[i][1])*dy)/l)):0,d=dist(p,[P[i][0]+u*dx,P[i][1]+u*dy]);if(d<best){best=d;s0=i+u}}
+for(i=0;i<n-1;i++){(function(i){var dx=P[i+1][0]-P[i][0],dy=P[i+1][1]-P[i][1],l=dx*dx+dy*dy;xs([P[i],P[i+1]],O).forEach(function(x){xp.push(i+((x[0]-P[i][0])*dx+(x[1]-P[i][1])*dy)/l)})})(i)}
+var lo=null,hi=null;xp.forEach(function(x){if(x<s0-1e-9&&(lo===null||x>lo))lo=x;if(x>s0+1e-9&&(hi===null||x<hi))hi=x});
+if(ring){if(lo===null||hi===null){say('A closed shape needs two cutting objects to trim.');return}
+var r=part(P,hi,n-1),q=part(P,0,lo);out=[mk(r.concat(q.slice(1)),e.l)]}
+else{if(lo===null&&hi===null){say('No cutting object found.');return}
+if(lo!==null)out.push(mk(part(P,0,lo),e.l));if(hi!==null)out.push(mk(part(P,hi,n-1),e.l))}}
+else{
+var base=e.t=='A'?e.s:0,span=e.t=='A'?(((e.e-e.s)%T)+T)%T:T,ang=[];
+function nm(a){return(((a-base)%T)+T)%T}
+O.forEach(function(q){(q.s||[]).forEach(function(h){sc(h[0],h[1],e).forEach(function(x){ang.push(nm(Math.atan2(x[1]-e.c[1],x[0]-e.c[0])))})});(q.c||[]).forEach(function(c){cc(e,c).forEach(function(x){ang.push(nm(Math.atan2(x[1]-e.c[1],x[0]-e.c[0])))})})});
+var u0=nm(Math.atan2(p[1]-e.c[1],p[0]-e.c[0])),lo2=null,hi2=null;
+ang.forEach(function(a){if(a<u0-1e-9&&(lo2===null||a>lo2))lo2=a;if(a>u0+1e-9&&(hi2===null||a<hi2))hi2=a});
+if(e.t=='C'){if(ang.length<2){say('A circle needs two cutting objects to trim.');return}
+if(lo2===null)lo2=Math.max.apply(null,ang);if(hi2===null)hi2=Math.min.apply(null,ang);
+out=[{t:'A',c:e.c,r:e.r,s:hi2,e:lo2,l:e.l}]}
+else{if(lo2===null&&hi2===null){say('No cutting object found.');return}
+if(lo2!==null)out.push({t:'A',c:e.c,r:e.r,s:base,e:base+lo2,l:e.l});if(hi2!==null)out.push({t:'A',c:e.c,r:e.r,s:base+hi2,e:base+span,l:e.l})}}
+out=out.filter(function(x){return x});
+ents.splice.apply(ents,[bi,1].concat(out));sel=null;save();draw();say('Trimmed.')}
+function extAt(p){
+var bi=near(p,function(e){return e.t=='L'||(e.t=='P'&&!e.z)});
+if(bi<0){say('Tap near the end of an open line or polyline.');return}
+var e=ents[bi],P=e.t=='L'?[e.a,e.b]:e.p,n=P.length,end=dist(p,P[0])<dist(p,P[n-1])?0:1,E=end?P[n-1]:P[0],B=end?P[n-2]:P[1],dx=E[0]-B[0],dy=E[1]-B[1],l=Math.sqrt(dx*dx+dy*dy);
+if(!l)return;
+var F=[E[0]+dx/l*1e6,E[1]+dy/l*1e6],best=null,bd=1e18;
+xs([E,F],others(bi)).forEach(function(x){var d=dist(x,E);if(d>1e-6&&d<bd){bd=d;best=x}});
+if(!best){say('No object found in that direction.');return}
+if(e.t=='L'){if(end)e.b=best;else e.a=best}else{if(end)e.p[n-1]=best;else e.p[0]=best}
+save();draw();say('Extended by '+f3(bd)+'.')}
+function explode(){
+if(!sel||sel.r){say('Select a polyline, polygon or curve first (tap it with no tool).');return}
+var e=ents[sel.i];
+if(e.t!='P'&&e.t!='S'){say('Only polylines, polygons and curves can be exploded.');return}
+if(e.t=='S'){ents[sel.i]={t:'P',p:spl(e.p),z:0,l:e.l};save();draw();say('Curve converted to a polyline. Explode again for separate lines.');return}
+var P=e.p,o=[],i;for(i=0;i<P.length-1;i++)o.push({t:'L',a:P[i],b:P[i+1],l:e.l});
+if(e.z&&P.length>2)o.push({t:'L',a:P[P.length-1],b:P[0],l:e.l});
+ents.splice.apply(ents,[sel.i,1].concat(o));sel=null;save();draw();say('Exploded into '+o.length+' lines.')}
+function joinPick(w){
+var bi=near(w,function(e){return e.t=='L'||(e.t=='P'&&!e.z)});
+if(bi<0){say('Tap lines or open polylines to join, then Done.');return}
+var j=jl.indexOf(bi);if(j<0)jl.push(bi);else jl.splice(j,1);say(jl.length+' selected. Tap Done to join them.');draw()}
+function doJoin(){
+if(!jl.length)return;
+var it=jl.map(function(k){var e=ents[k];return{p:e.t=='L'?[e.a,e.b]:e.p.slice(),k:k}}),lay=ents[jl[0]].l,f=it.shift(),ch=f.p,used=[f.k],eps=1e-3,go=1,i;
+while(it.length&&go){go=0;for(i=0;i<it.length;i++){var q=it[i].p,cs=ch[0],ce=ch[ch.length-1],m=null;
+if(dist(ce,q[0])<eps)m=ch.concat(q.slice(1));else if(dist(ce,q[q.length-1])<eps)m=ch.concat(q.slice().reverse().slice(1));else if(dist(cs,q[q.length-1])<eps)m=q.concat(ch.slice(1));else if(dist(cs,q[0])<eps)m=q.slice().reverse().concat(ch.slice(1));
+if(m){ch=m;used.push(it[i].k);it.splice(i,1);go=1;break}}}
+var z=0;if(ch.length>2&&dist(ch[0],ch[ch.length-1])<eps){ch=ch.slice(0,-1);z=1}
+if(used.length==1&&!z){say('Nothing to join: the ends do not touch.');jl=[];return}
+used.sort(function(a,b){return b-a}).forEach(function(k){ents.splice(k,1)});
+ents.push(z?{t:'P',p:ch,z:1,l:lay}:mk(ch,lay));
+jl=[];save();draw();say((z?'Closed polygon made. ':'Joined into one object. ')+(it.length?it.length+' object(s) did not touch and were left alone.':''))}
+function submit(){var i=$('in');SK='';feed(parse(i.value));i.value=''}
 $('ent').onclick=submit;
 $('in').onkeydown=function(e){if(e.keyCode==13){e.preventDefault();submit()}};
 $('tools').onclick=function(e){var t=e.target.getAttribute('data-t'),o=e.target.getAttribute('data-o');if(t)setTool(t);else if(o)ord(o)};
 function ord(m){
+if(m=='z'){explode();return}
 if(m=='x'){$('del').onclick();return}
 if(!sel){say('Select an object first: tap it with no tool active.');return}
 if(m=='l'){if(sel.r){say('Images are not on layers.');return}ents[sel.i].l=cur;say('Moved to layer '+layers[cur].n+'.');save();draw();return}
 var A=sel.r?rs:ents,i=sel.i,n=A.length,j=m=='f'?n-1:m=='b'?0:m=='u'?Math.min(i+1,n-1):Math.max(i-1,0),x=A.splice(i,1)[0];
 A.splice(j,0,x);sel.i=j;save();draw();say(j==i?'Already there.':'Order changed: now '+(j+1)+' of '+n+' (1 = back).')}
 $('done').onclick=function(){
+if(tool=='JOIN')doJoin();
 if((tool=='PLINE'&&tmp.length>1)||(tool=='CURVE'&&tmp.length>1)||(tool=='POLY'&&tmp.length>2)){var e=tool=='CURVE'?{t:'S',p:tmp.slice(),l:cur}:{t:'P',p:tmp.slice(),z:tool=='POLY'?1:0,l:cur};ents.push(e);say(info(e))}
 setTool(null);save();draw()};
-$('undo').onclick=function(){if(tool&&tmp.length){tmp.pop();step=tmp.length?1:0}else{ents.pop();sel=null}ask();save();draw()};
+$('undo').onclick=function(){if(tool&&tmp.length){tmp.pop();step=tmp.length?1:0}else if(hist.length>1){hist.pop();ents=JSON.parse(hist[hist.length-1]);sel=null}ask();save();draw()};
 $('fit').onclick=function(){
 var x0=1e18,y0=1e18,x1=-1e18,y1=-1e18;
 function add(x,y){x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)}
@@ -330,9 +425,10 @@ if(cnt==1){v.x-=(n[0]-o[0])/v.s;v.y+=(n[1]-o[1])/v.s;if(dist(n,sp0)>8)mv=1;Pt[e.
 else if(cnt==2){Pt[e.pointerId]=n;var k=Object.keys(Pt),a=Pt[k[0]],b=Pt[k[1]],d=dist(a,b)||1,m=[(a[0]+b[0])/2,(a[1]+b[1])/2],w0=Wd(m[0],m[1]);
 v.s=Math.max(0.0001,Math.min(1e7,v.s*d/pd));pd=d;var w1=Wd(m[0],m[1]);v.x+=w0[0]-w1[0];v.y+=w0[1]-w1[1];draw()}});
 cv.addEventListener('pointerup',function(e){if(!Pt[e.pointerId])return;
-if(cnt==1&&!mv){var q=pos(e),w=Wd(q[0],q[1]);if(tool)feed({pt:snap(w)});else pick(w)}
+if(cnt==1&&!mv){var q=pos(e),w=Wd(q[0],q[1]);if(tool=='TRIM')trimAt(w);else if(tool=='EXTEND')extAt(w);else if(tool=='JOIN')joinPick(w);else if(tool)feed({pt:snap(w)});else pick(w)}
 delete Pt[e.pointerId];cnt=Object.keys(Pt).length});
 cv.addEventListener('pointercancel',function(e){delete Pt[e.pointerId];cnt=Object.keys(Pt).length});
+(function(){var b=document.querySelectorAll('[data-s]');for(var i=0;i<b.length;i++){(function(x){var k=x.getAttribute('data-s');x.className=SN[k]?'on':'';x.onclick=function(){SN[k]=SN[k]?0:1;x.className=SN[k]?'on':'';say('Snap '+x.textContent+(SN[k]?' on':' off'))}})(b[i])}})();
 $('pj').onchange=function(){put();openP(this.value)};
 $('pnew').onclick=function(){if(!db){say('Projects need browser storage, which is not available.');return}var n=$('pn').value.trim()||'Project '+(plist.length+1);$('pn').value='';newP(n)};
 $('prn').onclick=function(){var n=$('pn').value.trim();if(!n||!pid){say('Type the new name in the project name box.');return}plist.forEach(function(x){if(x.id==pid)x.name=n});$('pn').value='';putIdx();fillP();say('Renamed to '+n)};
@@ -341,7 +437,7 @@ if(!pdc){pdc=1;say('Tap Delete project again within 5 seconds to delete "'+pname
 pdc=0;var old=pid;try{kv('readwrite').delete('p:'+old)}catch(x){}
 plist=plist.filter(function(x){return x.id!=old});
 if(!plist.length){pid=null;newP('Project 1')}else{openP(plist[0].id)}putIdx();say('Project deleted.')};
-$('psave').onclick=function(){if(!pid){say('Nothing to save yet.');return}put();var n=pname()||'project';save2(n.replace(/[^\w\- ]+/g,'_')+'.surveycad.json',JSON.stringify({app:'SurveyCAD',ver:1,name:n,data:snap()}))};
+$('psave').onclick=function(){if(!pid){say('Nothing to save yet.');return}put();var n=pname()||'project';save2(n.replace(/[^\w\- ]+/g,'_')+'.surveycad.json',JSON.stringify({app:'SurveyCAD',ver:1,name:n,data:snapP()}))};
 $('pf').onchange=function(){var f=this.files[0];if(!f)return;this.value='';var fr=new FileReader();fr.onload=function(){try{var d=JSON.parse(fr.result);if(d.app!='SurveyCAD'||!d.data)throw 0;newP((d.name||'Imported project')+' (opened)',d.data)}catch(x){say('That file is not a SurveyCAD project.')}};fr.readAsText(f)};
 window.addEventListener('resize',resize);
 load();fillLy();resize();idb(boot);
