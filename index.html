@@ -30,15 +30,19 @@ canvas{position:absolute;left:0;top:0;touch-action:none}
 #in{flex:1;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text}
 </style></head><body>
 <div class="row" id="tools">
-<button data-t="LINE">Line</button><button data-t="PLINE">Polyline</button><button data-t="POLY">Polygon</button><button data-t="CIRCLE">Circle</button><button data-t="ARC">Arc</button><button data-t="MEAS">Measure</button><button data-t="MOVE">Move</button><button data-t="SCALE">Scale</button><button data-t="ALIGN">Align</button><button id="done">Done</button><button id="undo">Undo</button><button id="fit">Fit</button><button data-o="f">Front</button><button data-o="u">Forward</button><button data-o="d">Backward</button><button data-o="b">Back</button><button data-o="l">To layer</button>
+<button data-t="LINE">Line</button><button data-t="PLINE">Polyline</button><button data-t="POLY">Polygon</button><button data-t="CURVE">Curve</button><button data-t="CIRCLE">Circle</button><button data-t="ARC">Arc</button><button data-t="MEAS">Measure</button><button data-t="MOVE">Move</button><button data-t="SCALE">Scale</button><button data-t="ROT">Rotate</button><button data-t="ALIGN">Align</button><button id="done">Done</button><button id="undo">Undo</button><button data-o="x">Delete</button><button id="fit">Fit</button><button data-o="f">Front</button><button data-o="u">Forward</button><button data-o="d">Backward</button><button data-o="b">Back</button><button data-o="l">To layer</button>
 </div>
 <div class="row"><select id="ly"></select><input id="ln" type="text" placeholder="New layer name" style="flex:1 1 100px;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text"><button id="addl">+ Layer</button><button id="vis">Hide</button><button id="mb">Menu</button></div>
 <div id="menu">
+<label><b>Projects (work saves automatically)</b><select id="pj"></select><input id="pn" type="text" placeholder="Project name" style="flex:1 1 120px;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text"><button id="pnew">New</button><button id="prn">Rename</button><button id="pdel">Delete project</button></label>
+<label><b>Project file: backup, or move to another phone</b><button id="psave">Save project file</button><input type="file" id="pf" accept=".json,application/json,text/plain"></label>
 <label><b>Project coordinate system</b><select id="pc"></select></label>
 <label><b>Import CSV (name,E,N or id,E,N; Lat/Lon = lat,lon)</b><select id="icrs"></select><select id="imode"><option value="pts">as points</option><option value="pl">as polyline</option><option value="pg">as polygon</option></select><input type="file" id="cf" accept=".csv,.txt,text/csv,text/plain"></label>
 <label><b>Export CSV in</b><select id="ecrs"></select><button id="ecsv">Save CSV</button></label>
 <label><b>Add image or base map</b><input type="file" id="imf" accept="image/*"></label>
 <label><b>Image and selection</b><button id="geo">Georeference</button><button id="rvis">Hide image</button><button id="del">Delete selected</button></label>
+<label><b>Layer tools (name comes from the name box)</b><button id="lren">Rename</button><button id="lcol">Next colour</button><button id="ldel">Delete layer</button></label>
+<label><b>Plot to scale (centred on current view, units = metres)</b><input id="sc" type="text" inputmode="numeric" placeholder="1:500" style="width:90px"><select id="pp"><option value="l">A4 landscape</option><option value="p">A4 portrait</option></select><button id="pdfs">Save scaled PDF</button></label>
 <label><b>Export current view</b><button id="png">Save PNG</button><button id="pdf">Save PDF</button></label>
 </div>
 <div id="wrap"><canvas id="cv"></canvas></div>
@@ -55,7 +59,7 @@ var cv=document.getElementById('cv'),ctx=cv.getContext('2d'),wrap=document.getEl
 var PAL=['#e5484d','#f5a524','#30a46c','#3e63dd','#ab4aba','#12a594'];
 var layers=[{n:'0',c:PAL[0],on:1}],cur=0,ents=[],rs=[],sel=null,v={x:0,y:0,s:10},W=0,H=0,tool=null,step=0,tmp=[],last=null,dl=null;
 var DPR=window.devicePixelRatio||1;
-var PR={LINE:['Line: start point','Line: next point (Done to finish)'],PLINE:['Polyline: first point','Polyline: next point (Done to finish)'],POLY:['Polygon: first point','Polygon: next point (Done to close)'],CIRCLE:['Circle: center','Circle: radius (number or tap)'],ARC:['Arc: center','Arc: radius','Arc: start angle (deg CCW from east)','Arc: end angle (deg)'],MEAS:['Measure: first point','Measure: second point'],MOVE:['Move: base point','Move: destination point'],SCALE:['Scale: base point','Scale: factor (e.g. 2)'],ALIGN:['Align: source point 1','Align: destination 1','Align: source point 2','Align: destination 2'],GEOREF:['Georeference: tap point 1 on the image','Point 1 real coordinates (x,y)','Tap point 2 on the image','Point 2 real coordinates (x,y)']};
+var PR={LINE:['Line: start point','Line: next point (Done to finish)'],CURVE:['Curve: first point','Curve: next point (Done to finish)'],ROT:['Rotate: base point','Rotate: angle in degrees (CCW)'],PLINE:['Polyline: first point','Polyline: next point (Done to finish)'],POLY:['Polygon: first point','Polygon: next point (Done to close)'],CIRCLE:['Circle: center','Circle: radius (number or tap)'],ARC:['Arc: center','Arc: radius','Arc: start angle (deg CCW from east)','Arc: end angle (deg)'],MEAS:['Measure: first point','Measure: second point'],MOVE:['Move: base point','Move: destination point'],SCALE:['Scale: base point','Scale: factor (e.g. 2)'],ALIGN:['Align: source point 1','Align: destination 1','Align: source point 2','Align: destination 2'],GEOREF:['Georeference: tap point 1 on the image','Point 1 real coordinates (x,y)','Tap point 2 on the image','Point 2 real coordinates (x,y)']};
 var CR={loc:['Local (no CRS)']};
 ['WGS84','Arc 1960'].forEach(function(d){[35,36].forEach(function(z){['N','S'].forEach(function(h){CR[(d[0]=='W'?'w':'a')+z+h]=[d+' UTM '+z+h,z,h=='S'?1:0,d[0]=='W'?'w':'a']})})});
 CR.ll=['Lat/Lon WGS84'];
@@ -80,11 +84,22 @@ if(a!='ll'){g=inv({e:A[3]=='a'?EA:EW,z:A[1],s:A[2]},p);if(A[3]=='a')g=sh(g,EA,EW
 if(b=='ll')return g;
 if(B[3]=='a')g=sh(g,EW,EA,[160,8,300]);
 return fwd({e:B[3]=='a'?EA:EW,z:B[1],s:B[2]},g)}
-var db=null,tm=0;
+var db=null,tm=0,pid=null,plist=[],pdc=0;
 function idb(cb){try{var q=indexedDB.open('scad',1);q.onupgradeneeded=function(){q.result.createObjectStore('kv')};q.onsuccess=function(){db=q.result;cb()};q.onerror=function(){}}catch(x){}}
-function saveR(){if(!db)return;clearTimeout(tm);tm=setTimeout(function(){try{db.transaction('kv','readwrite').objectStore('kv').put(rs.map(function(r){return{src:r.src,a:r.a,b:r.b,t:r.t,on:r.on,name:r.name}}),'rs')}catch(x){}},400)}
-function loadR(){try{var g=db.transaction('kv').objectStore('kv').get('rs');g.onsuccess=function(){(g.result||[]).forEach(function(o){var im=new Image();im.onload=draw;im.src=o.src;rs.push({img:im,src:o.src,a:o.a,b:o.b,t:o.t,on:o.on,name:o.name})});draw()}}catch(x){}}
-function save(){try{localStorage.setItem('scad2',JSON.stringify({l:layers,e:ents,c:cur,p:$('pc').value}))}catch(x){}saveR()}
+function kv(m){return db.transaction('kv',m||'readonly').objectStore('kv')}
+function snap(){return{l:layers,e:ents,c:cur,pc:$('pc').value,v:v,rs:rs.map(function(r){return{src:r.src,a:r.a,b:r.b,t:r.t,on:r.on,name:r.name}})}}
+function put(){if(!db||!pid)return;try{kv('readwrite').put(snap(),'p:'+pid)}catch(x){}}
+function putIdx(){try{kv('readwrite').put({cur:pid,list:plist},'idx')}catch(x){}}
+function save(){if(!db){try{localStorage.setItem('scad2',JSON.stringify({l:layers,e:ents,c:cur,p:$('pc').value}))}catch(x){}return}clearTimeout(tm);tm=setTimeout(put,400)}
+function addImg(o){var im=new Image();im.onload=draw;im.src=o.src;rs.push({img:im,src:o.src,a:o.a,b:o.b,t:o.t,on:o.on,name:o.name})}
+function apply(d){layers=d.l&&d.l.length?d.l:[{n:'0',c:PAL[0],on:1}];ents=d.e||[];cur=Math.min(d.c||0,layers.length-1);$('pc').value=(CR[d.pc]&&d.pc!='ll')?d.pc:'loc';v=d.v||{x:0,y:0,s:10};rs=[];(d.rs||[]).forEach(addImg);sel=null;last=null;setTool(null);fillLy();draw()}
+function pname(){var n=plist.filter(function(x){return x.id==pid})[0];return n?n.name:''}
+function fillP(){var e=$('pj');e.innerHTML='';plist.forEach(function(x){var o=document.createElement('option');o.value=x.id;o.textContent=x.name;e.appendChild(o)});e.value=pid}
+function openP(id){var g=kv().get('p:'+id);g.onsuccess=function(){pid=id;apply(g.result||{});putIdx();fillP();say('Project: '+pname())}}
+function newP(name,data){put();pid='p'+Date.now();plist.push({id:pid,name:name});apply(data||{});put();putIdx();fillP();say('Project: '+name)}
+function boot(){var g=kv().get('idx');g.onsuccess=function(){var x=g.result;
+if(x&&x.list&&x.list.length){plist=x.list;var ok=plist.filter(function(y){return y.id==x.cur}).length;openP(ok?x.cur:plist[0].id)}
+else{pid='p'+Date.now();plist=[{id:pid,name:'Project 1'}];var h=kv().get('rs');h.onsuccess=function(){(h.result||[]).forEach(addImg);putIdx();put();fillP();draw()}}}}
 function load(){try{var d=JSON.parse(localStorage.getItem('scad2')||'null');if(d&&d.l&&d.l.length){layers=d.l;ents=d.e||[];cur=d.c||0;if(CR[d.p])$('pc').value=d.p}}catch(x){}}
 function resize(){W=wrap.clientWidth;H=wrap.clientHeight;cv.width=W*DPR;cv.height=H*DPR;cv.style.width=W+'px';cv.style.height=H+'px';draw()}
 function S(p){return[(p[0]-v.x)*v.s+W/2,H/2-(p[1]-v.y)*v.s]}
@@ -94,6 +109,7 @@ function dist(a,b){return Math.sqrt((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[
 function path(e){ctx.beginPath();var p;
 if(e.t=='L'){p=S(e.a);ctx.moveTo(p[0],p[1]);p=S(e.b);ctx.lineTo(p[0],p[1])}
 else if(e.t=='P'){e.p.forEach(function(q,i){var s=S(q);if(i)ctx.lineTo(s[0],s[1]);else ctx.moveTo(s[0],s[1])});if(e.z)ctx.closePath()}
+else if(e.t=='S'){spl(e.p).forEach(function(q,i){var s=S(q);if(i)ctx.lineTo(s[0],s[1]);else ctx.moveTo(s[0],s[1])})}
 else if(e.t=='T'){p=S(e.p);ctx.moveTo(p[0]-5,p[1]);ctx.lineTo(p[0]+5,p[1]);ctx.moveTo(p[0],p[1]-5);ctx.lineTo(p[0],p[1]+5)}
 else{p=S(e.c);if(e.t=='C')ctx.arc(p[0],p[1],e.r*v.s,0,6.2832);else ctx.arc(p[0],p[1],e.r*v.s,-e.s,-e.e,true)}}
 function draw(){
@@ -130,6 +146,12 @@ m=/^(@?)(-?[\d.]+),(-?[\d.]+)$/.exec(s);
 if(m){var x=+m[2],y=+m[3];if(m[1]){var q=last||[0,0];x+=q[0];y+=q[1]}return{pt:[x,y]}}
 if(/^-?[\d.]+$/.test(s))return{num:+s};
 return null}
+function spl(P){var o=[],n=P.length,i,j,t,a,b,c,d;
+if(n<3)return P.slice();
+for(i=0;i<n-1;i++){a=P[i-1]||P[i];b=P[i];c=P[i+1];d=P[i+2]||c;
+for(j=0;j<16;j++){t=j/16;var t2=t*t,t3=t2*t;
+o.push([0,1].map(function(k){return .5*(2*b[k]+(c[k]-a[k])*t+(2*a[k]-5*b[k]+4*c[k]-d[k])*t2+(3*b[k]-a[k]-3*c[k]+d[k])*t3)}))}}
+o.push(P[n-1]);return o}
 function plen(p,z){var n=0,i;for(i=1;i<p.length;i++)n+=dist(p[i-1],p[i]);if(z)n+=dist(p[p.length-1],p[0]);return n}
 function area(p){var a=0,i,j;for(i=0;i<p.length;i++){j=(i+1)%p.length;a+=p[i][0]*p[j][1]-p[j][0]*p[i][1]}return Math.abs(a)/2}
 function az(a,b){var d=Math.atan2(b[0]-a[0],b[1]-a[1])*180/Math.PI;return (d+360)%360}
@@ -139,6 +161,7 @@ if(e.t=='L')return 'Line: length '+f3(dist(e.a,e.b))+', azimuth '+f3(az(e.a,e.b)
 if(e.t=='P')return (e.z?'Polygon: area '+f3(area(e.p))+', perimeter '+f3(plen(e.p,1)):'Polyline: length '+f3(plen(e.p,0)))+', '+e.p.length+' vertices';
 if(e.t=='C')return 'Circle: radius '+f3(e.r)+', circumference '+f3(6.28319*e.r)+', area '+f3(3.14159*e.r*e.r);
 if(e.t=='A')return 'Arc: radius '+f3(e.r)+', length '+f3(e.r*((((e.e-e.s)%6.28319)+6.28319)%6.28319));
+if(e.t=='S')return 'Curve: length '+f3(plen(spl(e.p),0))+', '+e.p.length+' control points';
 return 'Point '+(e.n||'')+': '+f3(e.p[0])+', '+f3(e.p[1])}
 function mp(M,T,p){return[M[0]*p[0]-M[1]*p[1]+T[0],M[1]*p[0]+M[0]*p[1]+T[1]]}
 function applyXf(M,T){
@@ -146,7 +169,7 @@ if(!sel)return;
 if(sel.r){var r=rs[sel.i],a=r.a,b=r.b;r.a=M[0]*a-M[1]*b;r.b=M[0]*b+M[1]*a;r.t=mp(M,T,r.t);return}
 var e=ents[sel.i],k=Math.sqrt(M[0]*M[0]+M[1]*M[1]),ro=Math.atan2(M[1],M[0]);
 function m(p){return mp(M,T,p)}
-if(e.t=='L'){e.a=m(e.a);e.b=m(e.b)}else if(e.t=='P')e.p=e.p.map(m);else if(e.t=='T')e.p=m(e.p);
+if(e.t=='L'){e.a=m(e.a);e.b=m(e.b)}else if(e.t=='P'||e.t=='S')e.p=e.p.map(m);else if(e.t=='T')e.p=m(e.p);
 else{e.c=m(e.c);e.r*=k;if(e.t=='A'){e.s+=ro;e.e+=ro}}}
 function sim(s1,d1,s2,d2){
 var nx=d2[0]-d1[0],ny=d2[1]-d1[1],dx=s2[0]-s1[0],dy=s2[1]-s1[1],q=dx*dx+dy*dy;
@@ -156,14 +179,14 @@ function tgt(){return sel&&sel.r?rs[sel.i]:rs[rs.length-1]}
 function feed(r){
 if(!tool){say('Pick a tool first, or tap an object to select it.');return}
 if(!r){say('Not understood. Try 100,200 or @10,5 or @25<45');return}
-if((tool=='MOVE'||tool=='SCALE'||tool=='ALIGN')&&!sel){say('Select an object first: tap it with no tool active.');return}
+if((tool=='MOVE'||tool=='SCALE'||tool=='ROT'||tool=='ALIGN')&&!sel){say('Select an object first: tap it with no tool active.');return}
 if(tool=='GEOREF'&&!tgt()){say('Add an image first (Menu).');return}
 var pt=r.pt,num=r.num,b;
 if(tool=='LINE'){
 if(!pt){say('Line needs a point.');return}
 if(step==0){tmp=[pt];step=1}else{ents.push({t:'L',a:tmp[0],b:pt,l:cur});tmp=[pt]}
 last=pt}
-else if(tool=='PLINE'||tool=='POLY'){
+else if(tool=='PLINE'||tool=='POLY'||tool=='CURVE'){
 if(!pt){say('Needs a point.');return}tmp.push(pt);step=1;last=pt}
 else if(tool=='CIRCLE'){
 if(step==0){if(!pt){say('Give the center as a point.');return}tmp=[pt];last=pt;step=1}
@@ -183,6 +206,9 @@ if(step==0){tmp=[pt];step=1}else{applyXf([1,0],[pt[0]-tmp[0][0],pt[1]-tmp[0][1]]
 else if(tool=='SCALE'){
 if(step==0){if(!pt){say('Needs a base point.');return}tmp=[pt];step=1}
 else{if(!(num>0)){say('Type a scale factor, e.g. 2');return}b=tmp[0];applyXf([num,0],[b[0]-num*b[0],b[1]-num*b[1]]);setTool(null);save();draw();say('Scaled by '+num);return}}
+else if(tool=='ROT'){
+if(step==0){if(!pt){say('Needs a base point.');return}tmp=[pt];step=1}
+else{if(num==null){say('Type an angle in degrees.');return}var ra=num*Math.PI/180,RM=[Math.cos(ra),Math.sin(ra)];b=tmp[0];var z=mp(RM,[0,0],b);applyXf(RM,[b[0]-z[0],b[1]-z[1]]);setTool(null);save();draw();say('Rotated '+num+' deg.');return}}
 else if(tool=='ALIGN'||tool=='GEOREF'){
 if(!pt){say('Needs a point.');return}
 tmp.push(tool=='GEOREF'&&tmp.length%2==0?w2r(tgt(),pt):pt);step=tmp.length;
@@ -192,13 +218,14 @@ if(tool=='ALIGN')applyXf(q.M,q.T);else{var R=tgt();R.a=q.M[0];R.b=q.M[1];R.t=q.T
 var n=tool;setTool(null);save();draw();say(n=='ALIGN'?'Aligned.':'Image georeferenced. Scale '+f3(Math.sqrt(q.M[0]*q.M[0]+q.M[1]*q.M[1]))+' units per pixel.');return}}
 if(last&&tool!='MEAS')say('Last point: '+f3(last[0])+', '+f3(last[1]));
 ask();save();draw()}
-function kp(e){return e.t=='L'?[e.a,e.b]:e.t=='P'?e.p:e.t=='T'?[e.p]:[e.c]}
+function kp(e){return e.t=='L'?[e.a,e.b]:(e.t=='P'||e.t=='S')?e.p:e.t=='T'?[e.p]:[e.c]}
 function snap(p){var t=14/v.s,best=null,bd=t;
 ents.forEach(function(e){kp(e).forEach(function(q){var d=dist(p,q);if(d<bd){bd=d;best=q}})});
 return best||p}
 function sg(p,a,b){var dx=b[0]-a[0],dy=b[1]-a[1],l=dx*dx+dy*dy,t=l?Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/l)):0;return dist(p,[a[0]+t*dx,a[1]+t*dy])}
 function hit(e,p){var i,m=1e18,n;
 if(e.t=='L')return sg(p,e.a,e.b);
+if(e.t=='S'){var q=spl(e.p);for(i=0;i<q.length-1;i++)m=Math.min(m,sg(p,q[i],q[i+1]));return m}
 if(e.t=='P'){n=e.p.length;for(i=0;i<n-1;i++)m=Math.min(m,sg(p,e.p[i],e.p[i+1]));if(e.z)m=Math.min(m,sg(p,e.p[n-1],e.p[0]));return m}
 if(e.t=='T')return dist(p,e.p);
 return Math.abs(dist(p,e.c)-e.r)}
@@ -212,12 +239,13 @@ $('ent').onclick=submit;
 $('in').onkeydown=function(e){if(e.keyCode==13){e.preventDefault();submit()}};
 $('tools').onclick=function(e){var t=e.target.getAttribute('data-t'),o=e.target.getAttribute('data-o');if(t)setTool(t);else if(o)ord(o)};
 function ord(m){
+if(m=='x'){$('del').onclick();return}
 if(!sel){say('Select an object first: tap it with no tool active.');return}
 if(m=='l'){if(sel.r){say('Images are not on layers.');return}ents[sel.i].l=cur;say('Moved to layer '+layers[cur].n+'.');save();draw();return}
 var A=sel.r?rs:ents,i=sel.i,n=A.length,j=m=='f'?n-1:m=='b'?0:m=='u'?Math.min(i+1,n-1):Math.max(i-1,0),x=A.splice(i,1)[0];
 A.splice(j,0,x);sel.i=j;save();draw();say(j==i?'Already there.':'Order changed: now '+(j+1)+' of '+n+' (1 = back).')}
 $('done').onclick=function(){
-if((tool=='PLINE'&&tmp.length>1)||(tool=='POLY'&&tmp.length>2)){var e={t:'P',p:tmp.slice(),z:tool=='POLY'?1:0,l:cur};ents.push(e);say(info(e))}
+if((tool=='PLINE'&&tmp.length>1)||(tool=='CURVE'&&tmp.length>1)||(tool=='POLY'&&tmp.length>2)){var e=tool=='CURVE'?{t:'S',p:tmp.slice(),l:cur}:{t:'P',p:tmp.slice(),z:tool=='POLY'?1:0,l:cur};ents.push(e);say(info(e))}
 setTool(null);save();draw()};
 $('undo').onclick=function(){if(tool&&tmp.length){tmp.pop();step=tmp.length?1:0}else{ents.pop();sel=null}ask();save();draw()};
 $('fit').onclick=function(){
@@ -254,29 +282,44 @@ $('cf').onchange=function(){var f=this.files[0];if(!f)return;var fr=new FileRead
 function out(name,p){var e=$('ecrs').value,pc=$('pc').value;if(e=='ll'){var q=tf(pc,'ll',p);return name+','+q[1].toFixed(8)+','+q[0].toFixed(8)}var q2=tf(pc,e,p);return name+','+f3(q2[0])+','+f3(q2[1])}
 $('ecsv').onclick=function(){
 var rows=[$('ecrs').value=='ll'?'name,lat,lon':'name,E,N'];
-ents.forEach(function(e,i){if(e.t=='T')rows.push(out(e.n||'P'+(i+1),e.p));else if(e.t=='L'||e.t=='P')kp(e).forEach(function(q,j){rows.push(out((e.t=='L'?'L':'V')+(i+1)+'-'+(j+1),q))})});
+ents.forEach(function(e,i){if(e.t=='T')rows.push(out(e.n||'P'+(i+1),e.p));else if(e.t=='L'||e.t=='P'||e.t=='S')kp(e).forEach(function(q,j){rows.push(out((e.t=='L'?'L':'V')+(i+1)+'-'+(j+1),q))})});
 if(rows.length<2){say('Nothing to export.');return}
 save2('coordinates.csv',rows.join('\n'))};
 function save2(name,data){
-if(!dl){try{var b=data instanceof Blob?data:new Blob([data],{type:'text/csv'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);say('Saving '+name);}catch(x){say('Saving is not available here.')}return}
+if(!dl){try{var b=data instanceof Blob?data:new Blob([data],{type:'text/plain'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);say('Saving '+name);}catch(x){say('Saving is not available here.')}return}
 dl.save({filename:name,data:data}).then(function(){say('Saved '+name)}).catch(function(x){say('Not saved: '+((x&&x.code)||'error'))})}
 $('png').onclick=function(){sel=null;draw();cv.toBlob(function(b){save2('drawing.png',b)})};
-$('pdf').onclick=function(){
-sel=null;draw();
-var d=atob(cv.toDataURL('image/jpeg',.92).split(',')[1]),n=d.length,im=new Uint8Array(n),i;
+function mkpdf(c,pw,ph){
+var d=atob(c.toDataURL('image/jpeg',.92).split(',')[1]),n=d.length,im=new Uint8Array(n),i;
 for(i=0;i<n;i++)im[i]=d.charCodeAt(i);
 var P=[],off=0,xr=[];
 function A(x){P.push(x);off+=x.length}
-var ob=['<</Type/Catalog/Pages 2 0 R>>','<</Type/Pages/Kids[3 0 R]/Count 1>>','<</Type/Page/Parent 2 0 R/MediaBox[0 0 '+W+' '+H+']/Contents 4 0 R/Resources<</XObject<</I 5 0 R>>>>>>'];
-var cs='q '+W+' 0 0 '+H+' 0 0 cm /I Do Q';
+var ob=['<</Type/Catalog/Pages 2 0 R>>','<</Type/Pages/Kids[3 0 R]/Count 1>>','<</Type/Page/Parent 2 0 R/MediaBox[0 0 '+pw+' '+ph+']/Contents 4 0 R/Resources<</XObject<</I 5 0 R>>>>>>'];
+var cs='q '+pw+' 0 0 '+ph+' 0 0 cm /I Do Q';
 A('%PDF-1.4\n');
 for(i=0;i<3;i++){xr[i+1]=off;A((i+1)+' 0 obj\n'+ob[i]+'\nendobj\n')}
 xr[4]=off;A('4 0 obj\n<</Length '+cs.length+'>>\nstream\n'+cs+'\nendstream\nendobj\n');
-xr[5]=off;A('5 0 obj\n<</Type/XObject/Subtype/Image/Width '+cv.width+'/Height '+cv.height+'/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length '+n+'>>\nstream\n');A(im);A('\nendstream\nendobj\n');
-var x=off,s='xref\n0 6\n0000000000 65535 f \n';
-for(i=1;i<6;i++)s+=('0000000000'+xr[i]).slice(-10)+' 00000 n \n';
-A(s+'trailer\n<</Size 6/Root 1 0 R>>\nstartxref\n'+x+'\n%%EOF');
-save2('drawing.pdf',new Blob(P,{type:'application/pdf'}))};
+xr[5]=off;A('5 0 obj\n<</Type/XObject/Subtype/Image/Width '+c.width+'/Height '+c.height+'/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length '+n+'>>\nstream\n');A(im);A('\nendstream\nendobj\n');
+var x=off,t='xref\n0 6\n0000000000 65535 f \n';
+for(i=1;i<6;i++)t+=('0000000000'+xr[i]).slice(-10)+' 00000 n \n';
+A(t+'trailer\n<</Size 6/Root 1 0 R>>\nstartxref\n'+x+'\n%%EOF');
+return new Blob(P,{type:'application/pdf'})}
+$('pdf').onclick=function(){sel=null;draw();save2('drawing.pdf',mkpdf(cv,W,H))};
+$('pdfs').onclick=function(){
+var N=parseFloat(($('sc').value||'').replace(/^1\s*:/,''));if(!(N>0)){say('Type a scale such as 1:500.');return}
+var land=$('pp').value=='l',pw=land?842:595,ph=land?595:842,cw=Math.round(pw*150/72),ch=Math.round(ph*150/72),gw=pw/72*0.0254*N,ppm=cw/gw;
+var o={W:W,H:H,D:DPR,s:v.s,sel:sel},R=document.documentElement;
+R.setAttribute('data-theme','light');sel=null;W=cw;H=ch;DPR=1;cv.width=cw;cv.height=ch;v.s=ppm;draw();
+ctx.setTransform(1,0,0,1,0,0);ctx.strokeStyle='#000';ctx.fillStyle='#000';ctx.lineWidth=3;ctx.strokeRect(12,12,cw-24,ch-24);
+ctx.font='30px sans-serif';ctx.fillText('Scale 1:'+N+'   (A4 '+(land?'landscape':'portrait')+')',30,ch-34);
+var L=Math.pow(10,Math.floor(Math.log(gw/4)/Math.LN10)),bx=cw-60-L*ppm;
+ctx.fillRect(bx,ch-52,L*ppm,10);ctx.fillText(L+' m',bx,ch-62);
+var b=mkpdf(cv,pw,ph);
+R.removeAttribute('data-theme');W=o.W;H=o.H;DPR=o.D;v.s=o.s;sel=o.sel;resize();
+save2('plot-1-'+N+'.pdf',b)};
+$('lren').onclick=function(){var n=$('ln').value.trim();if(!n){say('Type the new name in the name box.');return}layers[cur].n=n;$('ln').value='';fillLy();save();say('Layer renamed.')};
+$('lcol').onclick=function(){layers[cur].c=PAL[(PAL.indexOf(layers[cur].c)+1)%PAL.length];save();draw();say('Layer colour changed.')};
+$('ldel').onclick=function(){if(cur==0){say('The first layer cannot be deleted.');return}ents.forEach(function(e){if(e.l==cur)e.l=0;else if(e.l>cur)e.l--});layers.splice(cur,1);cur=0;fillLy();save();draw();say('Layer deleted. Its objects moved to the first layer.')};
 var Pt={},cnt=0,mv=0,sp0=null,pd=0;
 function pos(e){var r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]}
 cv.addEventListener('pointerdown',function(e){try{cv.setPointerCapture(e.pointerId)}catch(x){}
@@ -290,8 +333,18 @@ cv.addEventListener('pointerup',function(e){if(!Pt[e.pointerId])return;
 if(cnt==1&&!mv){var q=pos(e),w=Wd(q[0],q[1]);if(tool)feed({pt:snap(w)});else pick(w)}
 delete Pt[e.pointerId];cnt=Object.keys(Pt).length});
 cv.addEventListener('pointercancel',function(e){delete Pt[e.pointerId];cnt=Object.keys(Pt).length});
+$('pj').onchange=function(){put();openP(this.value)};
+$('pnew').onclick=function(){if(!db){say('Projects need browser storage, which is not available.');return}var n=$('pn').value.trim()||'Project '+(plist.length+1);$('pn').value='';newP(n)};
+$('prn').onclick=function(){var n=$('pn').value.trim();if(!n||!pid){say('Type the new name in the project name box.');return}plist.forEach(function(x){if(x.id==pid)x.name=n});$('pn').value='';putIdx();fillP();say('Renamed to '+n)};
+$('pdel').onclick=function(){if(!pid)return;
+if(!pdc){pdc=1;say('Tap Delete project again within 5 seconds to delete "'+pname()+'".');setTimeout(function(){pdc=0},5000);return}
+pdc=0;var old=pid;try{kv('readwrite').delete('p:'+old)}catch(x){}
+plist=plist.filter(function(x){return x.id!=old});
+if(!plist.length){pid=null;newP('Project 1')}else{openP(plist[0].id)}putIdx();say('Project deleted.')};
+$('psave').onclick=function(){if(!pid){say('Nothing to save yet.');return}put();var n=pname()||'project';save2(n.replace(/[^\w\- ]+/g,'_')+'.surveycad.json',JSON.stringify({app:'SurveyCAD',ver:1,name:n,data:snap()}))};
+$('pf').onchange=function(){var f=this.files[0];if(!f)return;this.value='';var fr=new FileReader();fr.onload=function(){try{var d=JSON.parse(fr.result);if(d.app!='SurveyCAD'||!d.data)throw 0;newP((d.name||'Imported project')+' (opened)',d.data)}catch(x){say('That file is not a SurveyCAD project.')}};fr.readAsText(f)};
 window.addEventListener('resize',resize);
-load();fillLy();resize();idb(loadR);
+load();fillLy();resize();idb(boot);
 try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js')}catch(x){}
 try{if(window.claude&&claude.use)claude.use('downloads').then(function(d){dl=d},function(){})}catch(x){}
 })();
