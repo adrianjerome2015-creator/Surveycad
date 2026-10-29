@@ -30,7 +30,7 @@ canvas{position:absolute;left:0;top:0;touch-action:none}
 #in{flex:1;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text}
 </style></head><body>
 <div class="row" id="tools">
-<button data-t="LINE">Line</button><button data-t="PLINE">Polyline</button><button data-t="POLY">Polygon</button><button data-t="CURVE">Curve</button><button data-t="CIRCLE">Circle</button><button data-t="CIRC3">Circle 3P</button><button data-t="ARC">Arc</button><button data-t="MEAS">Measure</button><button data-t="MOVE">Move</button><button data-t="SCALE">Scale</button><button data-t="ROT">Rotate</button><button data-t="TRIM">Trim</button><button data-t="EXTEND">Extend</button><button data-t="JOIN">Join</button><button data-o="z">Explode</button><button data-t="ALIGN">Align</button><button id="done">Done</button><button id="undo">Undo</button><button data-o="x">Delete</button><button id="fit">Fit</button><button data-o="f">Front</button><button data-o="u">Forward</button><button data-o="d">Backward</button><button data-o="b">Back</button><button data-o="l">To layer</button>
+<button data-t="LINE">Line</button><button data-t="PLINE">Polyline</button><button data-t="POLY">Polygon</button><button data-t="CURVE">Curve</button><button data-t="CIRCLE">Circle</button><button data-t="CIRC3">Circle 3P</button><button data-t="ARC">Arc</button><button data-t="MEAS">Measure</button><button data-t="MOVE">Move</button><button data-t="SCALE">Scale</button><button data-t="ROT">Rotate</button><button data-t="TRIM">Trim</button><button data-t="EXTEND">Extend</button><button data-t="JOIN">Join</button><button data-o="z">Explode</button><button data-t="VMOVE">Move vtx</button><button data-t="VADD">Add vtx</button><button data-t="VDEL">Del vtx</button><button data-t="ALIGN">Align</button><button id="done">Done</button><button id="undo">Undo</button><button data-o="x">Delete</button><button id="fit">Fit</button><button data-o="f">Front</button><button data-o="u">Forward</button><button data-o="d">Backward</button><button data-o="b">Back</button><button data-o="l">To layer</button>
 </div>
 <div class="row"><select id="ly"></select><input id="ln" type="text" placeholder="New layer name" style="flex:1 1 100px;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text"><button id="addl">+ Layer</button><button id="vis">Hide</button><button id="mb">Menu</button></div>
 <div id="menu">
@@ -60,7 +60,7 @@ var cv=document.getElementById('cv'),ctx=cv.getContext('2d'),wrap=document.getEl
 var PAL=['#e5484d','#f5a524','#30a46c','#3e63dd','#ab4aba','#12a594'];
 var layers=[{n:'0',c:PAL[0],on:1}],cur=0,ents=[],rs=[],sel=null,v={x:0,y:0,s:10},W=0,H=0,tool=null,step=0,tmp=[],last=null,dl=null;
 var DPR=window.devicePixelRatio||1;
-var PR={LINE:['Line: start point','Line: next point (Done to finish)'],TRIM:['Trim: tap the part to remove (it is cut at the nearest crossing objects)'],EXTEND:['Extend: tap near the end of an open line or polyline'],JOIN:['Join: tap lines or open polylines, then Done'],CURVE:['Curve: first point','Curve: next point (Done to finish)'],ROT:['Rotate: base point','Rotate: angle in degrees (CCW)'],PLINE:['Polyline: first point','Polyline: next point (Done to finish)'],POLY:['Polygon: first point','Polygon: next point (Done to close)'],CIRCLE:['Circle: center point','Circle: type the radius, or tap a point on the circle'],CIRC3:['Circle 3P: first point on the circle','Circle 3P: second point','Circle 3P: third point'],ARC:['Arc: center','Arc: radius','Arc: start angle (deg CCW from east)','Arc: end angle (deg)'],MEAS:['Measure: first point','Measure: second point'],MOVE:['Move: base point','Move: destination point'],SCALE:['Scale: base point','Scale: factor (e.g. 2)'],ALIGN:['Align: source point 1','Align: destination 1','Align: source point 2','Align: destination 2'],GEOREF:['Georeference: tap point 1 on the image','Point 1 real coordinates (x,y)','Tap point 2 on the image','Point 2 real coordinates (x,y)']};
+var PR={LINE:['Line: start point','Line: next point (Done to finish)'],VMOVE:['Move vertex: tap a vertex (squares), then tap its new position'],VADD:['Add vertex: tap a line, polyline, polygon or curve where the vertex goes'],VDEL:['Delete vertex: tap a vertex to remove'],TRIM:['Trim: tap the part to remove (it is cut at the nearest crossing objects)'],EXTEND:['Extend: tap near the end of an open line or polyline'],JOIN:['Join: tap lines or open polylines, then Done'],CURVE:['Curve: first point','Curve: next point (Done to finish)'],ROT:['Rotate: base point','Rotate: angle in degrees (CCW)'],PLINE:['Polyline: first point','Polyline: next point (Done to finish)'],POLY:['Polygon: first point','Polygon: next point (Done to close)'],CIRCLE:['Circle: center point','Circle: type the radius, or tap a point on the circle'],CIRC3:['Circle 3P: first point on the circle','Circle 3P: second point','Circle 3P: third point'],ARC:['Arc: center','Arc: radius','Arc: start angle (deg CCW from east)','Arc: end angle (deg)'],MEAS:['Measure: first point','Measure: second point'],MOVE:['Move: base point','Move: destination point'],SCALE:['Scale: base point','Scale: factor (e.g. 2)'],ALIGN:['Align: source point 1','Align: destination 1','Align: source point 2','Align: destination 2'],GEOREF:['Georeference: tap point 1 on the image','Point 1 real coordinates (x,y)','Tap point 2 on the image','Point 2 real coordinates (x,y)']};
 var CR={loc:['Local (no CRS)']};
 ['WGS84','Arc 1960'].forEach(function(d){[35,36].forEach(function(z){['N','S'].forEach(function(h){CR[(d[0]=='W'?'w':'a')+z+h]=[d+' UTM '+z+h,z,h=='S'?1:0,d[0]=='W'?'w':'a']})})});
 CR.ll=['Lat/Lon WGS84'];
@@ -85,7 +85,7 @@ if(a!='ll'){g=inv({e:A[3]=='a'?EA:EW,z:A[1],s:A[2]},p);if(A[3]=='a')g=sh(g,EA,EW
 if(b=='ll')return g;
 if(B[3]=='a')g=sh(g,EW,EA,[160,8,300]);
 return fwd({e:B[3]=='a'?EA:EW,z:B[1],s:B[2]},g)}
-var db=null,tm=0,pid=null,plist=[],pdc=0,hist=[],jl=[];
+var db=null,tm=0,pid=null,plist=[],pdc=0,hist=[],jl=[],vh=null;
 function idb(cb){try{var q=indexedDB.open('scad',1);q.onupgradeneeded=function(){q.result.createObjectStore('kv')};q.onsuccess=function(){db=q.result;cb()};q.onerror=function(){}}catch(x){}}
 function kv(m){return db.transaction('kv',m||'readonly').objectStore('kv')}
 function snapP(){return{l:layers,e:ents,c:cur,pc:$('pc').value,v:v,rs:rs.map(function(r){return{src:r.src,a:r.a,b:r.b,t:r.t,on:r.on,name:r.name}})}}
@@ -131,6 +131,7 @@ ents.forEach(function(e,k){var L=layers[e.l];if(!L||!L.on)return;
 var on=(sel&&!sel.r&&sel.i==k)||jl.indexOf(k)>=0;ctx.strokeStyle=on?css('--ac'):L.c;ctx.lineWidth=on?4:2;path(e);ctx.stroke();
 if(e.t=='T'&&e.n){var q=S(e.p);ctx.fillStyle=css('--fg');ctx.fillText(e.n,q[0]+7,q[1]-5)}});
 if(sel&&sel.r&&rs[sel.i]){var r=rs[sel.i],c=[[0,0],[r.img.width,0],[r.img.width,-r.img.height],[0,-r.img.height]].map(function(u){return S(r2w(r,u))});ctx.strokeStyle=css('--ac');ctx.lineWidth=3;ctx.beginPath();c.forEach(function(q,j){if(j)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1])});ctx.closePath();ctx.stroke()}
+if(tool=='VMOVE'||tool=='VDEL'){ctx.fillStyle=css('--ac');ents.forEach(function(e,k){var L=layers[e.l],P=vpts(e);if(!L||!L.on||!P)return;P.forEach(function(q,j){var z=S(q),h=vh&&vh.k==k&&vh.j==j?7:3;ctx.fillRect(z[0]-h,z[1]-h,2*h,2*h)})})}
 ctx.strokeStyle=css('--ac');ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();
 tmp.forEach(function(t,j){var q=S(t);if(j)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1])});ctx.stroke();ctx.setLineDash([]);
 ctx.fillStyle=css('--ac');tmp.forEach(function(t){var q=S(t);ctx.fillRect(q[0]-4,q[1]-4,8,8)});
@@ -139,7 +140,7 @@ function r2w(r,u){return[r.a*u[0]-r.b*u[1]+r.t[0],r.b*u[0]+r.a*u[1]+r.t[1]]}
 function w2r(r,w){var z0=w[0]-r.t[0],z1=w[1]-r.t[1],d=r.a*r.a+r.b*r.b;return[(z0*r.a+z1*r.b)/d,(z1*r.a-z0*r.b)/d]}
 function say(m){$('st').textContent=m}
 function ask(){$('pr').textContent=tool?PR[tool][Math.min(step,PR[tool].length-1)]:'Pick a tool'}
-function setTool(t){tool=t;step=0;tmp=[];jl=[];var b=document.querySelectorAll('#tools [data-t]');for(var i=0;i<b.length;i++)b[i].className=b[i].getAttribute('data-t')==t?'on':'';ask();draw()}
+function setTool(t){tool=t;step=0;tmp=[];jl=[];vh=null;var b=document.querySelectorAll('#tools [data-t]');for(var i=0;i<b.length;i++)b[i].className=b[i].getAttribute('data-t')==t?'on':'';ask();draw()}
 function parse(s){
 s=s.replace(/\s+/g,'');if(!s)return null;
 var m=/^(@?)(-?[\d.]+)<(-?[\d.]+)$/.exec(s);
@@ -214,6 +215,7 @@ if(step==0){tmp=[pt];step=1}else{applyXf([1,0],[pt[0]-tmp[0][0],pt[1]-tmp[0][1]]
 else if(tool=='SCALE'){
 if(step==0){if(!pt){say('Needs a base point.');return}tmp=[pt];step=1}
 else{if(!(num>0)){say('Type a scale factor, e.g. 2');return}b=tmp[0];applyXf([num,0],[b[0]-num*b[0],b[1]-num*b[1]]);setTool(null);save();draw();say('Scaled by '+num);return}}
+else if(tool=='VMOVE'){if(!vh||!pt){say('Tap a vertex first, then give the new position.');return}vset(vh,pt);vh=null;last=pt;save();draw();say('Vertex moved.');return}
 else if(tool=='ROT'){
 if(step==0){if(!pt){say('Needs a base point.');return}tmp=[pt];step=1}
 else{if(num==null){say('Type an angle in degrees.');return}var ra=num*Math.PI/180,RM=[Math.cos(ra),Math.sin(ra)];b=tmp[0];var z=mp(RM,[0,0],b);applyXf(RM,[b[0]-z[0],b[1]-z[1]]);setTool(null);save();draw();say('Rotated '+num+' deg.');return}}
@@ -327,6 +329,24 @@ if(used.length==1&&!z){say('Nothing to join: the ends do not touch.');jl=[];retu
 used.sort(function(a,b){return b-a}).forEach(function(k){ents.splice(k,1)});
 ents.push(z?{t:'P',p:ch,z:1,l:lay}:mk(ch,lay));
 jl=[];save();draw();say((z?'Closed polygon made. ':'Joined into one object. ')+(it.length?it.length+' object(s) did not touch and were left alone.':''))}
+
+function vpts(e){return e.t=='L'?[e.a,e.b]:(e.t=='P'||e.t=='S')?e.p:e.t=='T'?[e.p]:null}
+function vfind(w){var t=20/v.s,best=null,bd=t;ents.forEach(function(e,k){var L=layers[e.l],P=vpts(e);if(!L||!L.on||!P)return;P.forEach(function(q,j){var d=dist(w,q);if(d<bd){bd=d;best={k:k,j:j}}})});return best}
+function vset(b,q){var e=ents[b.k];if(e.t=='L'){if(b.j)e.b=q;else e.a=q}else if(e.t=='T')e.p=q;else e.p[b.j]=q}
+function vtap(w){
+if(tool=='VMOVE'){if(!vh){vh=vfind(w);say(vh?'Vertex picked. Tap its new position, or type x,y.':'Tap on a vertex (shown as squares).');draw()}else{vset(vh,snap(w));vh=null;save();draw();say('Vertex moved.')}return}
+if(tool=='VDEL'){var b=vfind(w);if(!b){say('Tap on a vertex (shown as squares).');return}var e=ents[b.k];
+if(e.t=='L'){say('A line needs both ends. Use Delete to remove the line.');return}
+if(e.t=='T'){say('Use Delete to remove a point.');return}
+if(e.p.length<=(e.z?3:2)){say('Too few vertices would remain. Use Delete to remove the object.');return}
+e.p.splice(b.j,1);if(e.t=='P'&&!e.z&&e.p.length==2)ents[b.k]=mk(e.p,e.l);save();draw();say('Vertex deleted.');return}
+var t=20/v.s,bi=-1,bd=t,bp=null,ins=0;
+ents.forEach(function(e,k){var L=layers[e.l];if(!L||!L.on||(e.t!='L'&&e.t!='P'&&e.t!='S'))return;
+var Q=e.t=='L'?[e.a,e.b]:e.t=='S'?spl(e.p):e.p.slice(),i;if(e.t=='P'&&e.z)Q.push(Q[0]);
+for(i=0;i<Q.length-1;i++){var dx=Q[i+1][0]-Q[i][0],dy=Q[i+1][1]-Q[i][1],l=dx*dx+dy*dy,u=l?Math.max(0,Math.min(1,((w[0]-Q[i][0])*dx+(w[1]-Q[i][1])*dy)/l)):0,q=[Q[i][0]+u*dx,Q[i][1]+u*dy],d=dist(w,q);if(d<bd){bd=d;bi=k;bp=q;ins=e.t=='S'?Math.floor(i/16)+1:i+1}}});
+if(bi<0){say('Tap on a line, polyline, polygon or curve.');return}
+var e2=ents[bi];if(e2.t=='L')ents[bi]={t:'P',p:[e2.a,bp,e2.b],z:0,l:e2.l};else e2.p.splice(ins,0,bp);
+save();draw();say('Vertex added. Use Move vtx to reposition it.')}
 function submit(){var i=$('in');SK='';feed(parse(i.value));i.value=''}
 $('ent').onclick=submit;
 $('in').onkeydown=function(e){if(e.keyCode==13){e.preventDefault();submit()}};
@@ -425,7 +445,7 @@ if(cnt==1){v.x-=(n[0]-o[0])/v.s;v.y+=(n[1]-o[1])/v.s;if(dist(n,sp0)>8)mv=1;Pt[e.
 else if(cnt==2){Pt[e.pointerId]=n;var k=Object.keys(Pt),a=Pt[k[0]],b=Pt[k[1]],d=dist(a,b)||1,m=[(a[0]+b[0])/2,(a[1]+b[1])/2],w0=Wd(m[0],m[1]);
 v.s=Math.max(0.0001,Math.min(1e7,v.s*d/pd));pd=d;var w1=Wd(m[0],m[1]);v.x+=w0[0]-w1[0];v.y+=w0[1]-w1[1];draw()}});
 cv.addEventListener('pointerup',function(e){if(!Pt[e.pointerId])return;
-if(cnt==1&&!mv){var q=pos(e),w=Wd(q[0],q[1]);if(tool=='TRIM')trimAt(w);else if(tool=='EXTEND')extAt(w);else if(tool=='JOIN')joinPick(w);else if(tool)feed({pt:snap(w)});else pick(w)}
+if(cnt==1&&!mv){var q=pos(e),w=Wd(q[0],q[1]);if(tool=='TRIM')trimAt(w);else if(tool=='EXTEND')extAt(w);else if(tool=='JOIN')joinPick(w);else if(tool=='VMOVE'||tool=='VADD'||tool=='VDEL')vtap(w);else if(tool)feed({pt:snap(w)});else pick(w)}
 delete Pt[e.pointerId];cnt=Object.keys(Pt).length});
 cv.addEventListener('pointercancel',function(e){delete Pt[e.pointerId];cnt=Object.keys(Pt).length});
 (function(){var b=document.querySelectorAll('[data-s]');for(var i=0;i<b.length;i++){(function(x){var k=x.getAttribute('data-s');x.className=SN[k]?'on':'';x.onclick=function(){SN[k]=SN[k]?0:1;x.className=SN[k]?'on':'';say('Snap '+x.textContent+(SN[k]?' on':' off'))}})(b[i])}})();
