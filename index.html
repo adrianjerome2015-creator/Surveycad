@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>SurveyCAD</title>
+<link rel="manifest" href="manifest.json">
+<style>
+:root{--bg:#eef2f4;--fg:#0f2a3a;--bar:#dde5ea;--ac:#0a7ea4;--bd:#b7c5ce;--gr:#d3dde3;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1b24;--fg:#e3eef3;--bar:#162b38;--ac:#4cc3e8;--bd:#2f4b5c;--gr:#1a3342}}
+:root[data-theme="dark"]{--bg:#0d1b24;--fg:#e3eef3;--bar:#162b38;--ac:#4cc3e8;--bd:#2f4b5c;--gr:#1a3342}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font:14px -apple-system,Helvetica,Arial,sans-serif;display:flex;flex-direction:column;overflow:hidden;-webkit-user-select:none;user-select:none}
+.row{display:flex;flex-wrap:wrap;gap:6px;padding:6px;background:var(--bar);border-bottom:1px solid var(--bd)}
+#tools{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
+#tools button{flex:none}
+button,select,input{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:6px 9px;min-height:34px}
+button.on{background:var(--ac);color:var(--bg);border-color:var(--ac)}
+select{flex:1;min-width:80px}
+#menu{display:none;max-height:42vh;overflow-y:auto;background:var(--bar);border-bottom:1px solid var(--bd);padding:6px}
+#menu.open{display:block}
+#menu label{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}
+#menu label b{flex:1 0 100%;font-weight:600}
+#wrap{flex:1;position:relative;min-height:80px}
+canvas{position:absolute;left:0;top:0;touch-action:none}
+#bot{border-top:1px solid var(--bd);background:var(--bar);padding:6px}
+#pr{font-weight:600;margin:0 0 4px}
+#st{font-size:12px;opacity:.8;margin:0 0 6px}
+#in{flex:1;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text}
+</style></head><body>
+<div class="row" id="tools">
+<button data-t="LINE">Line</button><button data-t="PLINE">Polyline</button><button data-t="POLY">Polygon</button><button data-t="CIRCLE">Circle</button><button data-t="ARC">Arc</button><button data-t="MEAS">Measure</button><button data-t="MOVE">Move</button><button data-t="SCALE">Scale</button><button data-t="ALIGN">Align</button><button id="done">Done</button><button id="undo">Undo</button><button id="fit">Fit</button><button data-o="f">Front</button><button data-o="u">Forward</button><button data-o="d">Backward</button><button data-o="b">Back</button><button data-o="l">To layer</button>
+</div>
+<div class="row"><select id="ly"></select><input id="ln" type="text" placeholder="New layer name" style="flex:1 1 100px;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text"><button id="addl">+ Layer</button><button id="vis">Hide</button><button id="mb">Menu</button></div>
+<div id="menu">
+<label><b>Project coordinate system</b><select id="pc"></select></label>
+<label><b>Import CSV (name,E,N or id,E,N; Lat/Lon = lat,lon)</b><select id="icrs"></select><select id="imode"><option value="pts">as points</option><option value="pl">as polyline</option><option value="pg">as polygon</option></select><input type="file" id="cf" accept=".csv,.txt,text/csv,text/plain"></label>
+<label><b>Export CSV in</b><select id="ecrs"></select><button id="ecsv">Save CSV</button></label>
+<label><b>Add image or base map</b><input type="file" id="imf" accept="image/*"></label>
+<label><b>Image and selection</b><button id="geo">Georeference</button><button id="rvis">Hide image</button><button id="del">Delete selected</button></label>
+<label><b>Export current view</b><button id="png">Save PNG</button><button id="pdf">Save PDF</button></label>
+</div>
+<div id="wrap"><canvas id="cv"></canvas></div>
+<div id="bot">
+<p id="pr">Pick a tool</p>
+<p id="st">Tap the canvas or type a point: 100,200 / @10,5 / @25&lt;45. Tap an object with no tool to select it.</p>
+<div class="row" style="padding:0;background:none;border:0">
+<input id="in" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="x,y  @dx,dy  @dist&lt;angle  or a number">
+<button id="ent">Enter</button></div>
+</div>
+<script>
+(function(){
+var cv=document.getElementById('cv'),ctx=cv.getContext('2d'),wrap=document.getElementById('wrap');
+var PAL=['#e5484d','#f5a524','#30a46c','#3e63dd','#ab4aba','#12a594'];
+var layers=[{n:'0',c:PAL[0],on:1}],cur=0,ents=[],rs=[],sel=null,v={x:0,y:0,s:10},W=0,H=0,tool=null,step=0,tmp=[],last=null,dl=null;
+var DPR=window.devicePixelRatio||1;
+var PR={LINE:['Line: start point','Line: next point (Done to finish)'],PLINE:['Polyline: first point','Polyline: next point (Done to finish)'],POLY:['Polygon: first point','Polygon: next point (Done to close)'],CIRCLE:['Circle: center','Circle: radius (number or tap)'],ARC:['Arc: center','Arc: radius','Arc: start angle (deg CCW from east)','Arc: end angle (deg)'],MEAS:['Measure: first point','Measure: second point'],MOVE:['Move: base point','Move: destination point'],SCALE:['Scale: base point','Scale: factor (e.g. 2)'],ALIGN:['Align: source point 1','Align: destination 1','Align: source point 2','Align: destination 2'],GEOREF:['Georeference: tap point 1 on the image','Point 1 real coordinates (x,y)','Tap point 2 on the image','Point 2 real coordinates (x,y)']};
+var CR={loc:['Local (no CRS)']};
+['WGS84','Arc 1960'].forEach(function(d){[35,36].forEach(function(z){['N','S'].forEach(function(h){CR[(d[0]=='W'?'w':'a')+z+h]=[d+' UTM '+z+h,z,h=='S'?1:0,d[0]=='W'?'w':'a']})})});
+CR.ll=['Lat/Lon WGS84'];
+var EW=[6378137,1/298.257223563],EA=[6378249.145,1/293.465];
+function K(e){var f=e[1],n=f/(2-f),n2=n*n,n3=n2*n;return{n:n,A:e[0]/(1+n)*(1+n2/4+n2*n2/64),al:[n/2-2*n2/3+5*n3/16,13*n2/48-3*n3/5,61*n3/240],be:[n/2-2*n2/3+37*n3/96,n2/48+n3/15,17*n3/480],de:[2*n-2*n2/3-2*n3,7*n2/3-8*n3/5,56*n3/15]}}
+function fwd(c,p){var k=K(c.e),r=Math.PI/180,ph=p[1]*r,dl=(p[0]-(c.z*6-183))*r,q=2*Math.sqrt(k.n)/(1+k.n),t=Math.sinh(Math.atanh(Math.sin(ph))-q*Math.atanh(q*Math.sin(ph))),x=Math.atan2(t,Math.cos(dl)),y=Math.atanh(Math.sin(dl)/Math.sqrt(1+t*t)),X=x,Y=y,j;
+for(j=1;j<4;j++){X+=k.al[j-1]*Math.sin(2*j*x)*Math.cosh(2*j*y);Y+=k.al[j-1]*Math.cos(2*j*x)*Math.sinh(2*j*y)}
+return[500000+.9996*k.A*Y,(c.s?1e7:0)+.9996*k.A*X]}
+function inv(c,p){var k=K(c.e),r=Math.PI/180,x=(p[1]-(c.s?1e7:0))/(.9996*k.A),y=(p[0]-5e5)/(.9996*k.A),X=x,Y=y,j;
+for(j=1;j<4;j++){X-=k.be[j-1]*Math.sin(2*j*x)*Math.cosh(2*j*y);Y-=k.be[j-1]*Math.cos(2*j*x)*Math.sinh(2*j*y)}
+var ch=Math.asin(Math.sin(X)/Math.cosh(Y)),ph=ch;for(j=1;j<4;j++)ph+=k.de[j-1]*Math.sin(2*j*ch);
+return[(c.z*6-183)+Math.atan2(Math.sinh(Y),Math.cos(X))/r,ph/r]}
+function g2c(g,e){var ph=g[1]*Math.PI/180,l=g[0]*Math.PI/180,e2=e[1]*(2-e[1]),N=e[0]/Math.sqrt(1-e2*Math.sin(ph)*Math.sin(ph));return[N*Math.cos(ph)*Math.cos(l),N*Math.cos(ph)*Math.sin(l),N*(1-e2)*Math.sin(ph)]}
+function c2g(c,e){var e2=e[1]*(2-e[1]),pp=Math.sqrt(c[0]*c[0]+c[1]*c[1]),ph=Math.atan2(c[2],pp*(1-e2)),N,i;for(i=0;i<6;i++){N=e[0]/Math.sqrt(1-e2*Math.sin(ph)*Math.sin(ph));ph=Math.atan2(c[2]+e2*N*Math.sin(ph),pp)}return[Math.atan2(c[1],c[0])*180/Math.PI,ph*180/Math.PI]}
+function sh(g,e1,e2,d){var c=g2c(g,e1);return c2g([c[0]+d[0],c[1]+d[1],c[2]+d[2]],e2)}
+
+function $(i){return document.getElementById(i)}
+function fillCr(id,skip){var s=$(id);for(var k in CR){if(k==skip)continue;var o=document.createElement('option');o.value=k;o.textContent=CR[k][0];s.appendChild(o)}}
+fillCr('pc','ll');fillCr('icrs');fillCr('ecrs');
+function tf(a,b,p){if(a==b||a=='loc'||b=='loc')return p;var A=CR[a],B=CR[b],g=p;
+if(a!='ll'){g=inv({e:A[3]=='a'?EA:EW,z:A[1],s:A[2]},p);if(A[3]=='a')g=sh(g,EA,EW,[-160,-8,-300])}
+if(b=='ll')return g;
+if(B[3]=='a')g=sh(g,EW,EA,[160,8,300]);
+return fwd({e:B[3]=='a'?EA:EW,z:B[1],s:B[2]},g)}
+var db=null,tm=0;
+function idb(cb){try{var q=indexedDB.open('scad',1);q.onupgradeneeded=function(){q.result.createObjectStore('kv')};q.onsuccess=function(){db=q.result;cb()};q.onerror=function(){}}catch(x){}}
+function saveR(){if(!db)return;clearTimeout(tm);tm=setTimeout(function(){try{db.transaction('kv','readwrite').objectStore('kv').put(rs.map(function(r){return{src:r.src,a:r.a,b:r.b,t:r.t,on:r.on,name:r.name}}),'rs')}catch(x){}},400)}
+function loadR(){try{var g=db.transaction('kv').objectStore('kv').get('rs');g.onsuccess=function(){(g.result||[]).forEach(function(o){var im=new Image();im.onload=draw;im.src=o.src;rs.push({img:im,src:o.src,a:o.a,b:o.b,t:o.t,on:o.on,name:o.name})});draw()}}catch(x){}}
+function save(){try{localStorage.setItem('scad2',JSON.stringify({l:layers,e:ents,c:cur,p:$('pc').value}))}catch(x){}saveR()}
+function load(){try{var d=JSON.parse(localStorage.getItem('scad2')||'null');if(d&&d.l&&d.l.length){layers=d.l;ents=d.e||[];cur=d.c||0;if(CR[d.p])$('pc').value=d.p}}catch(x){}}
+function resize(){W=wrap.clientWidth;H=wrap.clientHeight;cv.width=W*DPR;cv.height=H*DPR;cv.style.width=W+'px';cv.style.height=H+'px';draw()}
+function S(p){return[(p[0]-v.x)*v.s+W/2,H/2-(p[1]-v.y)*v.s]}
+function Wd(x,y){return[(x-W/2)/v.s+v.x,v.y-(y-H/2)/v.s]}
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n)}
+function dist(a,b){return Math.sqrt((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1]))}
+function path(e){ctx.beginPath();var p;
+if(e.t=='L'){p=S(e.a);ctx.moveTo(p[0],p[1]);p=S(e.b);ctx.lineTo(p[0],p[1])}
+else if(e.t=='P'){e.p.forEach(function(q,i){var s=S(q);if(i)ctx.lineTo(s[0],s[1]);else ctx.moveTo(s[0],s[1])});if(e.z)ctx.closePath()}
+else if(e.t=='T'){p=S(e.p);ctx.moveTo(p[0]-5,p[1]);ctx.lineTo(p[0]+5,p[1]);ctx.moveTo(p[0],p[1]-5);ctx.lineTo(p[0],p[1]+5)}
+else{p=S(e.c);if(e.t=='C')ctx.arc(p[0],p[1],e.r*v.s,0,6.2832);else ctx.arc(p[0],p[1],e.r*v.s,-e.s,-e.e,true)}}
+function draw(){
+ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle=css('--bg');ctx.fillRect(0,0,W,H);
+var s=v.s;
+rs.forEach(function(r){if(!r.on)return;ctx.setTransform(DPR*s*r.a,-DPR*s*r.b,DPR*s*r.b,DPR*s*r.a,DPR*(s*(r.t[0]-v.x)+W/2),DPR*(H/2-s*(r.t[1]-v.y)));ctx.globalAlpha=.85;ctx.drawImage(r.img,0,0);ctx.globalAlpha=1});
+ctx.setTransform(DPR,0,0,DPR,0,0);
+var g=1;while(g*s<40)g*=10;
+var a=Wd(0,H),b=Wd(W,0),i,p;
+ctx.strokeStyle=css('--gr');ctx.lineWidth=1;ctx.beginPath();
+for(i=Math.floor(a[0]/g);i<=b[0]/g;i++){p=S([i*g,0]);ctx.moveTo(p[0],0);ctx.lineTo(p[0],H)}
+for(i=Math.floor(a[1]/g);i<=b[1]/g;i++){p=S([0,i*g]);ctx.moveTo(0,p[1]);ctx.lineTo(W,p[1])}
+ctx.stroke();
+p=S([0,0]);ctx.strokeStyle=css('--ac');ctx.beginPath();ctx.moveTo(p[0]-10,p[1]);ctx.lineTo(p[0]+10,p[1]);ctx.moveTo(p[0],p[1]-10);ctx.lineTo(p[0],p[1]+10);ctx.stroke();
+ctx.fillStyle=css('--fg');ctx.font='11px sans-serif';ctx.fillText('grid '+g+' units',6,H-6);
+ents.forEach(function(e,k){var L=layers[e.l];if(!L||!L.on)return;
+var on=sel&&!sel.r&&sel.i==k;ctx.strokeStyle=on?css('--ac'):L.c;ctx.lineWidth=on?4:2;path(e);ctx.stroke();
+if(e.t=='T'&&e.n){var q=S(e.p);ctx.fillStyle=css('--fg');ctx.fillText(e.n,q[0]+7,q[1]-5)}});
+if(sel&&sel.r&&rs[sel.i]){var r=rs[sel.i],c=[[0,0],[r.img.width,0],[r.img.width,-r.img.height],[0,-r.img.height]].map(function(u){return S(r2w(r,u))});ctx.strokeStyle=css('--ac');ctx.lineWidth=3;ctx.beginPath();c.forEach(function(q,j){if(j)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1])});ctx.closePath();ctx.stroke()}
+ctx.strokeStyle=css('--ac');ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();
+tmp.forEach(function(t,j){var q=S(t);if(j)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1])});ctx.stroke();ctx.setLineDash([]);
+ctx.fillStyle=css('--ac');tmp.forEach(function(t){var q=S(t);ctx.fillRect(q[0]-4,q[1]-4,8,8)});
+}
+function r2w(r,u){return[r.a*u[0]-r.b*u[1]+r.t[0],r.b*u[0]+r.a*u[1]+r.t[1]]}
+function w2r(r,w){var z0=w[0]-r.t[0],z1=w[1]-r.t[1],d=r.a*r.a+r.b*r.b;return[(z0*r.a+z1*r.b)/d,(z1*r.a-z0*r.b)/d]}
+function say(m){$('st').textContent=m}
+function ask(){$('pr').textContent=tool?PR[tool][Math.min(step,PR[tool].length-1)]:'Pick a tool'}
+function setTool(t){tool=t;step=0;tmp=[];var b=document.querySelectorAll('#tools [data-t]');for(var i=0;i<b.length;i++)b[i].className=b[i].getAttribute('data-t')==t?'on':'';ask();draw()}
+function parse(s){
+s=s.replace(/\s+/g,'');if(!s)return null;
+var m=/^(@?)(-?[\d.]+)<(-?[\d.]+)$/.exec(s);
+if(m){var b=last||[0,0],d=+m[2],r=+m[3]*Math.PI/180;return{pt:[b[0]+d*Math.cos(r),b[1]+d*Math.sin(r)]}}
+m=/^(@?)(-?[\d.]+),(-?[\d.]+)$/.exec(s);
+if(m){var x=+m[2],y=+m[3];if(m[1]){var q=last||[0,0];x+=q[0];y+=q[1]}return{pt:[x,y]}}
+if(/^-?[\d.]+$/.test(s))return{num:+s};
+return null}
+function plen(p,z){var n=0,i;for(i=1;i<p.length;i++)n+=dist(p[i-1],p[i]);if(z)n+=dist(p[p.length-1],p[0]);return n}
+function area(p){var a=0,i,j;for(i=0;i<p.length;i++){j=(i+1)%p.length;a+=p[i][0]*p[j][1]-p[j][0]*p[i][1]}return Math.abs(a)/2}
+function az(a,b){var d=Math.atan2(b[0]-a[0],b[1]-a[1])*180/Math.PI;return (d+360)%360}
+function f3(n){return n.toFixed(3)}
+function info(e){
+if(e.t=='L')return 'Line: length '+f3(dist(e.a,e.b))+', azimuth '+f3(az(e.a,e.b))+' deg';
+if(e.t=='P')return (e.z?'Polygon: area '+f3(area(e.p))+', perimeter '+f3(plen(e.p,1)):'Polyline: length '+f3(plen(e.p,0)))+', '+e.p.length+' vertices';
+if(e.t=='C')return 'Circle: radius '+f3(e.r)+', circumference '+f3(6.28319*e.r)+', area '+f3(3.14159*e.r*e.r);
+if(e.t=='A')return 'Arc: radius '+f3(e.r)+', length '+f3(e.r*((((e.e-e.s)%6.28319)+6.28319)%6.28319));
+return 'Point '+(e.n||'')+': '+f3(e.p[0])+', '+f3(e.p[1])}
+function mp(M,T,p){return[M[0]*p[0]-M[1]*p[1]+T[0],M[1]*p[0]+M[0]*p[1]+T[1]]}
+function applyXf(M,T){
+if(!sel)return;
+if(sel.r){var r=rs[sel.i],a=r.a,b=r.b;r.a=M[0]*a-M[1]*b;r.b=M[0]*b+M[1]*a;r.t=mp(M,T,r.t);return}
+var e=ents[sel.i],k=Math.sqrt(M[0]*M[0]+M[1]*M[1]),ro=Math.atan2(M[1],M[0]);
+function m(p){return mp(M,T,p)}
+if(e.t=='L'){e.a=m(e.a);e.b=m(e.b)}else if(e.t=='P')e.p=e.p.map(m);else if(e.t=='T')e.p=m(e.p);
+else{e.c=m(e.c);e.r*=k;if(e.t=='A'){e.s+=ro;e.e+=ro}}}
+function sim(s1,d1,s2,d2){
+var nx=d2[0]-d1[0],ny=d2[1]-d1[1],dx=s2[0]-s1[0],dy=s2[1]-s1[1],q=dx*dx+dy*dy;
+if(!q||!(nx||ny))return null;
+var M=[(nx*dx+ny*dy)/q,(ny*dx-nx*dy)/q];var z=mp(M,[0,0],s1);return{M:M,T:[d1[0]-z[0],d1[1]-z[1]]}}
+function tgt(){return sel&&sel.r?rs[sel.i]:rs[rs.length-1]}
+function feed(r){
+if(!tool){say('Pick a tool first, or tap an object to select it.');return}
+if(!r){say('Not understood. Try 100,200 or @10,5 or @25<45');return}
+if((tool=='MOVE'||tool=='SCALE'||tool=='ALIGN')&&!sel){say('Select an object first: tap it with no tool active.');return}
+if(tool=='GEOREF'&&!tgt()){say('Add an image first (Menu).');return}
+var pt=r.pt,num=r.num,b;
+if(tool=='LINE'){
+if(!pt){say('Line needs a point.');return}
+if(step==0){tmp=[pt];step=1}else{ents.push({t:'L',a:tmp[0],b:pt,l:cur});tmp=[pt]}
+last=pt}
+else if(tool=='PLINE'||tool=='POLY'){
+if(!pt){say('Needs a point.');return}tmp.push(pt);step=1;last=pt}
+else if(tool=='CIRCLE'){
+if(step==0){if(!pt){say('Give the center as a point.');return}tmp=[pt];last=pt;step=1}
+else{var rad=pt?dist(tmp[0],pt):num;if(!(rad>0)){say('Radius must be above 0.');return}
+ents.push({t:'C',c:tmp[0],r:rad,l:cur});tmp=[];step=0}}
+else if(tool=='ARC'){
+if(step==0){if(!pt){say('Give the center as a point.');return}tmp=[pt];last=pt;step=1}
+else if(step==1){var r2=pt?dist(tmp[0],pt):num;if(!(r2>0)){say('Radius must be above 0.');return}tmp[1]=r2;step=2}
+else{var an=pt?Math.atan2(pt[1]-tmp[0][1],pt[0]-tmp[0][0]):num*Math.PI/180;
+if(step==2){tmp[2]=an;step=3}else{ents.push({t:'A',c:tmp[0],r:tmp[1],s:tmp[2],e:an,l:cur});tmp=[];step=0}}}
+else if(tool=='MEAS'){
+if(!pt){say('Measure needs a point.');return}
+if(step==0){tmp=[pt];step=1;last=pt}else{say('Distance '+f3(dist(tmp[0],pt))+'  Azimuth '+f3(az(tmp[0],pt))+' deg  dE '+f3(pt[0]-tmp[0][0])+'  dN '+f3(pt[1]-tmp[0][1]));tmp=[];step=0;last=pt;ask();draw();return}}
+else if(tool=='MOVE'){
+if(!pt){say('Needs a point.');return}
+if(step==0){tmp=[pt];step=1}else{applyXf([1,0],[pt[0]-tmp[0][0],pt[1]-tmp[0][1]]);setTool(null);save();draw();say('Moved.');return}}
+else if(tool=='SCALE'){
+if(step==0){if(!pt){say('Needs a base point.');return}tmp=[pt];step=1}
+else{if(!(num>0)){say('Type a scale factor, e.g. 2');return}b=tmp[0];applyXf([num,0],[b[0]-num*b[0],b[1]-num*b[1]]);setTool(null);save();draw();say('Scaled by '+num);return}}
+else if(tool=='ALIGN'||tool=='GEOREF'){
+if(!pt){say('Needs a point.');return}
+tmp.push(tool=='GEOREF'&&tmp.length%2==0?w2r(tgt(),pt):pt);step=tmp.length;
+if(tmp.length==4){var q=sim(tmp[0],tmp[1],tmp[2],tmp[3]);
+if(!q){say('The two points must be different.');setTool(tool);return}
+if(tool=='ALIGN')applyXf(q.M,q.T);else{var R=tgt();R.a=q.M[0];R.b=q.M[1];R.t=q.T}
+var n=tool;setTool(null);save();draw();say(n=='ALIGN'?'Aligned.':'Image georeferenced. Scale '+f3(Math.sqrt(q.M[0]*q.M[0]+q.M[1]*q.M[1]))+' units per pixel.');return}}
+if(last&&tool!='MEAS')say('Last point: '+f3(last[0])+', '+f3(last[1]));
+ask();save();draw()}
+function kp(e){return e.t=='L'?[e.a,e.b]:e.t=='P'?e.p:e.t=='T'?[e.p]:[e.c]}
+function snap(p){var t=14/v.s,best=null,bd=t;
+ents.forEach(function(e){kp(e).forEach(function(q){var d=dist(p,q);if(d<bd){bd=d;best=q}})});
+return best||p}
+function sg(p,a,b){var dx=b[0]-a[0],dy=b[1]-a[1],l=dx*dx+dy*dy,t=l?Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/l)):0;return dist(p,[a[0]+t*dx,a[1]+t*dy])}
+function hit(e,p){var i,m=1e18,n;
+if(e.t=='L')return sg(p,e.a,e.b);
+if(e.t=='P'){n=e.p.length;for(i=0;i<n-1;i++)m=Math.min(m,sg(p,e.p[i],e.p[i+1]));if(e.z)m=Math.min(m,sg(p,e.p[n-1],e.p[0]));return m}
+if(e.t=='T')return dist(p,e.p);
+return Math.abs(dist(p,e.c)-e.r)}
+function pick(w){var bd=16/v.s,bi=-1;
+ents.forEach(function(e,i){var L=layers[e.l];if(!L||!L.on)return;var d=hit(e,w);if(d<bd){bd=d;bi=i}});
+if(bi>=0){sel={r:0,i:bi};say(info(ents[bi])+' | layer '+layers[ents[bi].l].n);draw();return}
+for(var i=rs.length-1;i>=0;i--){var r=rs[i];if(!r.on)continue;var u=w2r(r,w);if(u[0]>=0&&u[0]<=r.img.width&&u[1]<=0&&u[1]>=-r.img.height){sel={r:1,i:i};say('Image selected: '+r.name);draw();return}}
+sel=null;say('Nothing selected.');draw()}
+function submit(){var i=$('in');feed(parse(i.value));i.value=''}
+$('ent').onclick=submit;
+$('in').onkeydown=function(e){if(e.keyCode==13){e.preventDefault();submit()}};
+$('tools').onclick=function(e){var t=e.target.getAttribute('data-t'),o=e.target.getAttribute('data-o');if(t)setTool(t);else if(o)ord(o)};
+function ord(m){
+if(!sel){say('Select an object first: tap it with no tool active.');return}
+if(m=='l'){if(sel.r){say('Images are not on layers.');return}ents[sel.i].l=cur;say('Moved to layer '+layers[cur].n+'.');save();draw();return}
+var A=sel.r?rs:ents,i=sel.i,n=A.length,j=m=='f'?n-1:m=='b'?0:m=='u'?Math.min(i+1,n-1):Math.max(i-1,0),x=A.splice(i,1)[0];
+A.splice(j,0,x);sel.i=j;save();draw();say(j==i?'Already there.':'Order changed: now '+(j+1)+' of '+n+' (1 = back).')}
+$('done').onclick=function(){
+if((tool=='PLINE'&&tmp.length>1)||(tool=='POLY'&&tmp.length>2)){var e={t:'P',p:tmp.slice(),z:tool=='POLY'?1:0,l:cur};ents.push(e);say(info(e))}
+setTool(null);save();draw()};
+$('undo').onclick=function(){if(tool&&tmp.length){tmp.pop();step=tmp.length?1:0}else{ents.pop();sel=null}ask();save();draw()};
+$('fit').onclick=function(){
+var x0=1e18,y0=1e18,x1=-1e18,y1=-1e18;
+function add(x,y){x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)}
+ents.forEach(function(e){if(e.c){add(e.c[0]-e.r,e.c[1]-e.r);add(e.c[0]+e.r,e.c[1]+e.r)}else kp(e).forEach(function(q){add(q[0],q[1])})});
+rs.forEach(function(r){[[0,0],[r.img.width,0],[r.img.width,-r.img.height],[0,-r.img.height]].forEach(function(u){var q=r2w(r,u);add(q[0],q[1])})});
+if(x0>x1){v={x:0,y:0,s:10};draw();return}
+var sp=Math.max(x1-x0,y1-y0,1e-6);v.x=(x0+x1)/2;v.y=(y0+y1)/2;v.s=Math.min(W,H)*0.85/sp;draw()};
+function fillLy(){var s=$('ly');s.innerHTML='';layers.forEach(function(L,i){var o=document.createElement('option');o.value=i;o.textContent=L.n+(L.on?'':' (hidden)');s.appendChild(o)});s.value=cur;$('vis').textContent=layers[cur].on?'Hide':'Show'}
+$('ly').onchange=function(){cur=+this.value;fillLy();save();say('New objects go on layer '+layers[cur].n+'.')};
+$('addl').onclick=function(){var n=$('ln').value.trim();if(!n){say('Type a layer name first.');return}layers.push({n:n,c:PAL[layers.length%PAL.length],on:1});cur=layers.length-1;$('ln').value='';fillLy();save();say('Layer added. New objects go on layer '+n+'.')};
+$('vis').onclick=function(){layers[cur].on=layers[cur].on?0:1;fillLy();save();draw()};
+$('mb').onclick=function(){var m=$('menu');m.className=m.className?'':'open';setTimeout(resize,0)};
+$('pc').onchange=save;
+$('geo').onclick=function(){if(!tgt()){say('Add an image first.');return}setTool('GEOREF');$('menu').className='';setTimeout(resize,0)};
+$('rvis').onclick=function(){var r=tgt();if(r){r.on=r.on?0:1;$('rvis').textContent=r.on?'Hide image':'Show image';save();draw()}};
+$('del').onclick=function(){if(!sel){say('Nothing selected.');return}if(sel.r)rs.splice(sel.i,1);else ents.splice(sel.i,1);sel=null;save();draw();say('Deleted.')};
+$('imf').onchange=function(){var f=this.files[0];if(!f)return;var fr=new FileReader();fr.onload=function(){var im=new Image();im.onload=function(){
+var k=(0.6*W/v.s)/im.width,c=[im.width/2,-im.height/2],t=[v.x-k*c[0],v.y-k*c[1]];
+rs.push({img:im,src:fr.result,a:k,b:0,t:t,on:1,name:f.name});save();sel={r:1,i:rs.length-1};say('Image added at the view centre. Move/Scale/Align it, or Georeference it.');draw()};im.src=fr.result};fr.readAsDataURL(f);this.value=''};
+function impCSV(txt){
+var f=$('icrs').value,pc=$('pc').value,mode=$('imode').value,P=[],cnt=0;
+txt.split(/\r?\n/).forEach(function(l){var c=l.split(/[,;\t]/),nm='',nu=[];
+c.forEach(function(s){s=s.trim();if(s!==''&&!isNaN(+s))nu.push(+s);else if(!nm&&s)nm=s});
+if(nu.length<2)return;var o=(nu.length>=3&&!nm)?1:0;
+if(!nm&&o)nm=String(nu[0]);
+var p=f=='ll'?[nu[o+1],nu[o]]:[nu[o],nu[o+1]];
+p=tf(f,pc,p);cnt++;
+if(mode=='pts')ents.push({t:'T',n:nm,p:p,l:cur});else P.push(p)});
+if(mode!='pts'&&P.length>1)ents.push({t:'P',p:P,z:mode=='pg'?1:0,l:cur});
+save();say('Imported '+cnt+' points.');$('fit').onclick();}
+$('cf').onchange=function(){var f=this.files[0];if(!f)return;var fr=new FileReader();fr.onload=function(){impCSV(fr.result)};fr.readAsText(f);this.value=''};
+function out(name,p){var e=$('ecrs').value,pc=$('pc').value;if(e=='ll'){var q=tf(pc,'ll',p);return name+','+q[1].toFixed(8)+','+q[0].toFixed(8)}var q2=tf(pc,e,p);return name+','+f3(q2[0])+','+f3(q2[1])}
+$('ecsv').onclick=function(){
+var rows=[$('ecrs').value=='ll'?'name,lat,lon':'name,E,N'];
+ents.forEach(function(e,i){if(e.t=='T')rows.push(out(e.n||'P'+(i+1),e.p));else if(e.t=='L'||e.t=='P')kp(e).forEach(function(q,j){rows.push(out((e.t=='L'?'L':'V')+(i+1)+'-'+(j+1),q))})});
+if(rows.length<2){say('Nothing to export.');return}
+save2('coordinates.csv',rows.join('\n'))};
+function save2(name,data){
+if(!dl){try{var b=data instanceof Blob?data:new Blob([data],{type:'text/csv'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);say('Saving '+name);}catch(x){say('Saving is not available here.')}return}
+dl.save({filename:name,data:data}).then(function(){say('Saved '+name)}).catch(function(x){say('Not saved: '+((x&&x.code)||'error'))})}
+$('png').onclick=function(){sel=null;draw();cv.toBlob(function(b){save2('drawing.png',b)})};
+$('pdf').onclick=function(){
+sel=null;draw();
+var d=atob(cv.toDataURL('image/jpeg',.92).split(',')[1]),n=d.length,im=new Uint8Array(n),i;
+for(i=0;i<n;i++)im[i]=d.charCodeAt(i);
+var P=[],off=0,xr=[];
+function A(x){P.push(x);off+=x.length}
+var ob=['<</Type/Catalog/Pages 2 0 R>>','<</Type/Pages/Kids[3 0 R]/Count 1>>','<</Type/Page/Parent 2 0 R/MediaBox[0 0 '+W+' '+H+']/Contents 4 0 R/Resources<</XObject<</I 5 0 R>>>>>>'];
+var cs='q '+W+' 0 0 '+H+' 0 0 cm /I Do Q';
+A('%PDF-1.4\n');
+for(i=0;i<3;i++){xr[i+1]=off;A((i+1)+' 0 obj\n'+ob[i]+'\nendobj\n')}
+xr[4]=off;A('4 0 obj\n<</Length '+cs.length+'>>\nstream\n'+cs+'\nendstream\nendobj\n');
+xr[5]=off;A('5 0 obj\n<</Type/XObject/Subtype/Image/Width '+cv.width+'/Height '+cv.height+'/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length '+n+'>>\nstream\n');A(im);A('\nendstream\nendobj\n');
+var x=off,s='xref\n0 6\n0000000000 65535 f \n';
+for(i=1;i<6;i++)s+=('0000000000'+xr[i]).slice(-10)+' 00000 n \n';
+A(s+'trailer\n<</Size 6/Root 1 0 R>>\nstartxref\n'+x+'\n%%EOF');
+save2('drawing.pdf',new Blob(P,{type:'application/pdf'}))};
+var Pt={},cnt=0,mv=0,sp0=null,pd=0;
+function pos(e){var r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]}
+cv.addEventListener('pointerdown',function(e){try{cv.setPointerCapture(e.pointerId)}catch(x){}
+Pt[e.pointerId]=pos(e);cnt=Object.keys(Pt).length;if(cnt==1){mv=0;sp0=pos(e)}if(cnt==2){mv=1;var k=Object.keys(Pt);pd=dist(Pt[k[0]],Pt[k[1]])||1}});
+cv.addEventListener('pointermove',function(e){
+if(!Pt[e.pointerId])return;var n=pos(e),o=Pt[e.pointerId];
+if(cnt==1){v.x-=(n[0]-o[0])/v.s;v.y+=(n[1]-o[1])/v.s;if(dist(n,sp0)>8)mv=1;Pt[e.pointerId]=n;draw()}
+else if(cnt==2){Pt[e.pointerId]=n;var k=Object.keys(Pt),a=Pt[k[0]],b=Pt[k[1]],d=dist(a,b)||1,m=[(a[0]+b[0])/2,(a[1]+b[1])/2],w0=Wd(m[0],m[1]);
+v.s=Math.max(0.0001,Math.min(1e7,v.s*d/pd));pd=d;var w1=Wd(m[0],m[1]);v.x+=w0[0]-w1[0];v.y+=w0[1]-w1[1];draw()}});
+cv.addEventListener('pointerup',function(e){if(!Pt[e.pointerId])return;
+if(cnt==1&&!mv){var q=pos(e),w=Wd(q[0],q[1]);if(tool)feed({pt:snap(w)});else pick(w)}
+delete Pt[e.pointerId];cnt=Object.keys(Pt).length});
+cv.addEventListener('pointercancel',function(e){delete Pt[e.pointerId];cnt=Object.keys(Pt).length});
+window.addEventListener('resize',resize);
+load();fillLy();resize();idb(loadR);
+try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js')}catch(x){}
+try{if(window.claude&&claude.use)claude.use('downloads').then(function(d){dl=d},function(){})}catch(x){}
+})();
+</script></body></html>
