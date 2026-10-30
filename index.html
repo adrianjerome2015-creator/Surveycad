@@ -27,6 +27,14 @@ select{flex:1;min-width:80px}
 #menu.open{display:block}
 #menu label{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}
 #menu label b{flex:1 0 100%;font-weight:600}
+#sb{display:none;position:absolute;left:6px;right:6px;bottom:6px;flex-wrap:wrap;gap:6px;align-items:center;background:var(--bar);border:1px solid var(--bd);border-radius:10px;padding:6px;font-size:12px;z-index:4;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+#sb select{flex:1 1 120px;min-width:0;min-height:30px;font-size:12px;padding:4px 6px}
+#sb button{min-height:30px;padding:4px 8px;font-size:12px}
+#prop{display:none;position:absolute;left:6px;right:6px;top:6px;background:var(--bar);border:1px solid var(--bd);border-radius:12px;padding:10px;z-index:6;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+#prop.open{display:block}
+#prop h4{margin:0 0 8px;font-size:12px;line-height:1.3}
+#prop .r{display:flex;gap:6px;margin-bottom:8px}
+#lc{width:44px;padding:2px}
 #wrap{flex:1;position:relative;min-height:80px}
 canvas{position:absolute;left:0;top:0;touch-action:none}
 #bot{border-top:1px solid var(--bd);background:var(--bar);padding:6px}
@@ -35,11 +43,10 @@ canvas{position:absolute;left:0;top:0;touch-action:none}
 #in{flex:1;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text}
 </style></head><body>
 <div class="row" id="top"><button id="tb">Tools &#9662;</button><button id="done">Done</button><button id="undo">Undo</button><button id="dl2">Delete</button><button id="fit">Fit</button></div>
-<div class="row"><select id="ly"></select><input id="ln" type="text" placeholder="New layer name" style="flex:1 1 100px;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text"><button id="addl">+ Layer</button><button id="vis">Hide</button><button id="mb">Menu</button></div>
+<div class="row"><select id="ly"></select><input id="ln" type="text" placeholder="New layer name" style="flex:1 1 100px;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text"><button id="addl">+ Layer</button><input type="color" id="lc" title="Layer colour"><button id="vis">Hide</button><button id="mb">Menu</button></div>
 <div id="menu">
 <label><b>Projects (work saves automatically)</b><select id="pj"></select><input id="pn" type="text" placeholder="Project name" style="flex:1 1 120px;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text"><button id="pnew">New</button><button id="prn">Rename</button><button id="pdel">Delete project</button></label>
 <label><b>Project file: backup, or move to another phone</b><button id="psave">Save project file</button><input type="file" id="pf" accept=".json,application/json,text/plain"></label>
-<label><b>Select similar by</b><select id="ss"><option value="both">Same type and layer</option><option value="type">Same type</option><option value="layer">Same layer</option></select></label>
 <label><b>Units</b><select id="bu"><option value="m">Drawing units: metres</option><option value="ft">Drawing units: feet</option><option value="usft">Drawing units: US survey feet</option></select><select id="ul"><option value="m">Length in m</option><option value="km">Length in km</option><option value="ft">Length in ft</option><option value="yd">Length in yd</option><option value="mi">Length in miles</option><option value="usft">Length in US ft</option></select><select id="ua"><option value="m2">Area in m&sup2;</option><option value="ha">Area in hectares</option><option value="km2">Area in km&sup2;</option><option value="ft2">Area in ft&sup2;</option><option value="ac">Area in acres</option></select><button id="um">Metric</button><button id="ui">Imperial</button></label>
 <label><b>Snap to (tap to turn on or off)</b><button data-s="e">Endpoint</button><button data-s="m">Midpoint</button><button data-s="c">Center</button><button data-s="i">Intersection</button><button data-s="n">Nearest</button><button data-s="h">Show points</button><button data-s="x">Crosshair</button></label>
 <label><b>Project coordinate system</b><select id="pc"></select></label>
@@ -47,11 +54,13 @@ canvas{position:absolute;left:0;top:0;touch-action:none}
 <label><b>Export CSV: choose which points</b><select id="es"><option value="all">All points</option><option value="vl">Visible layers only</option><option value="cl">Current layer only</option><option value="sel">Selected object only</option><option value="pk">Picked points only</option></select><select id="ecrs"></select><button id="epk">Pick points</button><button id="ewn">Window pick</button><button id="eclr">Clear picks</button><button id="ecsv">Save CSV</button></label>
 <label><b>Add image or base map</b><input type="file" id="imf" accept="image/*"></label>
 <label><b>Image and selection</b><button id="geo">Georeference</button><button id="rvis">Hide image</button><button id="del">Delete selected</button></label>
-<label><b>Layer tools (name comes from the name box)</b><button id="lren">Rename</button><button id="lcol">Next colour</button><button id="ldel">Delete layer</button></label>
+<label><b>Layer tools (name comes from the name box)</b><button id="lren">Rename</button><button id="lcol">New unique colour</button><button id="ldel">Delete layer</button></label>
 <label><b>Map export settings (leave scale blank for automatic 1:50, 1:100, 1:150 ...)</b><input id="sc" type="text" inputmode="numeric" placeholder="Auto" style="width:90px"><select id="pp"><option value="auto">Paper: auto</option><option value="a4l">A4 landscape</option><option value="a4p">A4 portrait</option><option value="a3l">A3 landscape</option><option value="a3p">A3 portrait</option></select><select id="pa"><option value="all">Area: all objects</option><option value="view">Area: current view</option></select></label>
 <label><b>Export map (border, north arrow, scale bar)</b><button id="png">Save image (PNG)</button><button id="pdf">Save PDF</button></label>
 </div>
-<div id="wrap"><canvas id="cv"></canvas><div id="tools"><h4>Draw</h4><div class="g"><button data-t="POINT"><i>✚</i>Point</button><button data-t="LINE"><i>╱</i>Line</button><button data-t="PLINE"><i>⌇</i>Polyline</button><button data-t="POLY"><i>△</i>Polygon</button><button data-t="CURVE"><i>∿</i>Curve</button><button data-t="CIRCLE"><i>○</i>Circle</button><button data-t="CIRC3"><i>◎</i>Circle 3P</button><button data-t="ARC"><i>◠</i>Arc</button></div><h4>Select</h4><div class="g"><button data-t="SELM"><i>☑</i>Multi</button><button data-t="SELW"><i>▭</i>Window</button><button data-t="SSIM"><i>≈</i>Similar</button><button data-o="A"><i>▣</i>All</button><button data-o="C"><i>☐</i>Clear</button></div>
+<div id="wrap"><canvas id="cv"></canvas>
+<div id="sb"><span id="sbt"></span><select id="ss"><option value="both">Similar: same type and layer</option><option value="type">Similar: same type</option><option value="layer">Similar: same layer</option></select><button id="sbp">+ Similar</button><button id="sbm">&minus; Similar</button><button id="sbq">Properties</button><button id="sbc">Clear</button></div>
+<div id="prop"><h4 id="pt">Properties</h4><div class="r"><select id="pl2"></select><button id="pla">Move to layer</button></div><div class="r" id="pnrow"><input id="pnn" type="text" placeholder="Point name" style="flex:1;min-width:0;font-size:16px"><button id="pna">Rename point</button></div><div class="r"><button id="pcl" style="flex:1">Close</button></div></div><div id="tools"><h4>Draw</h4><div class="g"><button data-t="POINT"><i>✚</i>Point</button><button data-t="LINE"><i>╱</i>Line</button><button data-t="PLINE"><i>⌇</i>Polyline</button><button data-t="POLY"><i>△</i>Polygon</button><button data-t="CURVE"><i>∿</i>Curve</button><button data-t="CIRCLE"><i>○</i>Circle</button><button data-t="CIRC3"><i>◎</i>Circle 3P</button><button data-t="ARC"><i>◠</i>Arc</button></div><h4>Select</h4><div class="g"><button data-t="SELM"><i>☑</i>Multi</button><button data-t="SELW"><i>▭</i>Window</button><button data-t="SSIM"><i>≈</i>Similar</button><button data-o="A"><i>▣</i>All</button><button data-o="C"><i>☐</i>Clear</button></div>
 <h4>Measure</h4><div class="g"><button data-t="MEAS"><i>↔</i>Distance</button><button data-t="MAREA"><i>▦</i>Area</button><button data-t="MANG"><i>∠</i>Angle</button></div><h4>Modify</h4><div class="g"><button data-t="MOVE"><i>✥</i>Move</button><button data-t="COPY"><i>❐</i>Copy</button><button data-t="ROT"><i>↻</i>Rotate</button><button data-t="SCALE"><i>⇲</i>Scale</button><button data-t="ALIGN"><i>⇉</i>Align</button><button data-t="TRIM"><i>✂</i>Trim</button><button data-t="EXTEND"><i>⇥</i>Extend</button><button data-t="JOIN"><i>⊕</i>Join</button><button data-o="z"><i>✸</i>Explode</button></div><h4>Vertices</h4><div class="g"><button data-t="VMOVE"><i>◆</i>Move vtx</button><button data-t="VADD"><i>⊞</i>Add vtx</button><button data-t="VDEL"><i>⊟</i>Del vtx</button></div><h4>Arrange selected</h4><div class="g"><button data-o="f"><i>⇧</i>Front</button><button data-o="u"><i>↑</i>Forward</button><button data-o="d"><i>↓</i>Backward</button><button data-o="b"><i>⇩</i>Back</button><button data-o="l"><i>≡</i>To layer</button></div></div></div>
 <div id="bot">
 <p id="pr">Pick a tool</p>
@@ -124,6 +133,7 @@ function draw(){
 ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle=PL?'#fff':css('--bg');ctx.fillRect(0,0,W,H);
 if(CR2){ctx.save();ctx.beginPath();ctx.rect(CR2[0],CR2[1],CR2[2],CR2[3]);ctx.clip()}
 var s=v.s,SL=selList();
+var sbx=$('sb');if(sbx){sbx.style.display=(SL.length&&!PL)?'flex':'none';$('sbt').textContent=SL.length+' selected'}
 rs.forEach(function(r){if(!r.on)return;ctx.setTransform(DPR*s*r.a,-DPR*s*r.b,DPR*s*r.b,DPR*s*r.a,DPR*(s*(r.t[0]-v.x)+W/2),DPR*(H/2-s*(r.t[1]-v.y)));ctx.globalAlpha=.85;ctx.drawImage(r.img,0,0);ctx.globalAlpha=1});
 ctx.setTransform(DPR,0,0,DPR,0,0);
 if(!PL){var g=1;while(g*s<40)g*=10;
@@ -204,7 +214,8 @@ if(e.t=='S')return 'Curve | Length: '+fL(plen(spl(e.p),0))+' | '+e.p.length+' co
 return 'Point '+(e.n||'')+' | E: '+f3(e.p[0])+' | N: '+f3(e.p[1])}
 function mp(M,T,p){return[M[0]*p[0]-M[1]*p[1]+T[0],M[1]*p[0]+M[0]*p[1]+T[1]]}
 function selList(){return sel&&!sel.r?(sel.m&&sel.m.length?sel.m:[sel.i]):[]}
-function setSel(L){sel=L.length?{r:0,i:L[0],m:L.slice()}:null}
+var refI=-1;
+function setSel(L){sel=L.length?{r:0,i:L[0],m:L.slice()}:null;refI=L.length?L[0]:-1}
 function applyXf(M,T){
 if(!sel)return;
 if(sel.r){var r=rs[sel.i],a=r.a,b=r.b;r.a=M[0]*a-M[1]*b;r.b=M[0]*b+M[1]*a;r.t=mp(M,T,r.t);return}
@@ -338,7 +349,7 @@ if(e.t=='T')return dist(p,e.p);
 return Math.abs(dist(p,e.c)-e.r)}
 function pick(w){var bd=16/v.s,bi=-1;
 ents.forEach(function(e,i){var L=layers[e.l];if(!L||!L.on)return;var d=hit(e,w);if(d<bd){bd=d;bi=i}});
-if(bi>=0){sel={r:0,i:bi};say(info(ents[bi])+' | layer '+layers[ents[bi].l].n);draw();return}
+if(bi>=0){sel={r:0,i:bi};refI=bi;say(info(ents[bi])+' | layer '+layers[ents[bi].l].n);draw();return}
 for(var i=rs.length-1;i>=0;i--){var r=rs[i];if(!r.on)continue;var u=w2r(r,w);if(u[0]>=0&&u[0]<=r.img.width&&u[1]<=0&&u[1]>=-r.img.height){sel={r:1,i:i};say('Image selected: '+r.name);draw();return}}
 sel=null;say('Nothing selected.');draw()}
 
@@ -489,15 +500,21 @@ return L.length+' selected: '+parts.join(', ')+' | Total length: '+fL(len)+(ar?'
 function ebox(e){var x0=1e18,y0=1e18,x1=-1e18,y1=-1e18;function add(q){x0=Math.min(x0,q[0]);x1=Math.max(x1,q[0]);y0=Math.min(y0,q[1]);y1=Math.max(y1,q[1])}
 if(e.c){add([e.c[0]-e.r,e.c[1]-e.r]);add([e.c[0]+e.r,e.c[1]+e.r])}else(e.t=='S'?spl(e.p):vpts(e)||[]).forEach(add);return[x0,y0,x1,y1]}
 function selmTap(w){var bi=near(w,function(){return true});if(bi<0){say('Tap on an object.');return}
-var L=selList().slice(),j=L.indexOf(bi);if(j<0)L.push(bi);else L.splice(j,1);setSel(L);say(selSummary(L));draw()}
+var L=selList().slice(),j=L.indexOf(bi);if(j<0)L.push(bi);else L.splice(j,1);setSel(L);if(j<0)refI=bi;say(selSummary(L));draw()}
 function selwTap(w){if(!wc){wc=w;tmp=[w];say('Window select: tap the opposite corner.');draw();return}
 var x0=Math.min(wc[0],w[0]),x1=Math.max(wc[0],w[0]),y0=Math.min(wc[1],w[1]),y1=Math.max(wc[1],w[1]),inside=w[0]>=wc[0],L=selList().slice();
 ents.forEach(function(e,k){var l=layers[e.l];if(!l||!l.on||L.indexOf(k)>=0)return;var b=ebox(e),ok=inside?(b[0]>=x0&&b[2]<=x1&&b[1]>=y0&&b[3]<=y1):(b[0]<=x1&&b[2]>=x0&&b[1]<=y1&&b[3]>=y0);if(ok)L.push(k)});
 wc=null;tmp=[];setSel(L);say((inside?'Inside box: ':'Touching box: ')+selSummary(L));draw()}
+function tyk(e){return e.t+(e.t=='P'?(e.z?'z':'o'):'')}
+function simList(ref){var r=ents[ref],m=$('ss').value,L=[];if(!r)return L;
+ents.forEach(function(e,k){var l=layers[e.l];if(!l||!l.on)return;if((m=='layer'||m=='both')&&e.l!=r.l)return;if((m=='type'||m=='both')&&tyk(e)!=tyk(r))return;L.push(k)});return L}
 function ssimTap(w){var bi=near(w,function(){return true});if(bi<0){say('Tap on an object to find others like it.');return}
-var r=ents[bi],m=$('ss').value,ty=function(e){return e.t+(e.t=='P'?(e.z?'z':'o'):'')},L=[];
-ents.forEach(function(e,k){var l=layers[e.l];if(!l||!l.on)return;if((m=='layer'||m=='both')&&e.l!=r.l)return;if((m=='type'||m=='both')&&ty(e)!=ty(r))return;L.push(k)});
-setSel(L);say(selSummary(L));draw()}
+setSel(simList(bi));refI=bi;say(selSummary(selList()));draw()}
+function openProps(){var L=selList();if(!L.length)return;var e=ents[L[0]],single=L.length==1&&e.t=='T',p=$('pl2');
+p.innerHTML='';layers.forEach(function(x,i){var o=document.createElement('option');o.value=i;o.textContent=x.n;p.appendChild(o)});p.value=e.l;
+$('pt').textContent='Properties | '+selSummary(L);$('pnrow').style.display=single?'flex':'none';if(single)$('pnn').value=e.n||'';$('prop').className='open'}
+function h2x(h,s,l){h/=360;s/=100;l/=100;function f(n){var k=(n+h*12)%12,a=s*Math.min(l,1-l);return l-a*Math.max(-1,Math.min(k-3,9-k,1))}return '#'+[f(0),f(8),f(4)].map(function(x){return('0'+Math.round(x*255).toString(16)).slice(-2)}).join('')}
+function newColor(){var used=layers.map(function(L){return String(L.c).toLowerCase()}),i=layers.length,c;do{c=h2x((i*137.508)%360,72,48);i++}while(used.indexOf(c)>=0);return c}
 function submit(){var i=$('in'),x=i.value;SK='';if(tool=='POINT'){var m=/^([A-Za-z][\w-]*)[\s:]+(\S.*)$/.exec(x.trim());if(m){pnm=m[1];x=m[2]}}feed(parse(x));i.value=''}
 $('ent').onclick=submit;
 $('pl').onclick=function(){var c=Wd(W/2,H/2),q=snap(c);if(tool=='TRIM')trimAt(c);else if(tool=='EXTEND')extAt(c);else if(tool=='JOIN')joinPick(c);else if(tool=='VMOVE'||tool=='VADD'||tool=='VDEL')vtap(q);else if(tool=='SELM')selmTap(c);else if(tool=='SELW')selwTap(c);else if(tool=='SSIM')ssimTap(c);else if(tool=='EPICK')epick(c);else if(tool=='EWIN')ewin(c);else if(tool)feed({pt:q});else pick(c)};
@@ -531,9 +548,9 @@ ents.forEach(function(e){if(e.c){add(e.c[0]-e.r,e.c[1]-e.r);add(e.c[0]+e.r,e.c[1
 rs.forEach(function(r){[[0,0],[r.img.width,0],[r.img.width,-r.img.height],[0,-r.img.height]].forEach(function(u){var q=r2w(r,u);add(q[0],q[1])})});
 if(x0>x1){v={x:0,y:0,s:10};draw();return}
 var sp=Math.max(x1-x0,y1-y0,1e-6);v.x=(x0+x1)/2;v.y=(y0+y1)/2;v.s=Math.min(W,H)*0.85/sp;draw()};
-function fillLy(){var s=$('ly');s.innerHTML='';layers.forEach(function(L,i){var o=document.createElement('option');o.value=i;o.textContent=L.n+(L.on?'':' (hidden)');s.appendChild(o)});s.value=cur;$('vis').textContent=layers[cur].on?'Hide':'Show'}
+function fillLy(){var s=$('ly');s.innerHTML='';layers.forEach(function(L,i){var o=document.createElement('option');o.value=i;o.textContent=L.n+(L.on?'':' (hidden)');s.appendChild(o)});s.value=cur;$('vis').textContent=layers[cur].on?'Hide':'Show';try{$('lc').value=layers[cur].c}catch(x){}}
 $('ly').onchange=function(){cur=+this.value;fillLy();save();say('New objects go on layer '+layers[cur].n+'.')};
-$('addl').onclick=function(){var n=$('ln').value.trim();if(!n){say('Type a layer name first.');return}layers.push({n:n,c:PAL[layers.length%PAL.length],on:1});cur=layers.length-1;$('ln').value='';fillLy();save();say('Layer added. New objects go on layer '+n+'.')};
+$('addl').onclick=function(){var n=$('ln').value.trim();if(!n){say('Type a layer name first.');return}layers.push({n:n,c:newColor(),on:1});cur=layers.length-1;$('ln').value='';fillLy();save();say('Layer added. New objects go on layer '+n+'.')};
 $('vis').onclick=function(){layers[cur].on=layers[cur].on?0:1;fillLy();save();draw()};
 $('mb').onclick=function(){var m=$('menu');m.className=m.className?'':'open';setTimeout(resize,0)};
 $('pc').onchange=save;
@@ -584,7 +601,7 @@ A(t+'trailer\n<</Size 6/Root 1 0 R>>\nstartxref\n'+x+'\n%%EOF');
 return new Blob(P,{type:'application/pdf'})}
 $('pdf').onclick=function(){plot('pdf')};$('png').onclick=function(){plot('png')};
 $('lren').onclick=function(){var n=$('ln').value.trim();if(!n){say('Type the new name in the name box.');return}layers[cur].n=n;$('ln').value='';fillLy();save();say('Layer renamed.')};
-$('lcol').onclick=function(){layers[cur].c=PAL[(PAL.indexOf(layers[cur].c)+1)%PAL.length];save();draw();say('Layer colour changed.')};
+$('lcol').onclick=function(){layers[cur].c=newColor();fillLy();save();draw();say('Layer colour changed.')};
 $('ldel').onclick=function(){if(cur==0){say('The first layer cannot be deleted.');return}ents.forEach(function(e){if(e.l==cur)e.l=0;else if(e.l>cur)e.l--});layers.splice(cur,1);cur=0;fillLy();save();draw();say('Layer deleted. Its objects moved to the first layer.')};
 var Pt={},cnt=0,mv=0,sp0=null,pd=0;
 function pos(e){var r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]}
@@ -615,6 +632,14 @@ plist=plist.filter(function(x){return x.id!=old});
 if(!plist.length){pid=null;newP('Project 1')}else{openP(plist[0].id)}putIdx();say('Project deleted.')};
 $('psave').onclick=function(){if(!pid){say('Nothing to save yet.');return}put();var n=pname()||'project';save2(n.replace(/[^\w\- ]+/g,'_')+'.surveycad.json',JSON.stringify({app:'SurveyCAD',ver:1,name:n,data:snapP()}))};
 $('pf').onchange=function(){var f=this.files[0];if(!f)return;this.value='';var fr=new FileReader();fr.onload=function(){try{var d=JSON.parse(fr.result);if(d.app!='SurveyCAD'||!d.data)throw 0;newP((d.name||'Imported project')+' (opened)',d.data)}catch(x){say('That file is not a SurveyCAD project.')}};fr.readAsText(f)};
+$('lc').onchange=function(){layers[cur].c=this.value;save();draw();say('Colour of layer '+layers[cur].n+' changed.')};
+$('sbp').onclick=function(){if(refI<0||!ents[refI])refI=sel?sel.i:-1;if(refI<0)return;var L=selList().slice();simList(refI).forEach(function(k){if(L.indexOf(k)<0)L.push(k)});var r=refI;setSel(L);refI=r;say(selSummary(L));draw()};
+$('sbm').onclick=function(){if(refI<0||!ents[refI])refI=sel?sel.i:-1;if(refI<0)return;var rm=simList(refI),L=selList().filter(function(k){return rm.indexOf(k)<0}),r=refI;setSel(L);refI=r;say(L.length?selSummary(L):'Deselected. Nothing selected.');draw()};
+$('sbq').onclick=openProps;
+$('sbc').onclick=function(){sel=null;$('prop').className='';say('Selection cleared.');draw()};
+$('pla').onclick=function(){var li=+$('pl2').value,L=selList();L.forEach(function(i){ents[i].l=li});$('prop').className='';save();draw();say('Moved '+L.length+' object(s) to layer '+layers[li].n+'.')};
+$('pna').onclick=function(){var L=selList(),n=$('pnn').value.trim();if(L.length==1&&ents[L[0]].t=='T'&&n){ents[L[0]].n=n;$('prop').className='';save();draw();say('Point renamed to '+n+'.')}};
+$('pcl').onclick=function(){$('prop').className=''};
 window.addEventListener('resize',resize);
 load();fillLy();resize();idb(boot);
 try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js')}catch(x){}
