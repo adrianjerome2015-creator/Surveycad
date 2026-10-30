@@ -35,6 +35,7 @@ select{flex:1;min-width:80px}
 #prop h4{margin:0 0 8px;font-size:12px;line-height:1.3}
 #prop .r{display:flex;gap:6px;margin-bottom:8px}
 #lc{width:44px;padding:2px}
+textarea{flex:1 1 100%;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:6px;box-sizing:border-box;-webkit-user-select:text;user-select:text}
 #wrap{flex:1;position:relative;min-height:80px}
 canvas{position:absolute;left:0;top:0;touch-action:none}
 #bot{border-top:1px solid var(--bd);background:var(--bar);padding:6px}
@@ -56,6 +57,7 @@ canvas{position:absolute;left:0;top:0;touch-action:none}
 <label><b>Image and selection</b><button id="geo">Georeference</button><button id="rvis">Hide image</button><button id="del">Delete selected</button></label>
 <label><b>Layer tools (name comes from the name box)</b><button id="lren">Rename</button><button id="lcol">New unique colour</button><button id="ldel">Delete layer</button></label>
 <label><b>Map export settings (leave scale blank for automatic 1:50, 1:100, 1:150 ...)</b><input id="sc" type="text" inputmode="numeric" placeholder="Auto" style="width:90px"><select id="pp"><option value="auto">Paper: auto</option><option value="a4l">A4 landscape</option><option value="a4p">A4 portrait</option><option value="a3l">A3 landscape</option><option value="a3p">A3 portrait</option></select><select id="pa"><option value="all">Area: all objects</option><option value="view">Area: current view</option></select></label>
+<label><b>Map title, information text and legend (printed on exports)</b><input id="mt" type="text" placeholder="Map title" style="flex:1 1 100%;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text"><textarea id="mi" rows="2" placeholder="Information text, 2 lines shown beside the scale (e.g. Plot 133, Kampala | Surveyed by ...)"></textarea><textarea id="ml" rows="4" placeholder="Legend, one entry per line. Start a line with a colour to get a colour line, e.g.&#10;#e5484d Boundary&#10;#3e63dd Road&#10;Building"></textarea><select id="lgp"><option value="tr">Legend: top right</option><option value="tl">Legend: top left</option><option value="br">Legend: bottom right</option><option value="bl">Legend: bottom left</option><option value="none">Legend: none</option></select><button id="mlf">Fill legend from layers</button></label>
 <label><b>Export map (border, north arrow, scale bar)</b><button id="png">Save image (PNG)</button><button id="pdf">Save PDF</button></label>
 </div>
 <div id="wrap"><canvas id="cv"></canvas>
@@ -103,13 +105,13 @@ return fwd({e:B[3]=='a'?EA:EW,z:B[1],s:B[2]},g)}
 var db=null,tm=0,pid=null,plist=[],pdc=0,hist=[],jl=[],vh=null,pnm='',xp={},wc=null,PL=0,CR2=null;
 function idb(cb){try{var q=indexedDB.open('scad',1);q.onupgradeneeded=function(){q.result.createObjectStore('kv')};q.onsuccess=function(){db=q.result;cb()};q.onerror=function(){}}catch(x){}}
 function kv(m){return db.transaction('kv',m||'readonly').objectStore('kv')}
-function snapP(){return{l:layers,e:ents,c:cur,pc:$('pc').value,v:v,rs:rs.map(function(r){return{src:r.src,a:r.a,b:r.b,t:r.t,on:r.on,name:r.name}})}}
+function snapP(){return{l:layers,e:ents,c:cur,pc:$('pc').value,v:v,ex:{t:$('mt').value,i:$('mi').value,l:$('ml').value,g:$('lgp').value},rs:rs.map(function(r){return{src:r.src,a:r.a,b:r.b,t:r.t,on:r.on,name:r.name}})}}
 function put(){if(!db||!pid)return;try{kv('readwrite').put(snapP(),'p:'+pid)}catch(x){}}
 function putIdx(){try{kv('readwrite').put({cur:pid,list:plist},'idx')}catch(x){}}
 function save(){try{var hj=JSON.stringify(ents);if(hj!=hist[hist.length-1]){hist.push(hj);if(hist.length>40)hist.shift()}}catch(x){}
 if(!db){try{localStorage.setItem('scad2',JSON.stringify({l:layers,e:ents,c:cur,p:$('pc').value}))}catch(x){}return}clearTimeout(tm);tm=setTimeout(put,400)}
 function addImg(o){var im=new Image();im.onload=draw;im.src=o.src;rs.push({img:im,src:o.src,a:o.a,b:o.b,t:o.t,on:o.on,name:o.name})}
-function apply(d){layers=d.l&&d.l.length?d.l:[{n:'0',c:PAL[0],on:1}];ents=d.e||[];cur=Math.min(d.c||0,layers.length-1);$('pc').value=(CR[d.pc]&&d.pc!='ll')?d.pc:'loc';v=d.v||{x:0,y:0,s:10};rs=[];(d.rs||[]).forEach(addImg);hist=[JSON.stringify(ents)];jl=[];xp={};sel=null;last=null;setTool(null);fillLy();draw()}
+function apply(d){layers=d.l&&d.l.length?d.l:[{n:'0',c:PAL[0],on:1}];ents=d.e||[];cur=Math.min(d.c||0,layers.length-1);$('pc').value=(CR[d.pc]&&d.pc!='ll')?d.pc:'loc';v=d.v||{x:0,y:0,s:10};var xx=d.ex||{};$('mt').value=xx.t||'';$('mi').value=xx.i||'';$('ml').value=xx.l||'';$('lgp').value=xx.g||'tr';rs=[];(d.rs||[]).forEach(addImg);hist=[JSON.stringify(ents)];jl=[];xp={};sel=null;last=null;setTool(null);fillLy();draw()}
 function pname(){var n=plist.filter(function(x){return x.id==pid})[0];return n?n.name:''}
 function fillP(){var e=$('pj');e.innerHTML='';plist.forEach(function(x){var o=document.createElement('option');o.value=x.id;o.textContent=x.name;e.appendChild(o)});e.value=pid}
 function openP(id){var g=kv().get('p:'+id);g.onsuccess=function(){pid=id;apply(g.result||{});putIdx();fillP();say('Project: '+pname())}}
@@ -456,14 +458,15 @@ ents.forEach(function(e){var L=layers[e.l];if(!L||!L.on)return;if(e.c){add(e.c[0
 rs.forEach(function(r){if(!r.on)return;[[0,0],[r.img.width,0],[r.img.width,-r.img.height],[0,-r.img.height]].forEach(function(u){var q=r2w(r,u);add(q[0],q[1])})});
 return x0>x1?null:[x0,y0,x1,y1]}
 var PS={a4l:[842,595],a4p:[595,842],a3l:[1191,842],a3p:[842,1191]},PN={a4l:'A4 landscape',a4p:'A4 portrait',a3l:'A3 landscape',a3p:'A3 portrait'};
-function lay(X,pp,N0){var mm=150/25.4,bm=UL[U.b][1],best=null;
-(pp=='auto'?['a4l','a4p']:[pp]).forEach(function(k){var P=PS[k],cw=Math.round(P[0]*150/72),ch=Math.round(P[1]*150/72),x0=13*mm,y0=13*mm,x1=cw-13*mm,y1=ch-30*mm,Wm=(x1-x0)/mm/1000,Hm=(y1-y0)/mm/1000,rq=Math.max((X[2]-X[0])*bm/Wm,(X[3]-X[1])*bm/Hm)*1.04,N=N0>0?N0:Math.max(50,Math.ceil(rq/50)*50);
+function lay(X,pp,N0,tp){var mm=150/25.4,bm=UL[U.b][1],best=null;
+(pp=='auto'?['a4l','a4p']:[pp]).forEach(function(k){var P=PS[k],cw=Math.round(P[0]*150/72),ch=Math.round(P[1]*150/72),x0=13*mm,y0=(tp?25:13)*mm,x1=cw-13*mm,y1=ch-30*mm,Wm=(x1-x0)/mm/1000,Hm=(y1-y0)/mm/1000,rq=Math.max((X[2]-X[0])*bm/Wm,(X[3]-X[1])*bm/Hm)*1.04,N=N0>0?N0:Math.max(50,Math.ceil(rq/50)*50);
 if(!best||N<best.N)best={k:k,pw:P[0],ph:P[1],cw:cw,ch:ch,x0:x0,y0:y0,x1:x1,y1:y1,N:N,mm:mm}});return best}
+function fit(t,maxW){var r=t;while(r.length>1&&ctx.measureText(r).width>maxW)r=r.slice(0,-1);return r.length<t.length?r.slice(0,-1)+'\u2026':r}
 function plot(kind){
-var N0=parseFloat(($('sc').value||'').replace(/^1\s*:/,'')),X=null,bm=UL[U.b][1];
+var N0=parseFloat(($('sc').value||'').replace(/^1\s*:/,'')),X=null,bm=UL[U.b][1],tt=$('mt').value.trim();
 if($('pa').value=='all')X=bnds();
 if(!X){var a=Wd(0,H),b=Wd(W,0);X=[a[0],a[1],b[0],b[1]]}
-var Ly=lay(X,$('pp').value,N0),mm=Ly.mm,cw=Ly.cw,ch=Ly.ch,N=Ly.N;
+var Ly=lay(X,$('pp').value,N0,!!tt),mm=Ly.mm,cw=Ly.cw,ch=Ly.ch,N=Ly.N;
 var o={W:W,H:H,D:DPR,s:v.s,x:v.x,y:v.y,tool:tool,tmp:tmp,hv:hv,sel:sel,jl:jl,vh:vh,h:SN.h,cx:SN.x},R=document.documentElement;
 R.setAttribute('data-theme','light');tool=null;tmp=[];hv=null;sel=null;jl=[];vh=null;SN.h=0;SN.x=0;
 W=cw;H=ch;DPR=1;cv.width=cw;cv.height=ch;PL=1;
@@ -474,11 +477,12 @@ CR2=[Ly.x0,Ly.y0,Ly.x1-Ly.x0,Ly.y1-Ly.y0];draw();CR2=null;
 ctx.setTransform(1,0,0,1,0,0);ctx.strokeStyle='#000';ctx.fillStyle='#000';
 ctx.lineWidth=Math.max(2,.5*mm);ctx.strokeRect(10*mm,10*mm,cw-20*mm,ch-20*mm);
 ctx.lineWidth=Math.max(1,.25*mm);ctx.strokeRect(Ly.x0,Ly.y0,Ly.x1-Ly.x0,Ly.y1-Ly.y0);
-var y1=Ly.y1;
+if(tt){var fs=7*mm;ctx.font='bold '+fs+'px sans-serif';while(ctx.measureText(tt).width>cw-30*mm&&fs>2*mm){fs-=mm*.25;ctx.font='bold '+fs+'px sans-serif'}
+ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(tt,cw/2,17.5*mm);ctx.textAlign='left';ctx.textBaseline='alphabetic'}
+var y1=Ly.y1,tg=0.05*N/UL[U.l][1],p10=Math.pow(10,Math.floor(Math.log(tg)/Math.LN10)),mt=tg/p10,Ld=(mt<1.5?1:mt<3.5?2:mt<7.5?5:10)*p10,px=Ld*UL[U.l][1]/N*1000*mm,bx1=cw-10*mm-30*mm,bx0=bx1-px,by=y1+10*mm,bh=3*mm,i;
 ctx.font='bold '+3.4*mm+'px sans-serif';ctx.fillText('Scale 1:'+N,15*mm,y1+7*mm);
-ctx.font=2.5*mm+'px sans-serif';ctx.fillText((pname()||'Project')+'  |  '+PN[Ly.k],15*mm,y1+12.5*mm);
-ctx.fillText((CR[$('pc').value]?CR[$('pc').value][0]:'')+'  |  '+new Date().toLocaleDateString(),15*mm,y1+17*mm);
-var tg=0.05*N/UL[U.l][1],p10=Math.pow(10,Math.floor(Math.log(tg)/Math.LN10)),mt=tg/p10,Ld=(mt<1.5?1:mt<3.5?2:mt<7.5?5:10)*p10,px=Ld*UL[U.l][1]/N*1000*mm,bx1=cw-10*mm-30*mm,bx0=bx1-px,by=y1+10*mm,bh=3*mm,i;
+ctx.font=2.5*mm+'px sans-serif';
+$('mi').value.split('\n').map(function(x){return x.trim()}).filter(function(x){return x}).slice(0,2).forEach(function(t,k){ctx.fillText(fit(t,bx0-20*mm),15*mm,y1+(12.5+4.5*k)*mm)});
 for(i=0;i<4;i++){ctx.fillStyle=i%2?'#fff':'#000';ctx.fillRect(bx0+i*px/4,by,px/4,bh)}
 ctx.strokeStyle='#000';ctx.lineWidth=Math.max(1,.25*mm);ctx.strokeRect(bx0,by,px,bh);ctx.fillStyle='#000';ctx.font=2.4*mm+'px sans-serif';
 [0,.5,1].forEach(function(f){ctx.textAlign=f==0?'left':f==1?'right':'center';ctx.fillText(String(+(f*Ld).toFixed(2))+(f==1?' '+UL[U.l][0]:''),bx0+f*px,by-1.5*mm)});
@@ -487,6 +491,18 @@ var ax=cw-10*mm-15*mm,t0=y1+6*mm,t1=y1+17*mm;
 ctx.beginPath();ctx.moveTo(ax,t0);ctx.lineTo(ax-4*mm,t1);ctx.lineTo(ax,t1-3.5*mm);ctx.closePath();ctx.fill();
 ctx.beginPath();ctx.moveTo(ax,t0);ctx.lineTo(ax+4*mm,t1);ctx.lineTo(ax,t1-3.5*mm);ctx.closePath();ctx.stroke();
 ctx.font='bold '+4*mm+'px sans-serif';ctx.textAlign='center';ctx.fillText('N',ax,t0-0.8*mm);ctx.textAlign='left';
+var gp=$('lgp').value,ent=$('ml').value.split('\n').map(function(x){return x.trim()}).filter(function(x){return x}).map(function(t){var m=/^(#[0-9a-fA-F]{6})\s+(.+)$/.exec(t);return m?{c:m[1],t:m[2]}:{c:null,t:t}});
+if(ent.length&&gp!='none'){
+var f2=2.6*mm,rh=5*mm,pd=2.5*mm,sw=8*mm,hd=5*mm,hasSw=ent.some(function(e){return e.c}),maxN=Math.max(1,Math.floor((Ly.y1-Ly.y0-6*mm-2*pd-hd)/rh)),tw=0;
+ent=ent.slice(0,maxN);ctx.font='bold '+f2+'px sans-serif';tw=ctx.measureText('Legend').width;ctx.font=f2+'px sans-serif';
+ent.forEach(function(e){tw=Math.max(tw,ctx.measureText(e.t).width)});
+var lw=Math.min(2*pd+(hasSw?sw+2*mm:0)+tw,(Ly.x1-Ly.x0)-6*mm),lh=2*pd+hd+ent.length*rh,
+lx=gp=='tl'||gp=='bl'?Ly.x0+3*mm:Ly.x1-3*mm-lw,ly=gp=='tl'||gp=='tr'?Ly.y0+3*mm:Ly.y1-3*mm-lh;
+ctx.fillStyle='#fff';ctx.globalAlpha=.94;ctx.fillRect(lx,ly,lw,lh);ctx.globalAlpha=1;ctx.strokeStyle='#000';ctx.lineWidth=Math.max(1,.25*mm);ctx.strokeRect(lx,ly,lw,lh);
+ctx.fillStyle='#000';ctx.font='bold '+f2+'px sans-serif';ctx.fillText('Legend',lx+pd,ly+pd+3.2*mm);ctx.font=f2+'px sans-serif';
+ent.forEach(function(e,k){var yy=ly+pd+hd+k*rh+rh*0.65,tx=lx+pd+(hasSw?sw+2*mm:0);
+if(e.c){ctx.strokeStyle=e.c;ctx.lineWidth=.9*mm;ctx.beginPath();ctx.moveTo(lx+pd,yy-1.2*mm);ctx.lineTo(lx+pd+sw,yy-1.2*mm);ctx.stroke()}
+ctx.fillStyle='#000';ctx.fillText(fit(e.t,lx+lw-pd-tx),tx,yy)})}
 var out2=kind=='pdf'?mkpdf(cv,Ly.pw,Ly.ph):null;
 function fin(b){R.removeAttribute('data-theme');PL=0;W=o.W;H=o.H;DPR=o.D;v.s=o.s;v.x=o.x;v.y=o.y;tool=o.tool;tmp=o.tmp;hv=o.hv;sel=o.sel;jl=o.jl;vh=o.vh;SN.h=o.h;SN.x=o.cx;resize();if(b)save2('map-1-'+N+(kind=='pdf'?'.pdf':'.png'),b);say('Plotted at 1:'+N+' on '+PN[Ly.k]+'.')}
 if(kind=='pdf')fin(out2);else cv.toBlob(function(b){fin(b)})}
@@ -640,6 +656,8 @@ $('sbc').onclick=function(){sel=null;$('prop').className='';say('Selection clear
 $('pla').onclick=function(){var li=+$('pl2').value,L=selList();L.forEach(function(i){ents[i].l=li});$('prop').className='';save();draw();say('Moved '+L.length+' object(s) to layer '+layers[li].n+'.')};
 $('pna').onclick=function(){var L=selList(),n=$('pnn').value.trim();if(L.length==1&&ents[L[0]].t=='T'&&n){ents[L[0]].n=n;$('prop').className='';save();draw();say('Point renamed to '+n+'.')}};
 $('pcl').onclick=function(){$('prop').className=''};
+['mt','mi','ml'].forEach(function(k){$(k).oninput=save});$('lgp').onchange=save;
+$('mlf').onclick=function(){var u={};ents.forEach(function(e){u[e.l]=1});$('ml').value=layers.map(function(L,i){return u[i]?L.c+' '+L.n:null}).filter(function(x){return x}).join('\n');save();say('Legend filled from layers. Edit the names as you like.')};
 window.addEventListener('resize',resize);
 load();fillLy();resize();idb(boot);
 try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js')}catch(x){}
