@@ -48,22 +48,24 @@ canvas{position:absolute;left:0;top:0;touch-action:none}
 <div id="menu">
 <label><b>Projects (work saves automatically)</b><select id="pj"></select><input id="pn" type="text" placeholder="Project name" style="flex:1 1 120px;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text"><button id="pnew">New</button><button id="prn">Rename</button><button id="pdel">Delete project</button></label>
 <label><b>Project file: backup, or move to another phone</b><button id="psave">Save project file</button><input type="file" id="pf" accept=".json,application/json,text/plain"></label>
+<label><b>Annotation settings</b><select id="ad"><option value="0">Length decimals: 0</option><option value="1">Length decimals: 1</option><option value="2" selected>Length decimals: 2</option><option value="3">Length decimals: 3</option><option value="4">Length decimals: 4</option></select><select id="aa"><option value="0">Area decimals: 0</option><option value="1">Area decimals: 1</option><option value="2" selected>Area decimals: 2</option><option value="3">Area decimals: 3</option><option value="4">Area decimals: 4</option></select><select id="au"><option value="ha">Area in hectares</option><option value="ac">Area in acres</option><option value="both" selected>Area in both</option></select><select id="as"><option value="s">Text size: small</option><option value="m" selected>Text size: medium</option><option value="l">Text size: large</option></select></label>
 <label><b>Units</b><select id="bu"><option value="m">Drawing units: metres</option><option value="ft">Drawing units: feet</option><option value="usft">Drawing units: US survey feet</option></select><select id="ul"><option value="m">Length in m</option><option value="km">Length in km</option><option value="ft">Length in ft</option><option value="yd">Length in yd</option><option value="mi">Length in miles</option><option value="usft">Length in US ft</option></select><select id="ua"><option value="m2">Area in m&sup2;</option><option value="ha">Area in hectares</option><option value="km2">Area in km&sup2;</option><option value="ft2">Area in ft&sup2;</option><option value="ac">Area in acres</option></select><button id="um">Metric</button><button id="ui">Imperial</button></label>
-<label><b>Snap to (tap to turn on or off)</b><button data-s="e">Endpoint</button><button data-s="m">Midpoint</button><button data-s="c">Center</button><button data-s="i">Intersection</button><button data-s="n">Nearest</button><button data-s="k">Raster corners</button><button data-s="h">Show points</button><button data-s="x">Crosshair</button></label>
+<label><b>Snap to (tap to turn on or off)</b><button data-s="e">Endpoint</button><button data-s="m">Midpoint</button><button data-s="c">Center</button><button data-s="i">Intersection</button><button data-s="n">Nearest</button><button data-s="k">Raster corners</button><button data-s="o">Polar</button><select id="pi"><option value="15">Polar step 15&deg;</option><option value="5">5&deg;</option><option value="10">10&deg;</option><option value="30">30&deg;</option><option value="45">45&deg;</option><option value="90">90&deg; (ortho)</option></select><button data-s="h">Show points</button><button data-s="x">Crosshair</button></label>
 <label><b>Project coordinate system</b><select id="pc"></select></label>
 <label><b>Import CSV (name,E,N or id,E,N; Lat/Lon = lat,lon)</b><select id="icrs"></select><select id="imode"><option value="pts">as points</option><option value="pl">as polyline</option><option value="pg">as polygon</option></select><input type="file" id="cf" accept=".csv,.txt,text/csv,text/plain"></label>
 <label><b>Export CSV: choose which points</b><select id="es"><option value="all">All points</option><option value="vl">Visible layers only</option><option value="cl">Current layer only</option><option value="sel">Selected object only</option><option value="pk">Picked points only</option></select><select id="ecrs"></select><button id="epk">Pick points</button><button id="ewn">Window pick</button><button id="eclr">Clear picks</button><button id="ecsv">Save CSV</button></label>
 <label><b>Add image or base map</b><input type="file" id="imf" accept="image/*"></label>
 <label><b>Image and selection</b><button id="geo">Georeference</button><button id="rvis">Hide image</button><button id="del">Delete selected</button></label>
-<label><b>Layer tools (name comes from the name box)</b><button id="lren">Rename</button><button id="lcol">New unique colour</button><button id="ldel">Delete layer</button></label>
+<label><b>Layer tools (name comes from the name box)</b><button id="lren">Rename</button><button id="lcol">New unique colour</button><button id="llk">Lock / unlock layer</button><button id="ldel">Delete layer</button></label>
 <label><b>Map export settings (leave scale blank for automatic 1:50, 1:100, 1:150 ...)</b><input id="sc" type="text" inputmode="numeric" placeholder="Auto" style="width:90px"><select id="pp"><option value="auto">Paper: auto</option><option value="a4l">A4 landscape</option><option value="a4p">A4 portrait</option><option value="a3l">A3 landscape</option><option value="a3p">A3 portrait</option></select><select id="pa"><option value="all">Area: all objects</option><option value="view">Area: current view</option></select></label>
 <label><b>Map title, information text and legend (printed on exports)</b><input id="mt" type="text" placeholder="Map title" style="flex:1 1 100%;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text"><textarea id="mi" rows="2" placeholder="Information text, 2 lines shown beside the scale (e.g. Plot 133, Kampala | Surveyed by ...)"></textarea><textarea id="ml" rows="4" placeholder="Legend, one entry per line. Start a line with a colour to get a colour line, e.g.&#10;#e5484d Boundary&#10;#3e63dd Road&#10;Building"></textarea><select id="lgp"><option value="tr">Legend: top right</option><option value="tl">Legend: top left</option><option value="br">Legend: bottom right</option><option value="bl">Legend: bottom left</option><option value="none">Legend: none</option></select><button id="mlf">Fill legend from layers</button></label>
 <label><b>Export map (border, north arrow, scale bar)</b><button id="png">Save image (PNG)</button><button id="pdf">Save PDF</button></label>
 </div>
 <div id="wrap"><canvas id="cv"></canvas>
 <div id="sb"><span id="sbt"></span><select id="ss"><option value="both">Similar: same type and layer</option><option value="type">Similar: same type</option><option value="layer">Similar: same layer</option></select><button id="sbp">+ Similar</button><button id="sbm">&minus; Similar</button><button id="sbq">Properties</button><button id="sbc">Clear</button></div>
-<div id="prop"><h4 id="pt">Properties</h4><div class="r"><select id="pl2"></select><button id="pla">Move to layer</button></div><div class="r" id="alrow" style="display:none;align-items:center"><span>Opacity</span><input type="range" id="alr" min="5" max="100" step="5" style="flex:1;min-height:30px"><span id="alv" style="min-width:42px;text-align:right"></span></div><div class="r" id="pnrow"><input id="pnn" type="text" placeholder="Point name" style="flex:1;min-width:0;font-size:16px"><button id="pna">Rename point</button></div><div class="r"><button id="pcl" style="flex:1">Close</button></div></div><div id="tools"><h4>Draw</h4><div class="g"><button data-t="POINT"><i>✚</i>Point</button><button data-t="LINE"><i>╱</i>Line</button><button data-t="PLINE"><i>⌇</i>Polyline</button><button data-t="POLY"><i>△</i>Polygon</button><button data-t="CURVE"><i>∿</i>Curve</button><button data-t="CIRCLE"><i>○</i>Circle</button><button data-t="CIRC3"><i>◎</i>Circle 3P</button><button data-t="ARC"><i>◠</i>Arc</button></div><h4>Select</h4><div class="g"><button data-t="SELM"><i>☑</i>Multi</button><button data-t="SELW"><i>▭</i>Window</button><button data-t="SSIM"><i>≈</i>Similar</button><button data-o="A"><i>▣</i>All</button><button data-o="C"><i>☐</i>Clear</button></div>
-<h4>Measure</h4><div class="g"><button data-t="MEAS"><i>↔</i>Distance</button><button data-t="MAREA"><i>▦</i>Area</button><button data-t="MANG"><i>∠</i>Angle</button></div><h4>Modify</h4><div class="g"><button data-t="MOVE"><i>✥</i>Move</button><button data-t="COPY"><i>❐</i>Copy</button><button data-t="ROT"><i>↻</i>Rotate</button><button data-t="SCALE"><i>⇲</i>Scale</button><button data-t="ALIGN"><i>⇉</i>Align</button><button data-t="TRIM"><i>✂</i>Trim</button><button data-t="EXTEND"><i>⇥</i>Extend</button><button data-t="JOIN"><i>⊕</i>Join</button><button data-o="z"><i>✸</i>Explode</button></div><h4>Vertices</h4><div class="g"><button data-t="VMOVE"><i>◆</i>Move vtx</button><button data-t="VADD"><i>⊞</i>Add vtx</button><button data-t="VDEL"><i>⊟</i>Del vtx</button></div><h4>Arrange selected</h4><div class="g"><button data-o="f"><i>⇧</i>Front</button><button data-o="u"><i>↑</i>Forward</button><button data-o="d"><i>↓</i>Backward</button><button data-o="b"><i>⇩</i>Back</button><button data-o="l"><i>≡</i>To layer</button></div></div></div>
+<div id="prop"><h4 id="pt">Properties</h4><div class="r" id="plrow"><select id="pl2"></select><button id="pla">Move to layer</button></div><div class="r" id="alrow" style="display:none;align-items:center"><span>Opacity</span><input type="range" id="alr" min="5" max="100" step="5" style="flex:1;min-height:30px"><span id="alv" style="min-width:42px;text-align:right"></span></div><div class="r" id="pnrow"><input id="pnn" type="text" style="flex:1;min-width:0;font-size:16px"><button id="pna">Apply text</button></div><div class="r" id="pn2row" style="display:none"><input id="pn2" type="text" placeholder="Manual area text (blank = automatic)" style="flex:1;min-width:0;font-size:16px"></div><div class="r" id="pflrow" style="display:none"><button id="pfl" style="flex:1">Flip label to the other side of the line</button></div><div class="r"><button id="pcl" style="flex:1">Close</button></div></div><div id="tools"><h4>Draw</h4><div class="g"><button data-t="POINT"><i>✚</i>Point</button><button data-t="LINE"><i>╱</i>Line</button><button data-t="PLINE"><i>⌇</i>Polyline</button><button data-t="POLY"><i>△</i>Polygon</button><button data-t="CURVE"><i>∿</i>Curve</button><button data-t="CIRCLE"><i>○</i>Circle</button><button data-t="CIRC3"><i>◎</i>Circle 3P</button><button data-t="ARC"><i>◠</i>Arc</button></div><h4>Select</h4><div class="g"><button data-t="SELM"><i>☑</i>Multi</button><button data-t="SELW"><i>▭</i>Window</button><button data-t="SSIM"><i>≈</i>Similar</button><button data-o="A"><i>▣</i>All</button><button data-o="C"><i>☐</i>Clear</button></div>
+<h4>Annotate</h4><div class="g"><button data-t="ALEN"><i>⟷</i>Length</button><button data-t="APOLY"><i>▢</i>Plot label</button><button data-t="TEXT"><i>T</i>Text</button></div>
+<h4>Measure</h4><div class="g"><button data-t="MEAS"><i>↔</i>Distance</button><button data-t="MAREA"><i>▦</i>Area</button><button data-t="MANG"><i>∠</i>Angle</button></div><h4>Modify</h4><div class="g"><button data-t="MOVE"><i>✥</i>Move</button><button data-t="COPY"><i>❐</i>Copy</button><button data-t="ROT"><i>↻</i>Rotate</button><button data-t="SCALE"><i>⇲</i>Scale</button><button data-t="ALIGN"><i>⇉</i>Align</button><button data-t="TRIM"><i>✂</i>Trim</button><button data-t="EXTEND"><i>⇥</i>Extend</button><button data-t="EXTO"><i>⇤</i>To object</button><button data-t="OFFSET"><i>⫽</i>Offset</button><button data-t="JOIN"><i>⊕</i>Join</button><button data-o="z"><i>✸</i>Explode</button></div><h4>Vertices</h4><div class="g"><button data-t="VMOVE"><i>◆</i>Move vtx</button><button data-t="VADD"><i>⊞</i>Add vtx</button><button data-t="VDEL"><i>⊟</i>Del vtx</button></div><h4>Arrange selected</h4><div class="g"><button data-o="f"><i>⇧</i>Front</button><button data-o="u"><i>↑</i>Forward</button><button data-o="d"><i>↓</i>Backward</button><button data-o="b"><i>⇩</i>Back</button><button data-o="l"><i>≡</i>To layer</button></div></div></div>
 <div id="bot">
 <p id="pr">Pick a tool</p>
 <p id="st">Tap the canvas or type a point: 100,200 / @10,5 / @25&lt;45. Tap an object with no tool to select it.</p>
@@ -77,7 +79,7 @@ var cv=document.getElementById('cv'),ctx=cv.getContext('2d'),wrap=document.getEl
 var PAL=['#e5484d','#f5a524','#30a46c','#3e63dd','#ab4aba','#12a594'];
 var layers=[{n:'0',c:PAL[0],on:1}],cur=0,ents=[],rs=[],sel=null,v={x:0,y:0,s:10},W=0,H=0,tool=null,step=0,tmp=[],last=null,dl=null;
 var DPR=window.devicePixelRatio||1;
-var PR={POINT:['Point: tap a location, or type x,y (or NAME x,y)'],COPY:['Copy: base point','Copy: destination (tap more for more copies, Done to finish)'],LINE:['Line: start point','Line: next point (Done to finish)'],VMOVE:['Move vertex: tap a vertex (squares), then tap its new position'],VADD:['Add vertex: tap a line, polyline, polygon or curve where the vertex goes'],VDEL:['Delete vertex: tap a vertex to remove'],SELM:['Select multiple: tap objects to add or remove them, then Done'],SELW:['Window select: tap the first corner','Window select: tap the opposite corner (left to right = fully inside, right to left = touching)'],SSIM:['Select similar: tap an object, and every object like it is selected'],EPICK:['Pick points to export: tap points or vertices (tap again to unpick)'],EWIN:['Window pick: tap the first corner','Window pick: tap the opposite corner'],TRIM:['Trim: tap the part to remove (it is cut at the nearest crossing objects)'],EXTEND:['Extend: tap near the end of an open line or polyline'],JOIN:['Join: tap lines or open polylines, then Done'],CURVE:['Curve: first point','Curve: next point (Done to finish)'],ROT:['Rotate: base point','Rotate: angle in degrees (CCW)'],PLINE:['Polyline: first point','Polyline: next point (Done to finish)'],POLY:['Polygon: first point','Polygon: next point (Done to close)'],CIRCLE:['Circle: center point','Circle: type the radius, or tap a point on the circle'],CIRC3:['Circle 3P: first point on the circle','Circle 3P: second point','Circle 3P: third point'],ARC:['Arc: center','Arc: radius','Arc: start angle (deg CCW from east)','Arc: end angle (deg)'],MEAS:['Distance: tap the first point','Distance: tap the second point'],MAREA:['Area: tap each corner of the shape (Done to finish)'],MANG:['Angle: tap a point on the first arm','Angle: tap the vertex (the corner)','Angle: tap a point on the second arm'],MOVE:['Move: base point','Move: destination point'],SCALE:['Scale: base point','Scale: factor (e.g. 2)'],ALIGN:['Align: source point 1','Align: destination 1','Align: source point 2','Align: destination 2'],GEOREF:['Georeference: tap point 1 on the image','Point 1 real coordinates (x,y)','Tap point 2 on the image','Point 2 real coordinates (x,y)']};
+var PR={POINT:['Point: tap a location, or type x,y (or NAME x,y)'],COPY:['Copy: base point','Copy: destination (tap more for more copies, Done to finish)'],LINE:['Line: start point','Line: next point (Done to finish)'],VMOVE:['Move vertex: tap a vertex (squares), then tap its new position'],VADD:['Add vertex: tap a line, polyline, polygon or curve where the vertex goes'],VDEL:['Delete vertex: tap a vertex to remove'],SELM:['Select multiple: tap objects to add or remove them, then Done'],SELW:['Window select: tap the first corner','Window select: tap the opposite corner (left to right = fully inside, right to left = touching)'],SSIM:['Select similar: tap an object, and every object like it is selected'],EPICK:['Pick points to export: tap points or vertices (tap again to unpick)'],EWIN:['Window pick: tap the first corner','Window pick: tap the opposite corner'],TRIM:['Trim: tap the part to remove (it is cut at the nearest crossing objects)'],EXTEND:['Extend: tap near the end of a line, then tap the target point (or type a length)'],EXTO:['Extend to object: tap near the end of a line or polyline'],OFFSET:['Offset: type a distance (optional), tap the object, then tap the side'],ALEN:['Length label: tap a line or segment, or tap a start point then an end point'],APOLY:['Plot label: type the plot name (optional), then tap inside a polygon'],TEXT:['Text: type the text and tap Enter, then tap where it goes'],JOIN:['Join: tap lines or open polylines, then Done'],CURVE:['Curve: first point','Curve: next point (Done to finish)'],ROT:['Rotate: base point','Rotate: angle in degrees (CCW)'],PLINE:['Polyline: first point','Polyline: next point (Done to finish)'],POLY:['Polygon: first point','Polygon: next point (Done to close)'],CIRCLE:['Circle: center point','Circle: type the radius, or tap a point on the circle'],CIRC3:['Circle 3P: first point on the circle','Circle 3P: second point','Circle 3P: third point'],ARC:['Arc: center','Arc: radius','Arc: start angle (deg CCW from east)','Arc: end angle (deg)'],MEAS:['Distance: tap the first point','Distance: tap the second point'],MAREA:['Area: tap each corner of the shape (Done to finish)'],MANG:['Angle: tap a point on the first arm','Angle: tap the vertex (the corner)','Angle: tap a point on the second arm'],MOVE:['Move: base point','Move: destination point'],SCALE:['Scale: base point','Scale: factor (e.g. 2)'],ALIGN:['Align: source point 1','Align: destination 1','Align: source point 2','Align: destination 2'],GEOREF:['Georeference: tap point 1 on the image','Point 1 real coordinates (x,y)','Tap point 2 on the image','Point 2 real coordinates (x,y)']};
 var CR={loc:['Local (no CRS)']};
 ['WGS84','Arc 1960'].forEach(function(d){[35,36].forEach(function(z){['N','S'].forEach(function(h){CR[(d[0]=='W'?'w':'a')+z+h]=[d+' UTM '+z+h,z,h=='S'?1:0,d[0]=='W'?'w':'a']})})});
 CR.ll=['Lat/Lon WGS84'];
@@ -102,7 +104,7 @@ if(a!='ll'){g=inv({e:A[3]=='a'?EA:EW,z:A[1],s:A[2]},p);if(A[3]=='a')g=sh(g,EA,EW
 if(b=='ll')return g;
 if(B[3]=='a')g=sh(g,EW,EA,[160,8,300]);
 return fwd({e:B[3]=='a'?EA:EW,z:B[1],s:B[2]},g)}
-var db=null,tm=0,pid=null,plist=[],pdc=0,hist=[],jl=[],vh=null,pnm='',xp={},wc=null,PL=0,CR2=null;
+var db=null,tm=0,pid=null,plist=[],pdc=0,hist=[],jl=[],vh=null,pnm='',xp={},wc=null,PL=0,CR2=null,ptx='',exI=-1,exEnd=0,offi=-1,offd=0,gp=[],PC={},LKM='Objects on a locked layer cannot be edited.';
 function idb(cb){try{var q=indexedDB.open('scad',1);q.onupgradeneeded=function(){q.result.createObjectStore('kv')};q.onsuccess=function(){db=q.result;cb()};q.onerror=function(){}}catch(x){}}
 function kv(m){return db.transaction('kv',m||'readonly').objectStore('kv')}
 function snapP(){return{l:layers,e:ents,c:cur,pc:$('pc').value,v:v,ex:{t:$('mt').value,i:$('mi').value,l:$('ml').value,g:$('lgp').value},rs:rs.map(function(r){return{src:r.src,a:r.a,b:r.b,t:r.t,on:r.on,name:r.name,l:r.l||0,al:r.al}})}}
@@ -146,8 +148,9 @@ for(i=Math.floor(a[1]/g);i<=b[1]/g;i++){p=S([0,i*g]);ctx.moveTo(0,p[1]);ctx.line
 ctx.stroke();
 p=S([0,0]);ctx.strokeStyle=css('--ac');ctx.beginPath();ctx.moveTo(p[0]-10,p[1]);ctx.lineTo(p[0]+10,p[1]);ctx.moveTo(p[0],p[1]-10);ctx.lineTo(p[0],p[1]+10);ctx.stroke();
 ctx.fillStyle=css('--fg');ctx.font='11px sans-serif';ctx.fillText('grid '+g+' units',6,H-6)}
+var idm={};ents.forEach(function(e){if(e.id)idm[e.id]=e});
 ents.forEach(function(e,k){var L=layers[e.l];if(!L||!L.on)return;
-var on=SL.indexOf(k)>=0||jl.indexOf(k)>=0;ctx.strokeStyle=on?css('--ac'):L.c;ctx.lineWidth=on?4:2;path(e);ctx.stroke();
+var on=SL.indexOf(k)>=0||jl.indexOf(k)>=0;if(e.t=='X'||e.t=='D'||e.t=='N'){drawAnn(e,on,idm);return}ctx.strokeStyle=on?css('--ac'):L.c;ctx.lineWidth=on?4:2;path(e);ctx.stroke();
 if(e.t=='T'&&e.n){var q=S(e.p);ctx.font=(PL?'26px':'11px')+' sans-serif';ctx.fillStyle=PL?'#000':css('--fg');ctx.fillText(e.n,q[0]+(PL?14:7),q[1]-(PL?10:5))}});
 if(sel&&sel.r&&rs[sel.i]){var r=rs[sel.i],c=[[0,0],[r.img.width,0],[r.img.width,-r.img.height],[0,-r.img.height]].map(function(u){return S(r2w(r,u))});ctx.strokeStyle=css('--ac');ctx.lineWidth=3;ctx.beginPath();c.forEach(function(q,j){if(j)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1])});ctx.closePath();ctx.stroke()}
 if(tool=='VMOVE'||tool=='VDEL'){ctx.fillStyle=css('--ac');ents.forEach(function(e,k){var L=layers[e.l],P=vpts(e);if(!L||!L.on||!P)return;P.forEach(function(q,j){var z=S(q),h=vh&&vh.k==k&&vh.j==j?7:3;ctx.fillRect(z[0]-h,z[1]-h,2*h,2*h)})})}
@@ -172,7 +175,7 @@ function r2w(r,u){return[r.a*u[0]-r.b*u[1]+r.t[0],r.b*u[0]+r.a*u[1]+r.t[1]]}
 function w2r(r,w){var z0=w[0]-r.t[0],z1=w[1]-r.t[1],d=r.a*r.a+r.b*r.b;return[(z0*r.a+z1*r.b)/d,(z1*r.a-z0*r.b)/d]}
 function say(m){$('st').textContent=m}
 function ask(){$('pr').textContent=tool?PR[tool][Math.min(step,PR[tool].length-1)]:'Pick a tool'}
-function setTool(t){tool=t;step=0;tmp=[];jl=[];vh=null;wc=null;var b=document.querySelectorAll('#tools [data-t]');for(var i=0;i<b.length;i++)b[i].className=b[i].getAttribute('data-t')==t?'on':'';ask();$('tb').textContent=(t&&document.querySelector('#tools [data-t="'+t+'"]')?document.querySelector('#tools [data-t="'+t+'"]').textContent.slice(1):'Tools')+' \u25BE';$('tb').className=t?'on':'';draw()}
+function setTool(t){tool=t;step=0;tmp=[];jl=[];vh=null;wc=null;exI=-1;offi=-1;gp=[];var b=document.querySelectorAll('#tools [data-t]');for(var i=0;i<b.length;i++)b[i].className=b[i].getAttribute('data-t')==t?'on':'';ask();$('tb').textContent=(t&&document.querySelector('#tools [data-t="'+t+'"]')?document.querySelector('#tools [data-t="'+t+'"]').textContent.slice(1):'Tools')+' \u25BE';$('tb').className=t?'on':'';draw()}
 function parse(s){
 s=s.replace(/\s+/g,'');if(!s)return null;
 var m=/^(@?)(-?[\d.]+)<(-?[\d.]+)$/.exec(s);
@@ -209,6 +212,9 @@ return null}
 function box(lines){ctx.font='bold 13px -apple-system,Helvetica,Arial,sans-serif';var w=0;lines.forEach(function(l){w=Math.max(w,ctx.measureText(l).width)});var h=lines.length*18+10;
 ctx.fillStyle=css('--bar');ctx.globalAlpha=.94;ctx.fillRect(8,8,w+20,h);ctx.globalAlpha=1;ctx.strokeStyle=css('--ac');ctx.lineWidth=1;ctx.strokeRect(8,8,w+20,h);ctx.fillStyle=css('--fg');lines.forEach(function(l,i){ctx.fillText(l,18,28+i*18)})}
 function info(e){
+if(e.t=='X')return 'Text | "'+e.s+'"';
+if(e.t=='D')return 'Length label | '+(e.s||lenT(e.a,e.b));
+if(e.t=='N'){var pg=byId(e.ref);return 'Plot label | Name: '+(e.n||'')+(pg?' | Area: '+(e.m||areaT(area(pg.p)).join(' / ')):'')}
 if(e.t=='L')return 'Line | Length: '+fL(dist(e.a,e.b))+' | Azimuth: '+f3(az(e.a,e.b))+'\u00b0';
 if(e.t=='P')return e.z?'Polygon | Area: '+fA(area(e.p))+' | Perimeter: '+fL(plen(e.p,1))+' | '+e.p.length+' corners':'Polyline | Length: '+fL(plen(e.p,0))+' | '+e.p.length+' vertices';
 if(e.t=='C')return 'Circle | Radius: '+fL(e.r)+' | Circumference: '+fL(6.283185*e.r)+' | Area: '+fA(3.141593*e.r*e.r);
@@ -226,8 +232,8 @@ if(!sel)return;
 if(sel.r){var r=rs[sel.i],a=r.a,b=r.b;r.a=M[0]*a-M[1]*b;r.b=M[0]*b+M[1]*a;r.t=mp(M,T,r.t);return}
 var k=Math.sqrt(M[0]*M[0]+M[1]*M[1]),ro=Math.atan2(M[1],M[0]);
 function m(p){return mp(M,T,p)}
-selList().forEach(function(i){var e=ents[i];
-if(e.t=='L'){e.a=m(e.a);e.b=m(e.b)}else if(e.t=='P'||e.t=='S')e.p=e.p.map(m);else if(e.t=='T')e.p=m(e.p);
+selList().forEach(function(i){var e=ents[i];if(lk(e))return;
+if(e.t=='L'){e.a=m(e.a);e.b=m(e.b)}else if(e.t=='X'){e.p=m(e.p);e.r=(e.r||0)+ro*180/Math.PI}else if(e.t=='D'){e.a=m(e.a);e.b=m(e.b)}else if(e.t=='N'){}else if(e.t=='P'||e.t=='S')e.p=e.p.map(m);else if(e.t=='T')e.p=m(e.p);
 else{e.c=m(e.c);e.r*=k;if(e.t=='A'){e.s+=ro;e.e+=ro}}})}
 function sim(s1,d1,s2,d2){
 var nx=d2[0]-d1[0],ny=d2[1]-d1[1],dx=s2[0]-s1[0],dy=s2[1]-s1[1],q=dx*dx+dy*dy;
@@ -239,7 +245,12 @@ if(!tool){say('Pick a tool first, or tap an object to select it.');return}
 if(!r){say('Not understood. Try 100,200 or @10,5 or @25<45');return}
 if((tool=='MOVE'||tool=='COPY'||tool=='SCALE'||tool=='ROT'||tool=='ALIGN')&&!sel){say('Select an object first: tap it with no tool active.');return}
 if(tool=='GEOREF'&&!tgt()){say('Add an image first (Menu).');return}
+if(/^(POINT|LINE|PLINE|POLY|CURVE|CIRCLE|CIRC3|ARC|COPY)$/.test(tool)&&layers[cur].lock){say('The current layer is locked. Choose or add another layer to draw on.');return}
+if((tool=='MOVE'||tool=='COPY'||tool=='SCALE'||tool=='ROT'||tool=='ALIGN')&&sel&&!sel.r&&selList().every(function(i){return lk(ents[i])})){say(LKM);return}
 var pt=r.pt,num=r.num,b;
+if(tool=='OFFSET'){if(num!=null&&!pt){offd=num;say('Offset distance set to '+fL(num)+'. Tap the object, then the side.')}else say('Type a distance, or tap the object.');return}
+if(tool=='EXTEND'){if(exI<0){say('Tap near the end of a line first.');return}if(pt)doExt(null,pt);else if(num!=null)doExt(num);return}
+if(tool=='ALEN'||tool=='APOLY'||tool=='TEXT'||tool=='EXTO'||tool=='TRIM'||tool=='JOIN'){say('Tap on the drawing for this tool.');return}
 if(tool=='LINE'){
 if(!pt){say('Line needs a point.');return}
 if(step==0){tmp=[pt];step=1}else{ents.push({t:'L',a:tmp[0],b:pt,l:cur});tmp=[pt]}
@@ -253,7 +264,7 @@ else if(tool=='COPY'){
 if(!pt){say('Needs a point.');return}
 if(step==0){tmp=[pt];step=1}
 else{if(sel.r){say('Images cannot be copied.');return}
-var og=selList(),nw=[],keep=sel;og.forEach(function(i){var c=JSON.parse(JSON.stringify(ents[i]));if(c.t=='T')c.n=nextP();ents.push(c);nw.push(ents.length-1)});
+var og=selList(),nw=[],keep=sel;og.forEach(function(i){var c=JSON.parse(JSON.stringify(ents[i]));if(lk(ents[i]))c.l=cur;if(c.t=='T')c.n=nextP();ents.push(c);nw.push(ents.length-1)});
 sel={r:0,i:nw[0],m:nw};applyXf([1,0],[pt[0]-tmp[0][0],pt[1]-tmp[0][1]]);sel=keep;save();draw();say('Copied '+og.length+' object(s). Tap another destination for more copies, or Done.');return}}
 else if(tool=='CIRC3'){
 if(!pt){say('Needs a point.');return}tmp.push(pt);last=pt;step=tmp.length;
@@ -299,15 +310,15 @@ if(step==0){if(!pt){say('Needs a base point.');return}tmp=[pt];step=1}
 else{if(num==null){say('Type an angle in degrees.');return}var ra=num*Math.PI/180,RM=[Math.cos(ra),Math.sin(ra)];b=tmp[0];var z=mp(RM,[0,0],b);applyXf(RM,[b[0]-z[0],b[1]-z[1]]);setTool(null);save();draw();say('Rotated '+num+' deg.');return}}
 else if(tool=='ALIGN'||tool=='GEOREF'){
 if(!pt){say('Needs a point.');return}
-tmp.push(tool=='GEOREF'&&tmp.length%2==0?w2r(tgt(),pt):pt);step=tmp.length;
+gp.push(pt);tmp.push(tool=='GEOREF'&&tmp.length%2==0?w2r(tgt(),pt):pt);step=tmp.length;
 if(tmp.length==4){var q=sim(tmp[0],tmp[1],tmp[2],tmp[3]);
 if(!q){say('The two points must be different.');setTool(tool);return}
 if(tool=='ALIGN')applyXf(q.M,q.T);else{var R=tgt();R.a=q.M[0];R.b=q.M[1];R.t=q.T}
 var n=tool;setTool(null);save();draw();say(n=='ALIGN'?'Aligned.':'Image georeferenced. Scale '+f3(Math.sqrt(q.M[0]*q.M[0]+q.M[1]*q.M[1]))+' units per pixel.');return}}
 if(last&&tool!='MEAS'&&tool!='MAREA'&&tool!='MANG')say((tool=='POINT'?'Point '+ents[ents.length-1].n+' at ':'Last point: ')+f3(last[0])+', '+f3(last[1])+(SK?'  (snapped to '+SK+')':''));
 ask();save();draw()}
-function kp(e){return e.t=='L'?[e.a,e.b]:(e.t=='P'||e.t=='S')?e.p:e.t=='T'?[e.p]:[e.c]}
-var SN={e:1,m:1,c:1,i:1,n:0,h:1,x:0,k:1},SK='',hv=null,raf=0;
+function kp(e){return e.t=='L'?[e.a,e.b]:(e.t=='P'||e.t=='S')?e.p:e.t=='T'?[e.p]:e.t=='X'?[e.p]:e.t=='D'?[e.a,e.b]:e.t=='N'?[]:[e.c]}
+var SN={e:1,m:1,c:1,i:1,n:0,h:1,x:0,k:1,o:0},SK='',hv=null,raf=0;
 function req(){if(!raf)raf=requestAnimationFrame(function(){raf=0;draw()})}
 function prim(e){var q,o=[],i;
 if(e.t=='L')return{s:[[e.a,e.b]]};
@@ -333,7 +344,7 @@ if(SN.i){for(var a=0;a<ne.length;a++)for(var b=a+1;b<ne.length;b++){var A=ne[a],
 (A.c||[]).forEach(function(c1){(B.s||[]).forEach(function(s2){sc(s2[0],s2[1],c1).forEach(function(q){add(q,'intersection',1)})});(B.c||[]).forEach(function(c2){cc(c1,c2).forEach(function(q){add(q,'intersection',1)})})})}}
 if(SN.n)ne.forEach(function(pr){(pr.s||[]).forEach(function(g){var dx=g[1][0]-g[0][0],dy=g[1][1]-g[0][1],l=dx*dx+dy*dy,u=l?Math.max(0,Math.min(1,((p[0]-g[0][0])*dx+(p[1]-g[0][1])*dy)/l)):0;add([g[0][0]+u*dx,g[0][1]+u*dy],'nearest',2.5)});(pr.c||[]).forEach(function(c){var d=dist(p,c.c);if(d>1e-12&&inArc(c,Math.atan2(p[1]-c.c[1],p[0]-c.c[0])))add([c.c[0]+c.r*(p[0]-c.c[0])/d,c.c[1]+c.r*(p[1]-c.c[1])/d],'nearest',2.5)})});
 return C}
-function snap(p){SK='';var C=snapAll(p,16/v.s);if(!C.length)return p;C.sort(function(a,b){return a.d-b.d});SK=C[0].k;return C[0].q}
+function snap(p){SK='';var C=snapAll(p,16/v.s);if(!C.length)return polar(p);C.sort(function(a,b){return a.d-b.d});SK=C[0].k;return C[0].q}
 function hmarks(p){var t=14/v.s,m=[];
 ents.forEach(function(e){var L=layers[e.l];if(!L||!L.on)return;var k=kpts(e),h=hit(e,p)<t;if(!h)k.forEach(function(c){if(dist(c.q,p)<t*1.5)h=true});if(h)m=m.concat(k)});
 snapAll(p,40/v.s).forEach(function(c){if(c.k=='intersection'||c.k=='nearest')m.push(c)});
@@ -350,6 +361,9 @@ else{ctx.moveTo(z[0],z[1]-r);ctx.lineTo(z[0]+r,z[1]);ctx.lineTo(z[0],z[1]+r);ctx
 ctx.stroke();if(big){ctx.fillStyle=col;ctx.font='bold 12px sans-serif';ctx.fillText(k,z[0]+r+4,z[1]-r)}}
 function sg(p,a,b){var dx=b[0]-a[0],dy=b[1]-a[1],l=dx*dx+dy*dy,t=l?Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/l)):0;return dist(p,[a[0]+t*dx,a[1]+t*dy])}
 function hit(e,p){var i,m=1e18,n;
+if(e.t=='X')return dist(p,e.p);
+if(e.t=='D'){var q4=annPos(e),w4=Wd(q4.x,q4.y);return dist(p,w4)}
+if(e.t=='N'){var pg=byId(e.ref);return pg?dist(p,plab(pg).c):1e18}
 if(e.t=='L')return sg(p,e.a,e.b);
 if(e.t=='S'){var q=spl(e.p);for(i=0;i<q.length-1;i++)m=Math.min(m,sg(p,q[i],q[i+1]));return m}
 if(e.t=='P'){n=e.p.length;for(i=0;i<n-1;i++)m=Math.min(m,sg(p,e.p[i],e.p[i+1]));if(e.z)m=Math.min(m,sg(p,e.p[n-1],e.p[0]));return m}
@@ -370,6 +384,7 @@ function near(p,ok){var t=20/v.s,bi=-1,bd=t;ents.forEach(function(e,k){var L=lay
 function trimAt(p){
 var bi=near(p,function(e){return e.t=='L'||e.t=='P'||e.t=='C'||e.t=='A'});
 if(bi<0){say('Tap on a line, polyline, polygon, arc or circle.');return}
+if(lk(ents[bi])){say(LKM);return}
 var e=ents[bi],O=others(bi),out=[],T=6.283185307;
 if(e.t=='L'||e.t=='P'){
 var P=e.t=='L'?[e.a,e.b]:e.p.slice(),ring=e.t=='P'&&e.z,n,i,best=1e18,s0=0,xp=[];
@@ -397,6 +412,7 @@ ents.splice.apply(ents,[bi,1].concat(out));sel=null;save();draw();say('Trimmed.'
 function extAt(p){
 var bi=near(p,function(e){return e.t=='L'||(e.t=='P'&&!e.z)});
 if(bi<0){say('Tap near the end of an open line or polyline.');return}
+if(lk(ents[bi])){say(LKM);return}
 var e=ents[bi],P=e.t=='L'?[e.a,e.b]:e.p,n=P.length,end=dist(p,P[0])<dist(p,P[n-1])?0:1,E=end?P[n-1]:P[0],B=end?P[n-2]:P[1],dx=E[0]-B[0],dy=E[1]-B[1],l=Math.sqrt(dx*dx+dy*dy);
 if(!l)return;
 var F=[E[0]+dx/l*1e6,E[1]+dy/l*1e6],best=null,bd=1e18;
@@ -407,7 +423,7 @@ save();draw();say('Extended by '+f3(bd)+'.')}
 function explode(){
 if(!sel||sel.r){say('Select a polyline, polygon or curve first (tap it with no tool).');return}
 var L=selList().slice().sort(function(a,b){return b-a}),c=0;
-L.forEach(function(i){var e=ents[i];if(e.t=='S'){ents[i]={t:'P',p:spl(e.p),z:0,l:e.l};c++;return}if(e.t!='P')return;
+L.forEach(function(i){var e=ents[i];if(lk(e))return;if(e.t=='S'){ents[i]={t:'P',p:spl(e.p),z:0,l:e.l};c++;return}if(e.t!='P')return;
 var P=e.p,o=[],j;for(j=0;j<P.length-1;j++)o.push({t:'L',a:P[j],b:P[j+1],l:e.l});if(e.z&&P.length>2)o.push({t:'L',a:P[P.length-1],b:P[0],l:e.l});
 ents.splice.apply(ents,[i,1].concat(o));c++});
 sel=null;if(!c){say('Only polylines, polygons and curves can be exploded.');return}
@@ -415,7 +431,7 @@ save();draw();say('Exploded '+c+' object(s). A curve becomes a polyline first; e
 function joinPick(w){
 var bi=near(w,function(e){return e.t=='L'||(e.t=='P'&&!e.z)});
 if(bi<0){say('Tap lines or open polylines to join, then Done.');return}
-var j=jl.indexOf(bi);if(j<0)jl.push(bi);else jl.splice(j,1);say(jl.length+' selected. Tap Done to join them.');draw()}
+if(lk(ents[bi])){say(LKM);return}var j=jl.indexOf(bi);if(j<0)jl.push(bi);else jl.splice(j,1);say(jl.length+' selected. Tap Done to join them.');draw()}
 function doJoin(){
 if(!jl.length)return;
 var it=jl.map(function(k){var e=ents[k];return{p:e.t=='L'?[e.a,e.b]:e.p.slice(),k:k}}),lay=ents[jl[0]].l,f=it.shift(),ch=f.p,used=[f.k],eps=1e-3,go=1,i;
@@ -432,14 +448,14 @@ function vpts(e){return e.t=='L'?[e.a,e.b]:(e.t=='P'||e.t=='S')?e.p:e.t=='T'?[e.
 function vfind(w){var t=20/v.s,best=null,bd=t;ents.forEach(function(e,k){var L=layers[e.l],P=vpts(e);if(!L||!L.on||!P)return;P.forEach(function(q,j){var d=dist(w,q);if(d<bd){bd=d;best={k:k,j:j}}})});return best}
 function vset(b,q){var e=ents[b.k];if(e.t=='L'){if(b.j)e.b=q;else e.a=q}else if(e.t=='T')e.p=q;else e.p[b.j]=q}
 function vtap(w){
-if(tool=='VMOVE'){if(!vh){vh=vfind(w);say(vh?'Vertex picked. Tap its new position, or type x,y.':'Tap on a vertex (shown as squares).');draw()}else{vset(vh,snap(w));vh=null;save();draw();say('Vertex moved.')}return}
-if(tool=='VDEL'){var b=vfind(w);if(!b){say('Tap on a vertex (shown as squares).');return}var e=ents[b.k];
+if(tool=='VMOVE'){if(!vh){vh=vfind(w);if(vh&&lk(ents[vh.k])){vh=null;say(LKM);draw();return}say(vh?'Vertex picked. Tap its new position, or type x,y.':'Tap on a vertex (shown as squares).');draw()}else{vset(vh,snap(w));vh=null;save();draw();say('Vertex moved.')}return}
+if(tool=='VDEL'){var b=vfind(w);if(!b){say('Tap on a vertex (shown as squares).');return}var e=ents[b.k];if(lk(e)){say(LKM);return}
 if(e.t=='L'){say('A line needs both ends. Use Delete to remove the line.');return}
 if(e.t=='T'){say('Use Delete to remove a point.');return}
 if(e.p.length<=(e.z?3:2)){say('Too few vertices would remain. Use Delete to remove the object.');return}
 e.p.splice(b.j,1);if(e.t=='P'&&!e.z&&e.p.length==2)ents[b.k]=mk(e.p,e.l);save();draw();say('Vertex deleted.');return}
 var t=20/v.s,bi=-1,bd=t,bp=null,ins=0;
-ents.forEach(function(e,k){var L=layers[e.l];if(!L||!L.on||(e.t!='L'&&e.t!='P'&&e.t!='S'))return;
+ents.forEach(function(e,k){var L=layers[e.l];if(!L||!L.on||L.lock||(e.t!='L'&&e.t!='P'&&e.t!='S'))return;
 var Q=e.t=='L'?[e.a,e.b]:e.t=='S'?spl(e.p):e.p.slice(),i;if(e.t=='P'&&e.z)Q.push(Q[0]);
 for(i=0;i<Q.length-1;i++){var dx=Q[i+1][0]-Q[i][0],dy=Q[i+1][1]-Q[i][1],l=dx*dx+dy*dy,u=l?Math.max(0,Math.min(1,((w[0]-Q[i][0])*dx+(w[1]-Q[i][1])*dy)/l)):0,q=[Q[i][0]+u*dx,Q[i][1]+u*dy],d=dist(w,q);if(d<bd){bd=d;bi=k;bp=q;ins=e.t=='S'?Math.floor(i/16)+1:i+1}}});
 if(bi<0){say('Tap on a line, polyline, polygon or curve.');return}
@@ -513,14 +529,14 @@ var out2=kind=='pdf'?mkpdf(cv,Ly.pw,Ly.ph):null;
 function fin(b){R.removeAttribute('data-theme');PL=0;W=o.W;H=o.H;DPR=o.D;v.s=o.s;v.x=o.x;v.y=o.y;tool=o.tool;tmp=o.tmp;hv=o.hv;sel=o.sel;jl=o.jl;vh=o.vh;SN.h=o.h;SN.x=o.cx;resize();if(b)save2('map-1-'+N+(kind=='pdf'?'.pdf':'.png'),b);say('Plotted at 1:'+N+' on '+PN[Ly.k]+'.')}
 if(kind=='pdf')fin(out2);else cv.toBlob(function(b){fin(b)})}
 
-var NM={L:'line',P:'polyline',S:'curve',C:'circle',A:'arc',T:'point'};
+var NM={L:'line',P:'polyline',S:'curve',C:'circle',A:'arc',T:'point',X:'text',D:'length label',N:'plot label'};
 function selSummary(L){if(!L.length)return 'Nothing selected.';var cnt={},len=0,ar=0,k;
 L.forEach(function(i){var e=ents[i],n=e.t=='P'&&e.z?'polygon':NM[e.t];cnt[n]=(cnt[n]||0)+1;
 if(e.t=='L')len+=dist(e.a,e.b);else if(e.t=='P'){len+=plen(e.p,e.z);if(e.z)ar+=area(e.p)}else if(e.t=='S')len+=plen(spl(e.p),0);else if(e.t=='C'){len+=6.283185*e.r;ar+=3.141593*e.r*e.r}else if(e.t=='A')len+=e.r*((((e.e-e.s)%6.283185)+6.283185)%6.283185)});
 var parts=[];for(k in cnt)parts.push(cnt[k]+' '+k+(cnt[k]>1?'s':''));
 return L.length+' selected: '+parts.join(', ')+' | Total length: '+fL(len)+(ar?' | Total area: '+fA(ar):'')}
 function ebox(e){var x0=1e18,y0=1e18,x1=-1e18,y1=-1e18;function add(q){x0=Math.min(x0,q[0]);x1=Math.max(x1,q[0]);y0=Math.min(y0,q[1]);y1=Math.max(y1,q[1])}
-if(e.c){add([e.c[0]-e.r,e.c[1]-e.r]);add([e.c[0]+e.r,e.c[1]+e.r])}else(e.t=='S'?spl(e.p):vpts(e)||[]).forEach(add);return[x0,y0,x1,y1]}
+if(e.t=='X')add(e.p);else if(e.t=='D'){add(e.a);add(e.b)}else if(e.c){add([e.c[0]-e.r,e.c[1]-e.r]);add([e.c[0]+e.r,e.c[1]+e.r])}else(e.t=='S'?spl(e.p):vpts(e)||[]).forEach(add);return[x0,y0,x1,y1]}
 function selmTap(w){var bi=near(w,function(){return true});if(bi<0){say('Tap on an object.');return}
 var L=selList().slice(),j=L.indexOf(bi);if(j<0)L.push(bi);else L.splice(j,1);setSel(L);if(j<0)refI=bi;say(selSummary(L));draw()}
 function selwTap(w){if(!wc){wc=w;tmp=[w];say('Window select: tap the opposite corner.');draw();return}
@@ -534,16 +550,102 @@ function ssimTap(w){var bi=near(w,function(){return true});if(bi<0){say('Tap on 
 setSel(simList(bi));refI=bi;say(selSummary(selList()));draw()}
 function openProps(){
 if(sel&&sel.r&&rs[sel.i]){var r=rs[sel.i],q=$('pl2');q.innerHTML='';layers.forEach(function(x,i){var o=document.createElement('option');o.value=i;o.textContent=x.n;q.appendChild(o)});q.value=r.l||0;
-$('pt').textContent='Properties | Image: '+r.name;$('pnrow').style.display='none';$('alrow').style.display='flex';var pc=Math.round((r.al==null?.85:r.al)*100);$('alr').value=pc;$('alv').textContent=pc+'%';$('prop').className='open';return}
-$('alrow').style.display='none';
-var L=selList();if(!L.length)return;var e=ents[L[0]],single=L.length==1&&e.t=='T',p=$('pl2');
+$('pt').textContent='Properties | Image: '+r.name;$('pnrow').style.display='none';$('plrow').style.display='none';$('pn2row').style.display='none';$('pflrow').style.display='none';$('alrow').style.display='flex';var pc=Math.round((r.al==null?.85:r.al)*100);$('alr').value=pc;$('alv').textContent=pc+'%';$('prop').className='open';return}
+$('alrow').style.display='none';$('plrow').style.display='';
+var L=selList();if(!L.length)return;var e=ents[L[0]],single=L.length==1&&(e.t=='T'||e.t=='X'||e.t=='D'||e.t=='N'),p=$('pl2');
 p.innerHTML='';layers.forEach(function(x,i){var o=document.createElement('option');o.value=i;o.textContent=x.n;p.appendChild(o)});p.value=e.l;
-$('pt').textContent='Properties | '+selSummary(L);$('pnrow').style.display=single?'flex':'none';if(single)$('pnn').value=e.n||'';$('prop').className='open'}
+$('pt').textContent='Properties | '+selSummary(L);$('pnrow').style.display=single?'flex':'none';$('pn2row').style.display=single&&e.t=='N'?'flex':'none';$('pflrow').style.display=single&&e.t=='D'?'flex':'none';
+if(single){$('pnn').placeholder=e.t=='T'?'Point name':e.t=='X'?'Text':e.t=='D'?'Manual length text (blank = automatic)':'Plot name';$('pnn').value=e.t=='X'?e.s:e.t=='D'?(e.s||''):(e.n||'');$('pn2').value=e.m||''}
+$('prop').className='open'}
 function h2x(h,s,l){h/=360;s/=100;l/=100;function f(n){var k=(n+h*12)%12,a=s*Math.min(l,1-l);return l-a*Math.max(-1,Math.min(k-3,9-k,1))}return '#'+[f(0),f(8),f(4)].map(function(x){return('0'+Math.round(x*255).toString(16)).slice(-2)}).join('')}
 function newColor(){var used=layers.map(function(L){return String(L.c).toLowerCase()}),i=layers.length,c;do{c=h2x((i*137.508)%360,72,48);i++}while(used.indexOf(c)>=0);return c}
-function submit(){var i=$('in'),x=i.value;SK='';if(tool=='POINT'){var m=/^([A-Za-z][\w-]*)[\s:]+(\S.*)$/.exec(x.trim());if(m){pnm=m[1];x=m[2]}}feed(parse(x));i.value=''}
+
+function lk(e){var L=layers[e.l];return !!(L&&L.lock)}
+function byId(id){for(var i=0;i<ents.length;i++)if(ents[i].id==id)return ents[i];return null}
+function newLayer(fname){var b=String(fname||'Import').replace(/\.[^.]+$/,'')||'Import',n=b,k=2;
+while(layers.some(function(L){return L.n==n}))n=b+' ('+k++ +')';
+layers.push({n:n,c:newColor(),on:1,lock:1,imp:1});return layers.length-1}
+function afs(){var z=$('as').value||'m';return PL?({s:2.4,m:3,l:3.8}[z])*150/25.4:({s:11,m:13,l:16}[z])}
+function lenT(a,b){return(dist(a,b)*UL[U.b][1]/UL[U.l][1]).toFixed(+($('ad').value||2))+' '+UL[U.l][0]}
+function areaT(ar){var g=ar*UL[U.b][1]*UL[U.b][1],d=+($('aa').value||2),u=$('au').value||'both',o=[];if(u!='ac')o.push((g/1e4).toFixed(d)+' ha');if(u!='ha')o.push((g/4046.8564224).toFixed(d)+' ac');return o}
+function annPos(e){var A=S(e.a),B=S(e.b),fs=afs(),ang=Math.atan2(B[1]-A[1],B[0]-A[0]);if(ang>Math.PI/2||ang<-Math.PI/2)ang+=Math.PI;
+var off=fs*0.95*(e.side||1);return{x:(A[0]+B[0])/2+Math.sin(ang)*off,y:(A[1]+B[1])/2-Math.cos(ang)*off,a:ang,px:dist(A,B)}}
+function plab(pg){var P=pg.p,key=P.length+':'+P.reduce(function(a,q){return a+q[0]*1.37+q[1]*.71},0),c0=PC[pg.id];if(c0&&c0.k==key)return c0.v;
+var x0=1e18,y0=1e18,x1=-1e18,y1=-1e18;P.forEach(function(q){x0=Math.min(x0,q[0]);x1=Math.max(x1,q[0]);y0=Math.min(y0,q[1]);y1=Math.max(y1,q[1])});
+function pip(x,y){var c=false,i,j,n=P.length;for(i=0,j=n-1;i<n;j=i++){if((P[i][1]>y)!=(P[j][1]>y)&&x<(P[j][0]-P[i][0])*(y-P[i][1])/(P[j][1]-P[i][1])+P[i][0])c=!c}return c}
+function dd(x,y){var m=1e18,i,n=P.length;for(i=0;i<n;i++)m=Math.min(m,sg([x,y],P[i],P[(i+1)%n]));return m}
+var cx=(x0+x1)/2,cy=(y0+y1)/2,hw=(x1-x0)/2,hh=(y1-y0)/2,best={c:[cx,cy],r:-1},it,gx,gy;
+for(it=0;it<6;it++){for(gx=0;gx<=10;gx++)for(gy=0;gy<=10;gy++){var x=cx-hw+gx*hw/5,y=cy-hh+gy*hh/5;if(!pip(x,y))continue;var d=dd(x,y);if(d>best.r)best={c:[x,y],r:d}}cx=best.c[0];cy=best.c[1];hw/=3;hh/=3}
+if(best.r<0)best={c:[(x0+x1)/2,(y0+y1)/2],r:0};PC[pg.id]={k:key,v:best};return best}
+function drawAnn(e,on,idm){var fs=afs(),col=PL?'#000':(on?css('--ac'):(layers[e.l]?layers[e.l].c:'#000'));
+ctx.fillStyle=col;ctx.textBaseline='middle';ctx.textAlign='center';ctx.font=fs+'px sans-serif';
+if(e.t=='X'){var q=S(e.p);ctx.save();ctx.translate(q[0],q[1]);ctx.rotate(-(e.r||0)*Math.PI/180);ctx.textAlign='left';ctx.fillText(e.s,0,0);ctx.restore()}
+else if(e.t=='D'){var tx=e.s||lenT(e.a,e.b),p2=annPos(e);if(p2.px>=ctx.measureText(tx).width*0.9){ctx.save();ctx.translate(p2.x,p2.y);ctx.rotate(p2.a);ctx.fillText(tx,0,0);ctx.restore()}}
+else{var pg=idm[e.ref];if(pg){var c=plab(pg),q3=S(c.c),al=e.m?e.m.split('\n'):areaT(area(pg.p)),L2=[{t:e.n||'',b:1}].concat(al.map(function(t){return{t:t,b:0}})).filter(function(x){return x.t}),mw=0;
+ctx.fillStyle=PL?'#000':(on?css('--ac'):css('--fg'));
+L2.forEach(function(x){ctx.font=(x.b?'bold ':'')+fs+'px sans-serif';mw=Math.max(mw,ctx.measureText(x.t).width)});
+var rp=c.r*v.s,f=Math.min(1,rp*1.7/(mw||1),rp*1.5/(L2.length*fs*1.25)),fz=fs*f;
+if(fz>=6)L2.forEach(function(x,i){ctx.font=(x.b?'bold ':'')+fz+'px sans-serif';ctx.fillText(x.t,q3[0],q3[1]+(i-(L2.length-1)/2)*fz*1.25)})}}
+ctx.textAlign='left';ctx.textBaseline='alphabetic'}
+function lli(s1,s2){var x1=s1[0][0],y1=s1[0][1],x2=s1[1][0],y2=s1[1][1],x3=s2[0][0],y3=s2[0][1],x4=s2[1][0],y4=s2[1][1],d=(x1-x2)*(y3-y4)-(y1-y2)*(x3-x4);if(Math.abs(d)<1e-12)return null;var a=x1*y2-y1*x2,b=x3*y4-y3*x4;return[(a*(x3-x4)-(x1-x2)*b)/d,(a*(y3-y4)-(y1-y2)*b)/d]}
+function offs(P,z,d){var n=P.length,sg2=[],i,out=[],m;
+for(i=0;i<(z?n:n-1);i++){var a=P[i],b=P[(i+1)%n],dx=b[0]-a[0],dy=b[1]-a[1],l=Math.sqrt(dx*dx+dy*dy);if(!l)continue;var nx=-dy/l*d,ny=dx/l*d;sg2.push([[a[0]+nx,a[1]+ny],[b[0]+nx,b[1]+ny]])}
+m=sg2.length;if(!m)return null;
+if(!z){out.push(sg2[0][0]);for(i=1;i<m;i++){var q=lli(sg2[i-1],sg2[i]);out.push(q&&dist(q,P[i])<5*Math.abs(d)?q:sg2[i-1][1])}out.push(sg2[m-1][1])}
+else{for(i=0;i<m;i++){var q2=lli(sg2[(i+m-1)%m],sg2[i]);out.push(q2&&dist(q2,P[i])<5*Math.abs(d)?q2:sg2[i][0])}}
+return out}
+function offTap(w){
+if(layers[cur].lock){say('The current layer is locked. Choose another layer for the offset.');return}
+if(offi<0){var bi=near(w,function(e){return e.t=='L'||e.t=='P'||e.t=='C'||e.t=='A'});if(bi<0){say('Tap a line, polyline, polygon, circle or arc to offset.');return}
+offi=bi;say(offd>0?'Now tap the side to offset to (distance '+fL(offd)+').':'Now tap the side. The offset distance is where you tap, or type a distance first.');draw();return}
+var e=ents[offi];if(!e){offi=-1;return}
+var d=offd,ne=null,lay=lk(e)?cur:e.l;
+if(e.t=='C'||e.t=='A'){var dc=dist(w,e.c),dd=d>0?d:Math.abs(dc-e.r),r2=dc>e.r?e.r+dd:e.r-dd;if(r2<=0){say('That offset is larger than the circle.');return}
+ne={t:e.t,c:e.c.slice(),r:r2,l:lay};if(e.t=='A'){ne.s=e.s;ne.e=e.e}}
+else{var P=e.t=='L'?[e.a,e.b]:e.p,z=e.t=='P'&&e.z,n=P.length,best=1e18,bs=null,i;
+for(i=0;i<(z?n:n-1);i++){var a=P[i],b=P[(i+1)%n],d2=sg(w,a,b);if(d2<best){best=d2;bs=[a,b]}}
+var cr=(bs[1][0]-bs[0][0])*(w[1]-bs[0][1])-(bs[1][1]-bs[0][1])*(w[0]-bs[0][0]),Q=offs(P,z,(cr>=0?1:-1)*(d>0?d:best));
+if(!Q){say('Could not offset that object.');return}
+ne=e.t=='L'?{t:'L',a:Q[0],b:Q[1],l:lay}:{t:'P',p:Q,z:z?1:0,l:lay}}
+ents.push(ne);offi=-1;save();draw();say('Offset created. Tap another object to offset again.')}
+function extTap(w){
+if(exI<0){var bi=near(w,function(e){return e.t=='L'||(e.t=='P'&&!e.z)});if(bi<0){say('Tap near the end of an open line or polyline.');return}
+var e=ents[bi];if(lk(e)){say(LKM);return}var P=e.t=='L'?[e.a,e.b]:e.p,n=P.length;exI=bi;exEnd=dist(w,P[0])<dist(w,P[n-1])?0:1;say('End chosen. Tap the target point, or type a length to add.');draw();return}
+doExt(null,snap(w))}
+function doExt(add,tp){var e=ents[exI];if(!e){exI=-1;return}
+var P=e.t=='L'?[e.a,e.b]:e.p,n=P.length,E=exEnd?P[n-1]:P[0],B=exEnd?P[n-2]:P[1],dx=E[0]-B[0],dy=E[1]-B[1],l=Math.sqrt(dx*dx+dy*dy);if(!l){exI=-1;return}
+dx/=l;dy/=l;var t=add!=null?add:(tp[0]-E[0])*dx+(tp[1]-E[1])*dy;
+if(l+t<=1e-9){say('That would shorten the line to nothing.');return}
+var N=[E[0]+dx*t,E[1]+dy*t];
+if(e.t=='L'){if(exEnd)e.b=N;else e.a=N}else{if(exEnd)e.p[n-1]=N;else e.p[0]=N}
+exI=-1;save();draw();say((t>=0?'Lengthened by ':'Shortened by ')+fL(Math.abs(t))+' along the same direction.')}
+function alenTap(w){
+if(layers[cur].lock){say('The current layer is locked. Choose another layer for labels.');return}
+if(tmp.length==1){ents.push({t:'D',a:tmp[0],b:snap(w),l:cur,side:1});tmp=[];save();draw();say('Length label added. Select it and tap Properties to flip the side or edit the text.');return}
+var best=null,bd=20/v.s;
+ents.forEach(function(e){var L=layers[e.l];if(!L||!L.on||(e.t!='L'&&e.t!='P'))return;prim(e).s.forEach(function(g){var d=sg(w,g[0],g[1]);if(d<bd){bd=d;best=g}})});
+if(best){ents.push({t:'D',a:best[0],b:best[1],l:cur,side:1});save();draw();say('Length label added. Tap another line, or select the label and open Properties to flip it.');return}
+tmp=[snap(w)];say('Start point set. Now tap the end point.');draw()}
+function apolyTap(w){
+if(layers[cur].lock){say('The current layer is locked. Choose another layer for labels.');return}
+var pg=null;ents.forEach(function(e){var L=layers[e.l];if(!L||!L.on||e.t!='P'||!e.z)return;var P=e.p,c=false,i,j,n=P.length;for(i=0,j=n-1;i<n;j=i++){if((P[i][1]>w[1])!=(P[j][1]>w[1])&&w[0]<(P[j][0]-P[i][0])*(w[1]-P[i][1])/(P[j][1]-P[i][1])+P[i][0])c=!c}if(c)pg=e});
+if(!pg){say('Tap inside a closed polygon.');return}
+if(!pg.id)pg.id='g'+Date.now()+Math.floor(Math.random()*1e4);
+var nn=ents.filter(function(e){return e.t=='N'}).length+1;
+ents.push({t:'N',ref:pg.id,n:ptx||('Plot '+nn),l:cur});ptx='';save();draw();say('Plot label added. Select it and tap Properties to edit the name or type the area text by hand.')}
+function textTap(w){
+if(layers[cur].lock){say('The current layer is locked. Choose another layer for text.');return}
+if(!ptx){say('Type the text in the box and tap Enter first, then tap where it goes.');return}
+ents.push({t:'X',p:snap(w),s:ptx,l:cur,r:0});save();draw();say('Text placed. Tap again to place the same text elsewhere, or type new text.')}
+function pref(){if(tool=='GEOREF')return step>=2?gp[step-2]:null;if(tool=='ALIGN')return step>=2?tmp[step-2]:null;return tmp.length?tmp[tmp.length-1]:null}
+function polar(p){var o=pref();if(!SN.o||!o)return p;var dx=p[0]-o[0],dy=p[1]-o[1],d=Math.sqrt(dx*dx+dy*dy);if(d<1e-9)return p;
+var st=+$('pi').value||15,a=Math.atan2(dy,dx)*180/Math.PI,na=Math.round(a/st)*st;if(Math.abs(a-na)>Math.min(st/2,6))return p;
+SK='polar '+(((na%360)+360)%360)+'\u00b0';var r=na*Math.PI/180;return[o[0]+d*Math.cos(r),o[1]+d*Math.sin(r)]}
+function submit(){var i=$('in'),x=i.value;SK='';
+if(tool=='TEXT'||tool=='APOLY'){ptx=x.trim();say((tool=='TEXT'?'Text':'Plot name')+' set to "'+ptx+'". Now tap '+(tool=='TEXT'?'where it goes.':'inside the polygon.'));i.value='';return}
+if(tool=='POINT'){var m=/^([A-Za-z][\w-]*)[\s:]+(\S.*)$/.exec(x.trim());if(m){pnm=m[1];x=m[2]}}feed(parse(x));i.value=''}
 $('ent').onclick=submit;
-$('pl').onclick=function(){var c=Wd(W/2,H/2),q=snap(c);if(tool=='TRIM')trimAt(c);else if(tool=='EXTEND')extAt(c);else if(tool=='JOIN')joinPick(c);else if(tool=='VMOVE'||tool=='VADD'||tool=='VDEL')vtap(q);else if(tool=='SELM')selmTap(c);else if(tool=='SELW')selwTap(c);else if(tool=='SSIM')ssimTap(c);else if(tool=='EPICK')epick(c);else if(tool=='EWIN')ewin(c);else if(tool)feed({pt:q});else pick(c)};
+$('pl').onclick=function(){var c=Wd(W/2,H/2),q=snap(c);if(tool=='TRIM')trimAt(c);else if(tool=='EXTO')extAt(c);else if(tool=='EXTEND')extTap(c);else if(tool=='ALEN')alenTap(c);else if(tool=='APOLY')apolyTap(c);else if(tool=='TEXT')textTap(c);else if(tool=='OFFSET')offTap(c);else if(tool=='JOIN')joinPick(c);else if(tool=='VMOVE'||tool=='VADD'||tool=='VDEL')vtap(q);else if(tool=='SELM')selmTap(c);else if(tool=='SELW')selwTap(c);else if(tool=='SSIM')ssimTap(c);else if(tool=='EPICK')epick(c);else if(tool=='EWIN')ewin(c);else if(tool)feed({pt:q});else pick(c)};
 $('in').onkeydown=function(e){if(e.keyCode==13){e.preventDefault();submit()}};
 $('tools').onclick=function(e){var b=e.target.closest?e.target.closest('button'):e.target;if(!b)return;var t=b.getAttribute('data-t'),o=b.getAttribute('data-o');if(t)setTool(t);else if(o)ord(o);else return;this.classList.remove('open')};
 $('tb').onclick=function(){$('tools').classList.toggle('open')};
@@ -554,7 +656,7 @@ if(m=='z'){explode();return}
 if(m=='A'){var all=[];ents.forEach(function(e,k){var L=layers[e.l];if(L&&L.on)all.push(k)});setSel(all);say(selSummary(all));draw();return}
 if(m=='C'){sel=null;say('Selection cleared.');draw();return}
 if(!sel){say('Select an object first: tap it with no tool active.');return}
-if(m=='l'){if(sel.r){rs[sel.i].l=cur;say('Image moved to layer '+layers[cur].n+'.');save();draw();return}selList().forEach(function(i){ents[i].l=cur});say('Moved to layer '+layers[cur].n+'.');save();draw();return}
+if(m=='l'){if(sel.r){say('An image stays on its own import layer. Hide that layer to hide the image.');return}selList().forEach(function(i){if(!lk(ents[i]))ents[i].l=cur});say('Moved to layer '+layers[cur].n+'.');save();draw();return}
 if(sel.r){var A=rs,i=sel.i,n=A.length,j=m=='f'?n-1:m=='b'?0:m=='u'?Math.min(i+1,n-1):Math.max(i-1,0),x=A.splice(i,1)[0];A.splice(j,0,x);sel.i=j;save();draw();say('Image order changed.');return}
 var L=selList(),o2=ents.map(function(e,k){return{e:e,s:L.indexOf(k)>=0}}),k,t;
 if(m=='f')o2=o2.filter(function(x){return!x.s}).concat(o2.filter(function(x){return x.s}));
@@ -574,7 +676,7 @@ ents.forEach(function(e){if(e.c){add(e.c[0]-e.r,e.c[1]-e.r);add(e.c[0]+e.r,e.c[1
 rs.forEach(function(r){[[0,0],[r.img.width,0],[r.img.width,-r.img.height],[0,-r.img.height]].forEach(function(u){var q=r2w(r,u);add(q[0],q[1])})});
 if(x0>x1){v={x:0,y:0,s:10};draw();return}
 var sp=Math.max(x1-x0,y1-y0,1e-6);v.x=(x0+x1)/2;v.y=(y0+y1)/2;v.s=Math.min(W,H)*0.85/sp;draw()};
-function fillLy(){var s=$('ly');s.innerHTML='';layers.forEach(function(L,i){var o=document.createElement('option');o.value=i;o.textContent=L.n+(L.on?'':' (hidden)');s.appendChild(o)});s.value=cur;$('vis').textContent=layers[cur].on?'Hide':'Show';try{$('lc').value=layers[cur].c}catch(x){}}
+function fillLy(){var s=$('ly');s.innerHTML='';layers.forEach(function(L,i){var o=document.createElement('option');o.value=i;o.textContent=(L.lock?'\uD83D\uDD12 ':'')+L.n+(L.on?'':' (hidden)');s.appendChild(o)});s.value=cur;$('vis').textContent=layers[cur].on?'Hide':'Show';try{$('lc').value=layers[cur].c}catch(x){}}
 $('ly').onchange=function(){cur=+this.value;fillLy();save();say('New objects go on layer '+layers[cur].n+'.')};
 $('addl').onclick=function(){var n=$('ln').value.trim();if(!n){say('Type a layer name first.');return}layers.push({n:n,c:newColor(),on:1});cur=layers.length-1;$('ln').value='';fillLy();save();say('Layer added. New objects go on layer '+n+'.')};
 $('vis').onclick=function(){layers[cur].on=layers[cur].on?0:1;fillLy();save();draw()};
@@ -582,22 +684,28 @@ $('mb').onclick=function(){var m=$('menu');m.className=m.className?'':'open';set
 $('pc').onchange=save;
 $('geo').onclick=function(){if(!tgt()){say('Add an image first.');return}setTool('GEOREF');$('menu').className='';setTimeout(resize,0)};
 $('rvis').onclick=function(){var r=tgt();if(r){r.on=r.on?0:1;$('rvis').textContent=r.on?'Hide image':'Show image';save();draw()}};
-$('del').onclick=function(){if(!sel){say('Nothing selected.');return}if(sel.r)rs.splice(sel.i,1);else selList().slice().sort(function(a,b){return b-a}).forEach(function(i){ents.splice(i,1)});sel=null;save();draw();say('Deleted.')};
+$('del').onclick=function(){if(!sel){say('Nothing selected.');return}
+if(sel.r){say('An image is removed by deleting its layer (Menu > Layer tools > Delete layer).');return}
+var L=selList().filter(function(i){return !lk(ents[i])}),skip=selList().length-L.length;
+if(!L.length){say(LKM+' Delete the layer to remove them.');return}
+L.sort(function(a,b){return b-a}).forEach(function(i){ents.splice(i,1)});sel=null;save();draw();say('Deleted '+L.length+' object(s).'+(skip?' '+skip+' on locked layers were kept.':''))};
 $('imf').onchange=function(){var f=this.files[0];if(!f)return;var fr=new FileReader();fr.onload=function(){var im=new Image();im.onload=function(){
-var k=(0.6*W/v.s)/im.width,c=[im.width/2,-im.height/2],t=[v.x-k*c[0],v.y-k*c[1]];
-rs.push({img:im,src:fr.result,a:k,b:0,t:t,on:1,name:f.name,l:cur,al:.85});save();sel={r:1,i:rs.length-1};say('Image added at the view centre. Move/Scale/Align it, or Georeference it.');draw()};im.src=fr.result};fr.readAsDataURL(f);this.value=''};
-function impCSV(txt){
-var f=$('icrs').value,pc=$('pc').value,mode=$('imode').value,P=[],cnt=0;
+var k=(0.6*W/v.s)/im.width,c=[im.width/2,-im.height/2],t=[v.x-k*c[0],v.y-k*c[1]],li=newLayer(f.name);
+rs.push({img:im,src:fr.result,a:k,b:0,t:t,on:1,name:f.name,l:li,al:.85});save();sel={r:1,i:rs.length-1};fillLy();say('Image added on locked layer "'+layers[li].n+'". You can still move, scale, align or georeference it. Delete the layer to remove it.');draw()};im.src=fr.result};fr.readAsDataURL(f);this.value=''};
+function impCSV(txt,fname){
+var f=$('icrs').value,pc=$('pc').value,mode=$('imode').value,P=[],RW=[],cnt=0;
 txt.split(/\r?\n/).forEach(function(l){var c=l.split(/[,;\t]/),nm='',nu=[];
 c.forEach(function(s){s=s.trim();if(s!==''&&!isNaN(+s))nu.push(+s);else if(!nm&&s)nm=s});
 if(nu.length<2)return;var o=(nu.length>=3&&!nm)?1:0;
 if(!nm&&o)nm=String(nu[0]);
 var p=f=='ll'?[nu[o+1],nu[o]]:[nu[o],nu[o+1]];
 p=tf(f,pc,p);cnt++;
-if(mode=='pts')ents.push({t:'T',n:nm,p:p,l:cur});else P.push(p)});
-if(mode!='pts'&&P.length>1)ents.push({t:'P',p:P,z:mode=='pg'?1:0,l:cur});
-save();say('Imported '+cnt+' points.');$('fit').onclick();}
-$('cf').onchange=function(){var f=this.files[0];if(!f)return;var fr=new FileReader();fr.onload=function(){impCSV(fr.result)};fr.readAsText(f);this.value=''};
+RW.push({n:nm,p:p})});
+if(!RW.length){say('No points found in that file. Check the format.');return}
+var li=newLayer(fname||'CSV points');
+if(mode=='pts')RW.forEach(function(r){ents.push({t:'T',n:r.n,p:r.p,l:li})});else if(RW.length>1)ents.push({t:'P',p:RW.map(function(r){return r.p}),z:mode=='pg'?1:0,l:li});
+fillLy();save();say('Imported '+cnt+' points onto locked layer "'+layers[li].n+'". Delete the layer to remove them.');$('fit').onclick();}
+$('cf').onchange=function(){var f=this.files[0];if(!f)return;var fr=new FileReader();fr.onload=function(){impCSV(fr.result,f.name)};fr.readAsText(f);this.value=''};
 function out(name,p){var e=$('ecrs').value,pc=$('pc').value;if(e=='ll'){var q=tf(pc,'ll',p);return name+','+q[1].toFixed(8)+','+q[0].toFixed(8)}var q2=tf(pc,e,p);return name+','+f3(q2[0])+','+f3(q2[1])}
 $('ecsv').onclick=function(){
 var rr=expRows($('es').value),rows=[$('ecrs').value=='ll'?'name,lat,lon':'name,E,N'];
@@ -628,7 +736,16 @@ return new Blob(P,{type:'application/pdf'})}
 $('pdf').onclick=function(){plot('pdf')};$('png').onclick=function(){plot('png')};
 $('lren').onclick=function(){var n=$('ln').value.trim();if(!n){say('Type the new name in the name box.');return}layers[cur].n=n;$('ln').value='';fillLy();save();say('Layer renamed.')};
 $('lcol').onclick=function(){layers[cur].c=newColor();fillLy();save();draw();say('Layer colour changed.')};
-$('ldel').onclick=function(){if(cur==0){say('The first layer cannot be deleted.');return}ents.forEach(function(e){if(e.l==cur)e.l=0;else if(e.l>cur)e.l--});rs.forEach(function(r){if(r.l==cur)r.l=0;else if(r.l>cur)r.l--});layers.splice(cur,1);cur=0;fillLy();save();draw();say('Layer deleted. Its objects moved to the first layer.')};
+var ldc=0;
+$('ldel').onclick=function(){if(cur==0){say('The first layer cannot be deleted.');return}
+var Ly=layers[cur];
+if(Ly.imp){var n1=ents.filter(function(e){return e.l==cur}).length,n2=rs.filter(function(r){return r.l==cur}).length;
+if(!ldc){ldc=1;say('Tap Delete layer again within 5 seconds to permanently delete "'+Ly.n+'" with its '+n1+' object(s) and '+n2+' image(s).');setTimeout(function(){ldc=0},5000);return}
+ldc=0;ents=ents.filter(function(e){return e.l!=cur});rs=rs.filter(function(r){return r.l!=cur})}
+else{ents.forEach(function(e){if(e.l==cur)e.l=0});rs.forEach(function(r){if(r.l==cur)r.l=0})}
+ents.forEach(function(e){if(e.l>cur)e.l--});rs.forEach(function(r){if(r.l>cur)r.l--});
+layers.splice(cur,1);cur=0;sel=null;fillLy();save();draw();say(Ly.imp?'Layer and its content deleted.':'Layer deleted. Its objects moved to the first layer.')};
+$('llk').onclick=function(){var Ly=layers[cur];if(Ly.imp){say('Import layers are always locked.');return}Ly.lock=Ly.lock?0:1;fillLy();save();say('Layer '+(Ly.lock?'locked.':'unlocked.'))};
 var Pt={},cnt=0,mv=0,sp0=null,pd=0;
 function pos(e){var r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]}
 cv.addEventListener('pointerdown',function(e){try{cv.setPointerCapture(e.pointerId)}catch(x){}
@@ -639,7 +756,7 @@ if(cnt==1){v.x-=(n[0]-o[0])/v.s;v.y+=(n[1]-o[1])/v.s;if(dist(n,sp0)>8){mv=1;hv=n
 else if(cnt==2){hv=null;Pt[e.pointerId]=n;var k=Object.keys(Pt),a=Pt[k[0]],b=Pt[k[1]],d=dist(a,b)||1,m=[(a[0]+b[0])/2,(a[1]+b[1])/2],w0=Wd(m[0],m[1]);
 v.s=Math.max(0.0001,Math.min(1e7,v.s*d/pd));pd=d;var w1=Wd(m[0],m[1]);v.x+=w0[0]-w1[0];v.y+=w0[1]-w1[1];draw()}});
 cv.addEventListener('pointerup',function(e){if(!Pt[e.pointerId])return;
-if(cnt==1&&!mv){var q=pos(e),w=Wd(q[0],q[1]);if(tool=='TRIM')trimAt(w);else if(tool=='EXTEND')extAt(w);else if(tool=='JOIN')joinPick(w);else if(tool=='VMOVE'||tool=='VADD'||tool=='VDEL')vtap(w);else if(tool=='SELM')selmTap(w);else if(tool=='SELW')selwTap(w);else if(tool=='SSIM')ssimTap(w);else if(tool=='EPICK')epick(w);else if(tool=='EWIN')ewin(w);else if(tool)feed({pt:snap(w)});else pick(w)}
+if(cnt==1&&!mv){var q=pos(e),w=Wd(q[0],q[1]);if(tool=='TRIM')trimAt(w);else if(tool=='EXTO')extAt(w);else if(tool=='EXTEND')extTap(w);else if(tool=='ALEN')alenTap(w);else if(tool=='APOLY')apolyTap(w);else if(tool=='TEXT')textTap(w);else if(tool=='OFFSET')offTap(w);else if(tool=='JOIN')joinPick(w);else if(tool=='VMOVE'||tool=='VADD'||tool=='VDEL')vtap(w);else if(tool=='SELM')selmTap(w);else if(tool=='SELW')selwTap(w);else if(tool=='SSIM')ssimTap(w);else if(tool=='EPICK')epick(w);else if(tool=='EWIN')ewin(w);else if(tool)feed({pt:snap(w)});else pick(w)}
 delete Pt[e.pointerId];cnt=Object.keys(Pt).length;if(e.pointerType=='touch'){hv=null;draw()}});
 cv.addEventListener('pointercancel',function(e){delete Pt[e.pointerId];cnt=Object.keys(Pt).length;hv=null;draw()});
 cv.addEventListener('pointerleave',function(e){if(e.pointerType!='touch'&&!cnt){hv=null;draw()}});
@@ -647,6 +764,8 @@ function uset(){$('bu').value=U.b;$('ul').value=U.l;$('ua').value=U.a}
 function usave(m){try{localStorage.setItem('scadU',JSON.stringify(U))}catch(x){}uset();say('Units: length in '+UL[U.l][0]+', area in '+UA[U.a][0]+'. Drawing units are '+UL[U.b][0]+'.')}
 $('bu').onchange=function(){U.b=this.value;usave()};$('ul').onchange=function(){U.l=this.value;usave()};$('ua').onchange=function(){U.a=this.value;usave()};
 $('um').onclick=function(){U.l='m';U.a='m2';usave()};$('ui').onclick=function(){U.l='ft';U.a='ac';usave()};uset();
+try{var as0=JSON.parse(localStorage.getItem('scadA')||'null');if(as0){$('ad').value=as0.d;$('aa').value=as0.a;$('au').value=as0.u;$('as').value=as0.s}}catch(x){}
+['ad','aa','au','as'].forEach(function(k){$(k).onchange=function(){try{localStorage.setItem('scadA',JSON.stringify({d:$('ad').value,a:$('aa').value,u:$('au').value,s:$('as').value}))}catch(x){}draw()}});
 (function(){var b=document.querySelectorAll('[data-s]');for(var i=0;i<b.length;i++){(function(x){var k=x.getAttribute('data-s');x.className=SN[k]?'on':'';x.onclick=function(){SN[k]=SN[k]?0:1;x.className=SN[k]?'on':'';say('Snap '+x.textContent+(SN[k]?' on':' off')+(k=='x'&&SN.x?'. Pan so the crosshair sits near a feature, then tap Place.':''));$('pl').style.display=SN.x?'':'none';draw()}})(b[i])}})();
 $('pj').onchange=function(){put();openP(this.value)};
 $('pnew').onclick=function(){if(!db){say('Projects need browser storage, which is not available.');return}var n=$('pn').value.trim()||'Project '+(plist.length+1);$('pn').value='';newP(n)};
@@ -663,8 +782,11 @@ $('sbp').onclick=function(){if(refI<0||!ents[refI])refI=sel?sel.i:-1;if(refI<0)r
 $('sbm').onclick=function(){if(refI<0||!ents[refI])refI=sel?sel.i:-1;if(refI<0)return;var rm=simList(refI),L=selList().filter(function(k){return rm.indexOf(k)<0}),r=refI;setSel(L);refI=r;say(L.length?selSummary(L):'Deselected. Nothing selected.');draw()};
 $('sbq').onclick=openProps;
 $('sbc').onclick=function(){sel=null;$('prop').className='';say('Selection cleared.');draw()};
-$('pla').onclick=function(){var li=+$('pl2').value;if(sel&&sel.r){rs[sel.i].l=li;$('prop').className='';save();draw();say('Image moved to layer '+layers[li].n+'.');return}var L=selList();L.forEach(function(i){ents[i].l=li});$('prop').className='';save();draw();say('Moved '+L.length+' object(s) to layer '+layers[li].n+'.')};
-$('pna').onclick=function(){var L=selList(),n=$('pnn').value.trim();if(L.length==1&&ents[L[0]].t=='T'&&n){ents[L[0]].n=n;$('prop').className='';save();draw();say('Point renamed to '+n+'.')}};
+$('pla').onclick=function(){var li=+$('pl2').value;if(sel&&sel.r){rs[sel.i].l=li;$('prop').className='';save();draw();say('Image moved to layer '+layers[li].n+'.');return}var L=selList();L.forEach(function(i){if(!lk(ents[i]))ents[i].l=li});$('prop').className='';save();draw();say('Moved '+L.length+' object(s) to layer '+layers[li].n+'.')};
+$('pna').onclick=function(){var L=selList(),e=L.length==1?ents[L[0]]:null;if(!e)return;if(lk(e)){say(LKM);return}var n=$('pnn').value.trim();
+if(e.t=='T'){if(!n)return;e.n=n}else if(e.t=='X'){if(!n)return;e.s=n}else if(e.t=='D'){e.s=n}else if(e.t=='N'){e.n=n;e.m=$('pn2').value.trim()}else return;
+$('prop').className='';save();draw();say('Updated.')};
+$('pfl').onclick=function(){var L=selList();if(L.length==1&&ents[L[0]].t=='D'){ents[L[0]].side=-(ents[L[0]].side||1);$('prop').className='';save();draw();say('Label moved to the other side.')}};
 $('pcl').onclick=function(){$('prop').className=''};
 $('alr').oninput=function(){if(sel&&sel.r&&rs[sel.i]){rs[sel.i].al=this.value/100;$('alv').textContent=this.value+'%';save();draw()}};
 ['mt','mi','ml'].forEach(function(k){$(k).oninput=save});$('lgp').onchange=save;
