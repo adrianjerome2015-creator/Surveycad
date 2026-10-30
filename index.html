@@ -43,12 +43,12 @@ canvas{position:absolute;left:0;top:0;touch-action:none}
 <label><b>Snap to (tap to turn on or off)</b><button data-s="e">Endpoint</button><button data-s="m">Midpoint</button><button data-s="c">Center</button><button data-s="i">Intersection</button><button data-s="n">Nearest</button><button data-s="h">Show points</button><button data-s="x">Crosshair</button></label>
 <label><b>Project coordinate system</b><select id="pc"></select></label>
 <label><b>Import CSV (name,E,N or id,E,N; Lat/Lon = lat,lon)</b><select id="icrs"></select><select id="imode"><option value="pts">as points</option><option value="pl">as polyline</option><option value="pg">as polygon</option></select><input type="file" id="cf" accept=".csv,.txt,text/csv,text/plain"></label>
-<label><b>Export CSV in</b><select id="ecrs"></select><button id="ecsv">Save CSV</button></label>
+<label><b>Export CSV: choose which points</b><select id="es"><option value="all">All points</option><option value="vl">Visible layers only</option><option value="cl">Current layer only</option><option value="sel">Selected object only</option><option value="pk">Picked points only</option></select><select id="ecrs"></select><button id="epk">Pick points</button><button id="ewn">Window pick</button><button id="eclr">Clear picks</button><button id="ecsv">Save CSV</button></label>
 <label><b>Add image or base map</b><input type="file" id="imf" accept="image/*"></label>
 <label><b>Image and selection</b><button id="geo">Georeference</button><button id="rvis">Hide image</button><button id="del">Delete selected</button></label>
 <label><b>Layer tools (name comes from the name box)</b><button id="lren">Rename</button><button id="lcol">Next colour</button><button id="ldel">Delete layer</button></label>
-<label><b>Plot to scale (centred on current view, units = metres)</b><input id="sc" type="text" inputmode="numeric" placeholder="1:500" style="width:90px"><select id="pp"><option value="l">A4 landscape</option><option value="p">A4 portrait</option></select><button id="pdfs">Save scaled PDF</button></label>
-<label><b>Export current view</b><button id="png">Save PNG</button><button id="pdf">Save PDF</button></label>
+<label><b>Map export settings (leave scale blank for automatic 1:50, 1:100, 1:150 ...)</b><input id="sc" type="text" inputmode="numeric" placeholder="Auto" style="width:90px"><select id="pp"><option value="auto">Paper: auto</option><option value="a4l">A4 landscape</option><option value="a4p">A4 portrait</option><option value="a3l">A3 landscape</option><option value="a3p">A3 portrait</option></select><select id="pa"><option value="all">Area: all objects</option><option value="view">Area: current view</option></select></label>
+<label><b>Export map (border, north arrow, scale bar)</b><button id="png">Save image (PNG)</button><button id="pdf">Save PDF</button></label>
 </div>
 <div id="wrap"><canvas id="cv"></canvas><div id="tools"><h4>Draw</h4><div class="g"><button data-t="POINT"><i>✚</i>Point</button><button data-t="LINE"><i>╱</i>Line</button><button data-t="PLINE"><i>⌇</i>Polyline</button><button data-t="POLY"><i>△</i>Polygon</button><button data-t="CURVE"><i>∿</i>Curve</button><button data-t="CIRCLE"><i>○</i>Circle</button><button data-t="CIRC3"><i>◎</i>Circle 3P</button><button data-t="ARC"><i>◠</i>Arc</button></div><h4>Measure</h4><div class="g"><button data-t="MEAS"><i>↔</i>Distance</button><button data-t="MAREA"><i>▦</i>Area</button><button data-t="MANG"><i>∠</i>Angle</button></div><h4>Modify</h4><div class="g"><button data-t="MOVE"><i>✥</i>Move</button><button data-t="COPY"><i>❐</i>Copy</button><button data-t="ROT"><i>↻</i>Rotate</button><button data-t="SCALE"><i>⇲</i>Scale</button><button data-t="ALIGN"><i>⇉</i>Align</button><button data-t="TRIM"><i>✂</i>Trim</button><button data-t="EXTEND"><i>⇥</i>Extend</button><button data-t="JOIN"><i>⊕</i>Join</button><button data-o="z"><i>✸</i>Explode</button></div><h4>Vertices</h4><div class="g"><button data-t="VMOVE"><i>◆</i>Move vtx</button><button data-t="VADD"><i>⊞</i>Add vtx</button><button data-t="VDEL"><i>⊟</i>Del vtx</button></div><h4>Arrange selected</h4><div class="g"><button data-o="f"><i>⇧</i>Front</button><button data-o="u"><i>↑</i>Forward</button><button data-o="d"><i>↓</i>Backward</button><button data-o="b"><i>⇩</i>Back</button><button data-o="l"><i>≡</i>To layer</button></div></div></div>
 <div id="bot">
@@ -64,7 +64,7 @@ var cv=document.getElementById('cv'),ctx=cv.getContext('2d'),wrap=document.getEl
 var PAL=['#e5484d','#f5a524','#30a46c','#3e63dd','#ab4aba','#12a594'];
 var layers=[{n:'0',c:PAL[0],on:1}],cur=0,ents=[],rs=[],sel=null,v={x:0,y:0,s:10},W=0,H=0,tool=null,step=0,tmp=[],last=null,dl=null;
 var DPR=window.devicePixelRatio||1;
-var PR={POINT:['Point: tap a location, or type x,y (or NAME x,y)'],COPY:['Copy: base point','Copy: destination (tap more for more copies, Done to finish)'],LINE:['Line: start point','Line: next point (Done to finish)'],VMOVE:['Move vertex: tap a vertex (squares), then tap its new position'],VADD:['Add vertex: tap a line, polyline, polygon or curve where the vertex goes'],VDEL:['Delete vertex: tap a vertex to remove'],TRIM:['Trim: tap the part to remove (it is cut at the nearest crossing objects)'],EXTEND:['Extend: tap near the end of an open line or polyline'],JOIN:['Join: tap lines or open polylines, then Done'],CURVE:['Curve: first point','Curve: next point (Done to finish)'],ROT:['Rotate: base point','Rotate: angle in degrees (CCW)'],PLINE:['Polyline: first point','Polyline: next point (Done to finish)'],POLY:['Polygon: first point','Polygon: next point (Done to close)'],CIRCLE:['Circle: center point','Circle: type the radius, or tap a point on the circle'],CIRC3:['Circle 3P: first point on the circle','Circle 3P: second point','Circle 3P: third point'],ARC:['Arc: center','Arc: radius','Arc: start angle (deg CCW from east)','Arc: end angle (deg)'],MEAS:['Distance: tap the first point','Distance: tap the second point'],MAREA:['Area: tap each corner of the shape (Done to finish)'],MANG:['Angle: tap a point on the first arm','Angle: tap the vertex (the corner)','Angle: tap a point on the second arm'],MOVE:['Move: base point','Move: destination point'],SCALE:['Scale: base point','Scale: factor (e.g. 2)'],ALIGN:['Align: source point 1','Align: destination 1','Align: source point 2','Align: destination 2'],GEOREF:['Georeference: tap point 1 on the image','Point 1 real coordinates (x,y)','Tap point 2 on the image','Point 2 real coordinates (x,y)']};
+var PR={POINT:['Point: tap a location, or type x,y (or NAME x,y)'],COPY:['Copy: base point','Copy: destination (tap more for more copies, Done to finish)'],LINE:['Line: start point','Line: next point (Done to finish)'],VMOVE:['Move vertex: tap a vertex (squares), then tap its new position'],VADD:['Add vertex: tap a line, polyline, polygon or curve where the vertex goes'],VDEL:['Delete vertex: tap a vertex to remove'],EPICK:['Pick points to export: tap points or vertices (tap again to unpick)'],EWIN:['Window pick: tap the first corner','Window pick: tap the opposite corner'],TRIM:['Trim: tap the part to remove (it is cut at the nearest crossing objects)'],EXTEND:['Extend: tap near the end of an open line or polyline'],JOIN:['Join: tap lines or open polylines, then Done'],CURVE:['Curve: first point','Curve: next point (Done to finish)'],ROT:['Rotate: base point','Rotate: angle in degrees (CCW)'],PLINE:['Polyline: first point','Polyline: next point (Done to finish)'],POLY:['Polygon: first point','Polygon: next point (Done to close)'],CIRCLE:['Circle: center point','Circle: type the radius, or tap a point on the circle'],CIRC3:['Circle 3P: first point on the circle','Circle 3P: second point','Circle 3P: third point'],ARC:['Arc: center','Arc: radius','Arc: start angle (deg CCW from east)','Arc: end angle (deg)'],MEAS:['Distance: tap the first point','Distance: tap the second point'],MAREA:['Area: tap each corner of the shape (Done to finish)'],MANG:['Angle: tap a point on the first arm','Angle: tap the vertex (the corner)','Angle: tap a point on the second arm'],MOVE:['Move: base point','Move: destination point'],SCALE:['Scale: base point','Scale: factor (e.g. 2)'],ALIGN:['Align: source point 1','Align: destination 1','Align: source point 2','Align: destination 2'],GEOREF:['Georeference: tap point 1 on the image','Point 1 real coordinates (x,y)','Tap point 2 on the image','Point 2 real coordinates (x,y)']};
 var CR={loc:['Local (no CRS)']};
 ['WGS84','Arc 1960'].forEach(function(d){[35,36].forEach(function(z){['N','S'].forEach(function(h){CR[(d[0]=='W'?'w':'a')+z+h]=[d+' UTM '+z+h,z,h=='S'?1:0,d[0]=='W'?'w':'a']})})});
 CR.ll=['Lat/Lon WGS84'];
@@ -89,7 +89,7 @@ if(a!='ll'){g=inv({e:A[3]=='a'?EA:EW,z:A[1],s:A[2]},p);if(A[3]=='a')g=sh(g,EA,EW
 if(b=='ll')return g;
 if(B[3]=='a')g=sh(g,EW,EA,[160,8,300]);
 return fwd({e:B[3]=='a'?EA:EW,z:B[1],s:B[2]},g)}
-var db=null,tm=0,pid=null,plist=[],pdc=0,hist=[],jl=[],vh=null,pnm='';
+var db=null,tm=0,pid=null,plist=[],pdc=0,hist=[],jl=[],vh=null,pnm='',xp={},wc=null,PL=0,CR2=null;
 function idb(cb){try{var q=indexedDB.open('scad',1);q.onupgradeneeded=function(){q.result.createObjectStore('kv')};q.onsuccess=function(){db=q.result;cb()};q.onerror=function(){}}catch(x){}}
 function kv(m){return db.transaction('kv',m||'readonly').objectStore('kv')}
 function snapP(){return{l:layers,e:ents,c:cur,pc:$('pc').value,v:v,rs:rs.map(function(r){return{src:r.src,a:r.a,b:r.b,t:r.t,on:r.on,name:r.name}})}}
@@ -98,7 +98,7 @@ function putIdx(){try{kv('readwrite').put({cur:pid,list:plist},'idx')}catch(x){}
 function save(){try{var hj=JSON.stringify(ents);if(hj!=hist[hist.length-1]){hist.push(hj);if(hist.length>40)hist.shift()}}catch(x){}
 if(!db){try{localStorage.setItem('scad2',JSON.stringify({l:layers,e:ents,c:cur,p:$('pc').value}))}catch(x){}return}clearTimeout(tm);tm=setTimeout(put,400)}
 function addImg(o){var im=new Image();im.onload=draw;im.src=o.src;rs.push({img:im,src:o.src,a:o.a,b:o.b,t:o.t,on:o.on,name:o.name})}
-function apply(d){layers=d.l&&d.l.length?d.l:[{n:'0',c:PAL[0],on:1}];ents=d.e||[];cur=Math.min(d.c||0,layers.length-1);$('pc').value=(CR[d.pc]&&d.pc!='ll')?d.pc:'loc';v=d.v||{x:0,y:0,s:10};rs=[];(d.rs||[]).forEach(addImg);hist=[JSON.stringify(ents)];jl=[];sel=null;last=null;setTool(null);fillLy();draw()}
+function apply(d){layers=d.l&&d.l.length?d.l:[{n:'0',c:PAL[0],on:1}];ents=d.e||[];cur=Math.min(d.c||0,layers.length-1);$('pc').value=(CR[d.pc]&&d.pc!='ll')?d.pc:'loc';v=d.v||{x:0,y:0,s:10};rs=[];(d.rs||[]).forEach(addImg);hist=[JSON.stringify(ents)];jl=[];xp={};sel=null;last=null;setTool(null);fillLy();draw()}
 function pname(){var n=plist.filter(function(x){return x.id==pid})[0];return n?n.name:''}
 function fillP(){var e=$('pj');e.innerHTML='';plist.forEach(function(x){var o=document.createElement('option');o.value=x.id;o.textContent=x.name;e.appendChild(o)});e.value=pid}
 function openP(id){var g=kv().get('p:'+id);g.onsuccess=function(){pid=id;apply(g.result||{});putIdx();fillP();say('Project: '+pname())}}
@@ -119,23 +119,25 @@ else if(e.t=='S'){spl(e.p).forEach(function(q,i){var s=S(q);if(i)ctx.lineTo(s[0]
 else if(e.t=='T'){p=S(e.p);ctx.moveTo(p[0]-5,p[1]);ctx.lineTo(p[0]+5,p[1]);ctx.moveTo(p[0],p[1]-5);ctx.lineTo(p[0],p[1]+5)}
 else{p=S(e.c);if(e.t=='C')ctx.arc(p[0],p[1],e.r*v.s,0,6.2832);else ctx.arc(p[0],p[1],e.r*v.s,-e.s,-e.e,true)}}
 function draw(){
-ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle=css('--bg');ctx.fillRect(0,0,W,H);
+ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle=PL?'#fff':css('--bg');ctx.fillRect(0,0,W,H);
+if(CR2){ctx.save();ctx.beginPath();ctx.rect(CR2[0],CR2[1],CR2[2],CR2[3]);ctx.clip()}
 var s=v.s;
 rs.forEach(function(r){if(!r.on)return;ctx.setTransform(DPR*s*r.a,-DPR*s*r.b,DPR*s*r.b,DPR*s*r.a,DPR*(s*(r.t[0]-v.x)+W/2),DPR*(H/2-s*(r.t[1]-v.y)));ctx.globalAlpha=.85;ctx.drawImage(r.img,0,0);ctx.globalAlpha=1});
 ctx.setTransform(DPR,0,0,DPR,0,0);
-var g=1;while(g*s<40)g*=10;
+if(!PL){var g=1;while(g*s<40)g*=10;
 var a=Wd(0,H),b=Wd(W,0),i,p;
 ctx.strokeStyle=css('--gr');ctx.lineWidth=1;ctx.beginPath();
 for(i=Math.floor(a[0]/g);i<=b[0]/g;i++){p=S([i*g,0]);ctx.moveTo(p[0],0);ctx.lineTo(p[0],H)}
 for(i=Math.floor(a[1]/g);i<=b[1]/g;i++){p=S([0,i*g]);ctx.moveTo(0,p[1]);ctx.lineTo(W,p[1])}
 ctx.stroke();
 p=S([0,0]);ctx.strokeStyle=css('--ac');ctx.beginPath();ctx.moveTo(p[0]-10,p[1]);ctx.lineTo(p[0]+10,p[1]);ctx.moveTo(p[0],p[1]-10);ctx.lineTo(p[0],p[1]+10);ctx.stroke();
-ctx.fillStyle=css('--fg');ctx.font='11px sans-serif';ctx.fillText('grid '+g+' units',6,H-6);
+ctx.fillStyle=css('--fg');ctx.font='11px sans-serif';ctx.fillText('grid '+g+' units',6,H-6)}
 ents.forEach(function(e,k){var L=layers[e.l];if(!L||!L.on)return;
 var on=(sel&&!sel.r&&sel.i==k)||jl.indexOf(k)>=0;ctx.strokeStyle=on?css('--ac'):L.c;ctx.lineWidth=on?4:2;path(e);ctx.stroke();
-if(e.t=='T'&&e.n){var q=S(e.p);ctx.fillStyle=css('--fg');ctx.fillText(e.n,q[0]+7,q[1]-5)}});
+if(e.t=='T'&&e.n){var q=S(e.p);ctx.font=(PL?'26px':'11px')+' sans-serif';ctx.fillStyle=PL?'#000':css('--fg');ctx.fillText(e.n,q[0]+(PL?14:7),q[1]-(PL?10:5))}});
 if(sel&&sel.r&&rs[sel.i]){var r=rs[sel.i],c=[[0,0],[r.img.width,0],[r.img.width,-r.img.height],[0,-r.img.height]].map(function(u){return S(r2w(r,u))});ctx.strokeStyle=css('--ac');ctx.lineWidth=3;ctx.beginPath();c.forEach(function(q,j){if(j)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1])});ctx.closePath();ctx.stroke()}
 if(tool=='VMOVE'||tool=='VDEL'){ctx.fillStyle=css('--ac');ents.forEach(function(e,k){var L=layers[e.l],P=vpts(e);if(!L||!L.on||!P)return;P.forEach(function(q,j){var z=S(q),h=vh&&vh.k==k&&vh.j==j?7:3;ctx.fillRect(z[0]-h,z[1]-h,2*h,2*h)})})}
+if(!PL)for(var kx in xp){var pq=kx.split(','),pz=S([+pq[0],+pq[1]]);ctx.strokeStyle='#e5484d';ctx.lineWidth=3;ctx.beginPath();ctx.arc(pz[0],pz[1],10,0,6.2832);ctx.stroke()}
 if(SN.h){var cn=0;ctx.globalAlpha=.9;ents.forEach(function(e){var L=layers[e.l];if(!L||!L.on||cn>400)return;kpts(e).forEach(function(c){var z=S(c.q);if(z[0]<-10||z[0]>W+10||z[1]<-10||z[1]>H+10)return;cn++;mark(c.q,c.k,0,1)})});ctx.globalAlpha=1}
 var hh=hv||(SN.x?Wd(W/2,H/2):null);
 if(SN.x){ctx.strokeStyle=css('--fg');ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(W/2-22,H/2);ctx.lineTo(W/2+22,H/2);ctx.moveTo(W/2,H/2-22);ctx.lineTo(W/2,H/2+22);ctx.stroke();ctx.setLineDash([3,3]);ctx.beginPath();ctx.arc(W/2,H/2,16,0,6.2832);ctx.stroke();ctx.setLineDash([])}
@@ -149,12 +151,13 @@ ctx.restore();box(LV.split(' | '))}}
 ctx.strokeStyle=css('--ac');ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();
 tmp.forEach(function(t,j){var q=S(t);if(j)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1])});if(tool=='MAREA'&&tmp.length>2){ctx.closePath();ctx.globalAlpha=.15;ctx.fill();ctx.globalAlpha=1}ctx.stroke();ctx.setLineDash([]);
 ctx.fillStyle=css('--ac');tmp.forEach(function(t){var q=S(t);ctx.fillRect(q[0]-4,q[1]-4,8,8)});
+if(CR2)ctx.restore();
 }
 function r2w(r,u){return[r.a*u[0]-r.b*u[1]+r.t[0],r.b*u[0]+r.a*u[1]+r.t[1]]}
 function w2r(r,w){var z0=w[0]-r.t[0],z1=w[1]-r.t[1],d=r.a*r.a+r.b*r.b;return[(z0*r.a+z1*r.b)/d,(z1*r.a-z0*r.b)/d]}
 function say(m){$('st').textContent=m}
 function ask(){$('pr').textContent=tool?PR[tool][Math.min(step,PR[tool].length-1)]:'Pick a tool'}
-function setTool(t){tool=t;step=0;tmp=[];jl=[];vh=null;var b=document.querySelectorAll('#tools [data-t]');for(var i=0;i<b.length;i++)b[i].className=b[i].getAttribute('data-t')==t?'on':'';ask();$('tb').textContent=(t&&document.querySelector('#tools [data-t="'+t+'"]')?document.querySelector('#tools [data-t="'+t+'"]').textContent.slice(1):'Tools')+' \u25BE';$('tb').className=t?'on':'';draw()}
+function setTool(t){tool=t;step=0;tmp=[];jl=[];vh=null;wc=null;var b=document.querySelectorAll('#tools [data-t]');for(var i=0;i<b.length;i++)b[i].className=b[i].getAttribute('data-t')==t?'on':'';ask();$('tb').textContent=(t&&document.querySelector('#tools [data-t="'+t+'"]')?document.querySelector('#tools [data-t="'+t+'"]').textContent.slice(1):'Tools')+' \u25BE';$('tb').className=t?'on':'';draw()}
 function parse(s){
 s=s.replace(/\s+/g,'');if(!s)return null;
 var m=/^(@?)(-?[\d.]+)<(-?[\d.]+)$/.exec(s);
@@ -417,9 +420,61 @@ if(bi<0){say('Tap on a line, polyline, polygon or curve.');return}
 var e2=ents[bi];if(e2.t=='L')ents[bi]={t:'P',p:[e2.a,bp,e2.b],z:0,l:e2.l};else e2.p.splice(ins,0,bp);
 save();draw();say('Vertex added. Use Move vtx to reposition it.')}
 function nextP(){var m=0;ents.forEach(function(e){if(e.t=='T'){var x=/^P(\d+)$/.exec(e.n||'');if(x)m=Math.max(m,+x[1])}});return 'P'+(m+1)}
+
+function expRows(sc){var rows=[],seen={};ents.forEach(function(e,i){var L=layers[e.l];
+if(sc=='cl'&&e.l!=cur)return;if(sc=='vl'&&(!L||!L.on))return;if(sc=='sel'&&!(sel&&!sel.r&&sel.i==i))return;
+var P=vpts(e);if(!P)return;
+P.forEach(function(q,j){var k=q[0].toFixed(6)+','+q[1].toFixed(6);if(sc=='pk'){if(!xp[k]||seen[k])return;seen[k]=1}
+rows.push([e.t=='T'?(e.n||'P'+(i+1)):((e.t=='L'?'L':'V')+(i+1)+'-'+(j+1)),q])})});return rows}
+function epick(w){var b=vfind(w);if(!b){say('Tap on a point or vertex.');return}
+var q=vpts(ents[b.k])[b.j],k=q[0].toFixed(6)+','+q[1].toFixed(6);if(xp[k])delete xp[k];else xp[k]=1;$('es').value='pk';
+say(Object.keys(xp).length+' point(s) picked. Tap Save CSV (Picked points only) when ready.');draw()}
+function ewin(w){if(!wc){wc=w;tmp=[w];say('Window pick: tap the opposite corner.');draw();return}
+var x0=Math.min(wc[0],w[0]),x1=Math.max(wc[0],w[0]),y0=Math.min(wc[1],w[1]),y1=Math.max(wc[1],w[1]);
+ents.forEach(function(e){var L=layers[e.l],P=vpts(e);if(!L||!L.on||!P)return;P.forEach(function(q){if(q[0]>=x0&&q[0]<=x1&&q[1]>=y0&&q[1]<=y1)xp[q[0].toFixed(6)+','+q[1].toFixed(6)]=1})});
+wc=null;tmp=[];$('es').value='pk';say(Object.keys(xp).length+' point(s) picked. Tap Save CSV (Picked points only) when ready.');draw()}
+function bnds(){var x0=1e18,y0=1e18,x1=-1e18,y1=-1e18;function add(x,y){x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)}
+ents.forEach(function(e){var L=layers[e.l];if(!L||!L.on)return;if(e.c){add(e.c[0]-e.r,e.c[1]-e.r);add(e.c[0]+e.r,e.c[1]+e.r)}else(e.t=='S'?spl(e.p):vpts(e)||[]).forEach(function(q){add(q[0],q[1])})});
+rs.forEach(function(r){if(!r.on)return;[[0,0],[r.img.width,0],[r.img.width,-r.img.height],[0,-r.img.height]].forEach(function(u){var q=r2w(r,u);add(q[0],q[1])})});
+return x0>x1?null:[x0,y0,x1,y1]}
+var PS={a4l:[842,595],a4p:[595,842],a3l:[1191,842],a3p:[842,1191]},PN={a4l:'A4 landscape',a4p:'A4 portrait',a3l:'A3 landscape',a3p:'A3 portrait'};
+function lay(X,pp,N0){var mm=150/25.4,bm=UL[U.b][1],best=null;
+(pp=='auto'?['a4l','a4p']:[pp]).forEach(function(k){var P=PS[k],cw=Math.round(P[0]*150/72),ch=Math.round(P[1]*150/72),x0=13*mm,y0=13*mm,x1=cw-13*mm,y1=ch-30*mm,Wm=(x1-x0)/mm/1000,Hm=(y1-y0)/mm/1000,rq=Math.max((X[2]-X[0])*bm/Wm,(X[3]-X[1])*bm/Hm)*1.04,N=N0>0?N0:Math.max(50,Math.ceil(rq/50)*50);
+if(!best||N<best.N)best={k:k,pw:P[0],ph:P[1],cw:cw,ch:ch,x0:x0,y0:y0,x1:x1,y1:y1,N:N,mm:mm}});return best}
+function plot(kind){
+var N0=parseFloat(($('sc').value||'').replace(/^1\s*:/,'')),X=null,bm=UL[U.b][1];
+if($('pa').value=='all')X=bnds();
+if(!X){var a=Wd(0,H),b=Wd(W,0);X=[a[0],a[1],b[0],b[1]]}
+var Ly=lay(X,$('pp').value,N0),mm=Ly.mm,cw=Ly.cw,ch=Ly.ch,N=Ly.N;
+var o={W:W,H:H,D:DPR,s:v.s,x:v.x,y:v.y,tool:tool,tmp:tmp,hv:hv,sel:sel,jl:jl,vh:vh,h:SN.h,cx:SN.x},R=document.documentElement;
+R.setAttribute('data-theme','light');tool=null;tmp=[];hv=null;sel=null;jl=[];vh=null;SN.h=0;SN.x=0;
+W=cw;H=ch;DPR=1;cv.width=cw;cv.height=ch;PL=1;
+v.s=bm*mm*1000/N;
+var mcx=(Ly.x0+Ly.x1)/2,mcy=(Ly.y0+Ly.y1)/2;
+v.x=(X[0]+X[2])/2-(mcx-cw/2)/v.s;v.y=(X[1]+X[3])/2+(mcy-ch/2)/v.s;
+CR2=[Ly.x0,Ly.y0,Ly.x1-Ly.x0,Ly.y1-Ly.y0];draw();CR2=null;
+ctx.setTransform(1,0,0,1,0,0);ctx.strokeStyle='#000';ctx.fillStyle='#000';
+ctx.lineWidth=Math.max(2,.5*mm);ctx.strokeRect(10*mm,10*mm,cw-20*mm,ch-20*mm);
+ctx.lineWidth=Math.max(1,.25*mm);ctx.strokeRect(Ly.x0,Ly.y0,Ly.x1-Ly.x0,Ly.y1-Ly.y0);
+var y1=Ly.y1;
+ctx.font='bold '+3.4*mm+'px sans-serif';ctx.fillText('Scale 1:'+N,15*mm,y1+7*mm);
+ctx.font=2.5*mm+'px sans-serif';ctx.fillText((pname()||'Project')+'  |  '+PN[Ly.k],15*mm,y1+12.5*mm);
+ctx.fillText((CR[$('pc').value]?CR[$('pc').value][0]:'')+'  |  '+new Date().toLocaleDateString(),15*mm,y1+17*mm);
+var tg=0.05*N/UL[U.l][1],p10=Math.pow(10,Math.floor(Math.log(tg)/Math.LN10)),mt=tg/p10,Ld=(mt<1.5?1:mt<3.5?2:mt<7.5?5:10)*p10,px=Ld*UL[U.l][1]/N*1000*mm,bx1=cw-10*mm-30*mm,bx0=bx1-px,by=y1+10*mm,bh=3*mm,i;
+for(i=0;i<4;i++){ctx.fillStyle=i%2?'#fff':'#000';ctx.fillRect(bx0+i*px/4,by,px/4,bh)}
+ctx.strokeStyle='#000';ctx.lineWidth=Math.max(1,.25*mm);ctx.strokeRect(bx0,by,px,bh);ctx.fillStyle='#000';ctx.font=2.4*mm+'px sans-serif';
+[0,.5,1].forEach(function(f){ctx.textAlign=f==0?'left':f==1?'right':'center';ctx.fillText(String(+(f*Ld).toFixed(2))+(f==1?' '+UL[U.l][0]:''),bx0+f*px,by-1.5*mm)});
+ctx.textAlign='left';
+var ax=cw-10*mm-15*mm,t0=y1+6*mm,t1=y1+17*mm;
+ctx.beginPath();ctx.moveTo(ax,t0);ctx.lineTo(ax-4*mm,t1);ctx.lineTo(ax,t1-3.5*mm);ctx.closePath();ctx.fill();
+ctx.beginPath();ctx.moveTo(ax,t0);ctx.lineTo(ax+4*mm,t1);ctx.lineTo(ax,t1-3.5*mm);ctx.closePath();ctx.stroke();
+ctx.font='bold '+4*mm+'px sans-serif';ctx.textAlign='center';ctx.fillText('N',ax,t0-0.8*mm);ctx.textAlign='left';
+var out2=kind=='pdf'?mkpdf(cv,Ly.pw,Ly.ph):null;
+function fin(b){R.removeAttribute('data-theme');PL=0;W=o.W;H=o.H;DPR=o.D;v.s=o.s;v.x=o.x;v.y=o.y;tool=o.tool;tmp=o.tmp;hv=o.hv;sel=o.sel;jl=o.jl;vh=o.vh;SN.h=o.h;SN.x=o.cx;resize();if(b)save2('map-1-'+N+(kind=='pdf'?'.pdf':'.png'),b);say('Plotted at 1:'+N+' on '+PN[Ly.k]+'.')}
+if(kind=='pdf')fin(out2);else cv.toBlob(function(b){fin(b)})}
 function submit(){var i=$('in'),x=i.value;SK='';if(tool=='POINT'){var m=/^([A-Za-z][\w-]*)[\s:]+(\S.*)$/.exec(x.trim());if(m){pnm=m[1];x=m[2]}}feed(parse(x));i.value=''}
 $('ent').onclick=submit;
-$('pl').onclick=function(){var c=Wd(W/2,H/2),q=snap(c);if(tool=='TRIM')trimAt(c);else if(tool=='EXTEND')extAt(c);else if(tool=='JOIN')joinPick(c);else if(tool=='VMOVE'||tool=='VADD'||tool=='VDEL')vtap(q);else if(tool)feed({pt:q});else pick(c)};
+$('pl').onclick=function(){var c=Wd(W/2,H/2),q=snap(c);if(tool=='TRIM')trimAt(c);else if(tool=='EXTEND')extAt(c);else if(tool=='JOIN')joinPick(c);else if(tool=='VMOVE'||tool=='VADD'||tool=='VDEL')vtap(q);else if(tool=='EPICK')epick(c);else if(tool=='EWIN')ewin(c);else if(tool)feed({pt:q});else pick(c)};
 $('in').onkeydown=function(e){if(e.keyCode==13){e.preventDefault();submit()}};
 $('tools').onclick=function(e){var b=e.target.closest?e.target.closest('button'):e.target;if(!b)return;var t=b.getAttribute('data-t'),o=b.getAttribute('data-o');if(t)setTool(t);else if(o)ord(o);else return;this.classList.remove('open')};
 $('tb').onclick=function(){$('tools').classList.toggle('open')};
@@ -469,14 +524,16 @@ save();say('Imported '+cnt+' points.');$('fit').onclick();}
 $('cf').onchange=function(){var f=this.files[0];if(!f)return;var fr=new FileReader();fr.onload=function(){impCSV(fr.result)};fr.readAsText(f);this.value=''};
 function out(name,p){var e=$('ecrs').value,pc=$('pc').value;if(e=='ll'){var q=tf(pc,'ll',p);return name+','+q[1].toFixed(8)+','+q[0].toFixed(8)}var q2=tf(pc,e,p);return name+','+f3(q2[0])+','+f3(q2[1])}
 $('ecsv').onclick=function(){
-var rows=[$('ecrs').value=='ll'?'name,lat,lon':'name,E,N'];
-ents.forEach(function(e,i){if(e.t=='T')rows.push(out(e.n||'P'+(i+1),e.p));else if(e.t=='L'||e.t=='P'||e.t=='S')kp(e).forEach(function(q,j){rows.push(out((e.t=='L'?'L':'V')+(i+1)+'-'+(j+1),q))})});
-if(rows.length<2){say('Nothing to export.');return}
-save2('coordinates.csv',rows.join('\n'))};
+var rr=expRows($('es').value),rows=[$('ecrs').value=='ll'?'name,lat,lon':'name,E,N'];
+rr.forEach(function(r){rows.push(out(r[0],r[1]))});
+if(rr.length<1){say($('es').value=='pk'?'No points picked. Use Pick points or Window pick first.':'No points match that choice.');return}
+save2('coordinates.csv',rows.join('\n'));say('Exporting '+rr.length+' point(s).')};
+$('epk').onclick=function(){setTool('EPICK');$('menu').className='';setTimeout(resize,0)};
+$('ewn').onclick=function(){setTool('EWIN');$('menu').className='';setTimeout(resize,0)};
+$('eclr').onclick=function(){xp={};say('Picked points cleared.');draw()};
 function save2(name,data){
 if(!dl){try{var b=data instanceof Blob?data:new Blob([data],{type:'text/plain'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);say('Saving '+name);}catch(x){say('Saving is not available here.')}return}
 dl.save({filename:name,data:data}).then(function(){say('Saved '+name)}).catch(function(x){say('Not saved: '+((x&&x.code)||'error'))})}
-$('png').onclick=function(){sel=null;draw();cv.toBlob(function(b){save2('drawing.png',b)})};
 function mkpdf(c,pw,ph){
 var d=atob(c.toDataURL('image/jpeg',.92).split(',')[1]),n=d.length,im=new Uint8Array(n),i;
 for(i=0;i<n;i++)im[i]=d.charCodeAt(i);
@@ -492,19 +549,7 @@ var x=off,t='xref\n0 6\n0000000000 65535 f \n';
 for(i=1;i<6;i++)t+=('0000000000'+xr[i]).slice(-10)+' 00000 n \n';
 A(t+'trailer\n<</Size 6/Root 1 0 R>>\nstartxref\n'+x+'\n%%EOF');
 return new Blob(P,{type:'application/pdf'})}
-$('pdf').onclick=function(){sel=null;draw();save2('drawing.pdf',mkpdf(cv,W,H))};
-$('pdfs').onclick=function(){
-var N=parseFloat(($('sc').value||'').replace(/^1\s*:/,''));if(!(N>0)){say('Type a scale such as 1:500.');return}
-var land=$('pp').value=='l',pw=land?842:595,ph=land?595:842,cw=Math.round(pw*150/72),ch=Math.round(ph*150/72),gw=pw/72*0.0254*N,ppm=cw/gw;
-var o={W:W,H:H,D:DPR,s:v.s,sel:sel},R=document.documentElement;
-R.setAttribute('data-theme','light');sel=null;W=cw;H=ch;DPR=1;cv.width=cw;cv.height=ch;v.s=ppm;draw();
-ctx.setTransform(1,0,0,1,0,0);ctx.strokeStyle='#000';ctx.fillStyle='#000';ctx.lineWidth=3;ctx.strokeRect(12,12,cw-24,ch-24);
-ctx.font='30px sans-serif';ctx.fillText('Scale 1:'+N+'   (A4 '+(land?'landscape':'portrait')+')',30,ch-34);
-var L=Math.pow(10,Math.floor(Math.log(gw/4)/Math.LN10)),bx=cw-60-L*ppm;
-ctx.fillRect(bx,ch-52,L*ppm,10);ctx.fillText(L+' m',bx,ch-62);
-var b=mkpdf(cv,pw,ph);
-R.removeAttribute('data-theme');W=o.W;H=o.H;DPR=o.D;v.s=o.s;sel=o.sel;resize();
-save2('plot-1-'+N+'.pdf',b)};
+$('pdf').onclick=function(){plot('pdf')};$('png').onclick=function(){plot('png')};
 $('lren').onclick=function(){var n=$('ln').value.trim();if(!n){say('Type the new name in the name box.');return}layers[cur].n=n;$('ln').value='';fillLy();save();say('Layer renamed.')};
 $('lcol').onclick=function(){layers[cur].c=PAL[(PAL.indexOf(layers[cur].c)+1)%PAL.length];save();draw();say('Layer colour changed.')};
 $('ldel').onclick=function(){if(cur==0){say('The first layer cannot be deleted.');return}ents.forEach(function(e){if(e.l==cur)e.l=0;else if(e.l>cur)e.l--});layers.splice(cur,1);cur=0;fillLy();save();draw();say('Layer deleted. Its objects moved to the first layer.')};
@@ -518,7 +563,7 @@ if(cnt==1){v.x-=(n[0]-o[0])/v.s;v.y+=(n[1]-o[1])/v.s;if(dist(n,sp0)>8){mv=1;hv=n
 else if(cnt==2){hv=null;Pt[e.pointerId]=n;var k=Object.keys(Pt),a=Pt[k[0]],b=Pt[k[1]],d=dist(a,b)||1,m=[(a[0]+b[0])/2,(a[1]+b[1])/2],w0=Wd(m[0],m[1]);
 v.s=Math.max(0.0001,Math.min(1e7,v.s*d/pd));pd=d;var w1=Wd(m[0],m[1]);v.x+=w0[0]-w1[0];v.y+=w0[1]-w1[1];draw()}});
 cv.addEventListener('pointerup',function(e){if(!Pt[e.pointerId])return;
-if(cnt==1&&!mv){var q=pos(e),w=Wd(q[0],q[1]);if(tool=='TRIM')trimAt(w);else if(tool=='EXTEND')extAt(w);else if(tool=='JOIN')joinPick(w);else if(tool=='VMOVE'||tool=='VADD'||tool=='VDEL')vtap(w);else if(tool)feed({pt:snap(w)});else pick(w)}
+if(cnt==1&&!mv){var q=pos(e),w=Wd(q[0],q[1]);if(tool=='TRIM')trimAt(w);else if(tool=='EXTEND')extAt(w);else if(tool=='JOIN')joinPick(w);else if(tool=='VMOVE'||tool=='VADD'||tool=='VDEL')vtap(w);else if(tool=='EPICK')epick(w);else if(tool=='EWIN')ewin(w);else if(tool)feed({pt:snap(w)});else pick(w)}
 delete Pt[e.pointerId];cnt=Object.keys(Pt).length;if(e.pointerType=='touch'){hv=null;draw()}});
 cv.addEventListener('pointercancel',function(e){delete Pt[e.pointerId];cnt=Object.keys(Pt).length;hv=null;draw()});
 cv.addEventListener('pointerleave',function(e){if(e.pointerType!='touch'&&!cnt){hv=null;draw()}});
