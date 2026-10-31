@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
+<meta name="theme-color" content="#14181f">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="SurveyCAD">
 <title>SurveyCAD</title>
 <link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap">
 <style>
-:root{--bg:#eef2f4;--fg:#0f2a3a;--bar:#dde5ea;--ac:#0a7ea4;--bd:#b7c5ce;--gr:#d3dde3;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1b24;--fg:#e3eef3;--bar:#162b38;--ac:#4cc3e8;--bd:#2f4b5c;--gr:#1a3342}}
-:root[data-theme="dark"]{--bg:#0d1b24;--fg:#e3eef3;--bar:#162b38;--ac:#4cc3e8;--bd:#2f4b5c;--gr:#1a3342}
+:root{--app:#14181f;--bg:#0e1218;--bar:#1a1f27;--sc:#232a34;--fg:#ece9df;--mu:#8b95a3;--ac:#4cc4d8;--pr:#f0b24a;--bd:#2c323c;--gr:#1b212a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme="light"]{--app:#e6ebee;--bg:#f4f6f7;--bar:#dde5ea;--sc:#ffffff;--fg:#0f2a3a;--mu:#5a6b76;--ac:#0a7ea4;--pr:#c2870f;--bd:#b7c5ce;--gr:#d9e1e6}
 html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--fg);font:14px -apple-system,Helvetica,Arial,sans-serif;display:flex;flex-direction:column;overflow:hidden;-webkit-user-select:none;user-select:none}
+body{position:relative;background:var(--app);color:var(--fg);font:13px 'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;display:flex;flex-direction:column;overflow:hidden;-webkit-user-select:none;user-select:none}
 .row{display:flex;flex-wrap:wrap;gap:6px;padding:6px;background:var(--bar);border-bottom:1px solid var(--bd)}
 #top button{flex:1;min-width:0;padding:6px 4px}
 #tools{display:none;position:absolute;left:6px;right:6px;top:6px;max-height:calc(100% - 12px);overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bar);border:1px solid var(--bd);border-radius:12px;padding:4px 10px 10px;box-shadow:0 6px 24px rgba(0,0,0,.35);z-index:5}
@@ -20,14 +23,14 @@ body{background:var(--bg);color:var(--fg);font:14px -apple-system,Helvetica,Aria
 .g{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 #tools button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px;min-height:52px;font-size:12px;line-height:1.1}
 #tools i{font-style:normal;font-size:20px;line-height:1}
-button,select,input{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:6px 9px;min-height:34px}
-button.on{background:var(--ac);color:var(--bg);border-color:var(--ac)}
+button,select,input{font:inherit;color:var(--fg);background:var(--sc);border:1px solid var(--bd);border-radius:6px;padding:6px 9px;min-height:34px}
+button.on{background:var(--pr);color:#20180a;border-color:var(--pr)}
 select{flex:1;min-width:80px}
-#menu{display:none;max-height:42vh;overflow-y:auto;background:var(--bar);border-bottom:1px solid var(--bd);padding:6px}
+#menu{display:none;position:absolute;left:0;right:0;bottom:0;max-height:78%;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bar);border-top:1px solid var(--bd);border-radius:14px 14px 0 0;padding:12px;z-index:20;box-shadow:0 -12px 40px -8px rgba(0,0,0,.6)}
 #menu.open{display:block}
 #menu label{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}
 #menu label b{flex:1 0 100%;font-weight:600}
-#sb{display:none;position:absolute;left:6px;right:6px;bottom:6px;flex-wrap:wrap;gap:6px;align-items:center;background:var(--bar);border:1px solid var(--bd);border-radius:10px;padding:6px;font-size:12px;z-index:4;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+#sb{display:none;position:absolute;left:6px;right:6px;bottom:46px;flex-wrap:wrap;gap:6px;align-items:center;background:var(--bar);border:1px solid var(--bd);border-radius:10px;padding:6px;font-size:12px;z-index:4;box-shadow:0 4px 16px rgba(0,0,0,.3)}
 #sb select{flex:1 1 120px;min-width:0;min-height:30px;font-size:12px;padding:4px 6px}
 #sb button{min-height:30px;padding:4px 8px;font-size:12px}
 #prop{display:none;position:absolute;left:6px;right:6px;top:6px;background:var(--bar);border:1px solid var(--bd);border-radius:12px;padding:10px;z-index:6;box-shadow:0 6px 24px rgba(0,0,0,.35)}
@@ -35,22 +38,38 @@ select{flex:1;min-width:80px}
 #prop h4{margin:0 0 8px;font-size:12px;line-height:1.3}
 #prop .r{display:flex;gap:6px;margin-bottom:8px}
 #lc{width:44px;padding:2px}
+#hdr{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bar);border-bottom:1px solid var(--bd)}
+.brand{font-family:'Space Grotesk',system-ui,sans-serif;font-size:17px;font-weight:700}
+.brand b{color:var(--pr);margin-right:3px}
+#pill{margin-left:auto;display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:3px 8px;font-size:12px;border-radius:6px;background:transparent}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--pr);display:inline-block}
+#zb{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:4px;z-index:3}
+.zbtn{width:40px;min-height:40px;padding:0;font-size:20px;background:var(--bar)}
+#tgs{position:absolute;right:8px;bottom:8px;display:flex;gap:4px;z-index:3}
+.tg{min-height:30px;padding:4px 8px;font-size:10px;font-weight:600;letter-spacing:.05em;border-radius:4px;color:var(--mu);background:var(--bar)}
+.tg.on{background:var(--ac);color:#05262c;border-color:var(--ac)}
+#hint{position:absolute;left:8px;top:8px;background:var(--bar);opacity:.92;border-radius:6px;padding:6px 8px;font-size:11px;color:var(--mu);pointer-events:none;z-index:2}
+#strip{display:flex;gap:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:6px 0 0}
+#strip button{flex:none;min-width:58px;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 6px;font-size:10px;border:none}
+#strip i{font-style:normal;font-size:18px;line-height:1}
+.mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:16px}
 textarea{flex:1 1 100%;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:6px;box-sizing:border-box;-webkit-user-select:text;user-select:text}
 #wrap{flex:1;position:relative;min-height:80px}
 canvas{position:absolute;left:0;top:0;touch-action:none}
 #bot{border-top:1px solid var(--bd);background:var(--bar);padding:6px}
-#pr{font-weight:600;margin:0 0 4px}
-#st{font-size:12px;opacity:.8;margin:0 0 6px}
+#pr{font-weight:600;margin:0 0 4px;color:var(--pr)}
+#st{font-size:11px;color:var(--mu);margin:0 0 6px}
 #in{flex:1;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text}
 </style></head><body>
+<div id="hdr"><span class="brand"><b>Survey</b>CAD</span><button id="pill"><i class="dot"></i><span id="pn0"></span></button></div>
 <div class="row" id="top"><button id="tb">Tools &#9662;</button><button id="done">Done</button><button id="undo">Undo</button><button id="dl2">Delete</button><button id="fit">Fit</button></div>
-<div class="row"><select id="ly"></select><input id="ln" type="text" placeholder="New layer name" style="flex:1 1 100px;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text"><button id="addl">+ Layer</button><input type="color" id="lc" title="Layer colour"><button id="vis">Hide</button><button id="mb">Menu</button></div>
-<div id="menu">
+<div class="row"><select id="ly"></select><input id="ln" type="text" placeholder="New layer name" style="flex:1 1 100px;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text"><button id="addl">+ Layer</button><button id="dlay">&minus; Layer</button><input type="color" id="lc" title="Layer colour"><button id="vis">Hide</button><button id="mb">Menu</button></div>
+<div id="menu"><div class="mh"><b>Menu</b><button id="mclose">Close</button></div>
 <label><b>Projects (work saves automatically)</b><select id="pj"></select><input id="pn" type="text" placeholder="Project name" style="flex:1 1 120px;min-width:0;font-size:16px;-webkit-user-select:text;user-select:text"><button id="pnew">New</button><button id="prn">Rename</button><button id="pdel">Delete project</button></label>
 <label><b>Project file: backup, or move to another phone</b><button id="psave">Save project file</button><input type="file" id="pf" accept=".json,application/json,text/plain"></label>
 <label><b>Annotation settings</b><select id="ad"><option value="0">Length decimals: 0</option><option value="1">Length decimals: 1</option><option value="2" selected>Length decimals: 2</option><option value="3">Length decimals: 3</option><option value="4">Length decimals: 4</option></select><select id="aa"><option value="0">Area decimals: 0</option><option value="1">Area decimals: 1</option><option value="2" selected>Area decimals: 2</option><option value="3">Area decimals: 3</option><option value="4">Area decimals: 4</option></select><select id="au"><option value="ha">Area in hectares</option><option value="ac">Area in acres</option><option value="both" selected>Area in both</option></select><select id="as"><option value="s">Text size: small</option><option value="m" selected>Text size: medium</option><option value="l">Text size: large</option></select></label>
 <label><b>Units</b><select id="bu"><option value="m">Drawing units: metres</option><option value="ft">Drawing units: feet</option><option value="usft">Drawing units: US survey feet</option></select><select id="ul"><option value="m">Length in m</option><option value="km">Length in km</option><option value="ft">Length in ft</option><option value="yd">Length in yd</option><option value="mi">Length in miles</option><option value="usft">Length in US ft</option></select><select id="ua"><option value="m2">Area in m&sup2;</option><option value="ha">Area in hectares</option><option value="km2">Area in km&sup2;</option><option value="ft2">Area in ft&sup2;</option><option value="ac">Area in acres</option></select><button id="um">Metric</button><button id="ui">Imperial</button></label>
-<label><b>Snap to (tap to turn on or off)</b><button data-s="e">Endpoint</button><button data-s="m">Midpoint</button><button data-s="c">Center</button><button data-s="i">Intersection</button><button data-s="n">Nearest</button><button data-s="k">Raster corners</button><button data-s="o">Polar</button><select id="pi"><option value="15">Polar step 15&deg;</option><option value="5">5&deg;</option><option value="10">10&deg;</option><option value="30">30&deg;</option><option value="45">45&deg;</option><option value="90">90&deg; (ortho)</option></select><button data-s="h">Show points</button><button data-s="x">Crosshair</button></label>
+<label><b>Snap to (tap to turn on or off)</b><button data-s="a">All snaps</button><button data-s="e">Endpoint</button><button data-s="m">Midpoint</button><button data-s="c">Center</button><button data-s="q">Quadrant</button><button data-s="i">Intersection</button><button data-s="n">Nearest</button><button data-s="k">Raster corners</button><button data-s="b">Base map</button><button data-s="o">Polar</button><select id="pi"><option value="15">Polar step 15&deg;</option><option value="5">5&deg;</option><option value="10">10&deg;</option><option value="30">30&deg;</option><option value="45">45&deg;</option><option value="90">90&deg; (ortho)</option></select><button data-s="h">Show points</button><button data-s="x">Crosshair</button></label>
 <label><b>Project coordinate system</b><select id="pc"></select></label>
 <label><b>Import CSV (name,E,N or id,E,N; Lat/Lon = lat,lon)</b><select id="icrs"></select><select id="imode"><option value="pts">as points</option><option value="pl">as polyline</option><option value="pg">as polygon</option></select><input type="file" id="cf" accept=".csv,.txt,text/csv,text/plain"></label>
 <label><b>Export CSV: choose which points</b><select id="es"><option value="all">All points</option><option value="vl">Visible layers only</option><option value="cl">Current layer only</option><option value="sel">Selected object only</option><option value="pk">Picked points only</option></select><select id="ecrs"></select><button id="epk">Pick points</button><button id="ewn">Window pick</button><button id="eclr">Clear picks</button><button id="ecsv">Save CSV</button></label>
@@ -62,6 +81,9 @@ canvas{position:absolute;left:0;top:0;touch-action:none}
 <label><b>Export map (border, north arrow, scale bar)</b><button id="png">Save image (PNG)</button><button id="pdf">Save PDF</button></label>
 </div>
 <div id="wrap"><canvas id="cv"></canvas>
+<div id="hint">tap to place &middot; drag to pan &middot; pinch to zoom</div>
+<div id="zb"><button class="zbtn" id="zi">+</button><button class="zbtn" id="zo">&minus;</button><button class="zbtn" id="zf">&#9974;</button></div>
+<div id="tgs"><button class="tg" data-s="a">SNAP</button><button class="tg" data-s="o">POLAR</button><button class="tg" data-s="x">CROSS</button><button class="tg" data-s="h">PTS</button><button class="tg" data-s="b">MAP</button></div>
 <div id="sb"><span id="sbt"></span><select id="ss"><option value="both">Similar: same type and layer</option><option value="type">Similar: same type</option><option value="layer">Similar: same layer</option></select><button id="sbp">+ Similar</button><button id="sbm">&minus; Similar</button><button id="sbq">Properties</button><button id="sbc">Clear</button></div>
 <div id="prop"><h4 id="pt">Properties</h4><div class="r" id="plrow"><select id="pl2"></select><button id="pla">Move to layer</button></div><div class="r" id="alrow" style="display:none;align-items:center"><span>Opacity</span><input type="range" id="alr" min="5" max="100" step="5" style="flex:1;min-height:30px"><span id="alv" style="min-width:42px;text-align:right"></span></div><div class="r" id="pnrow"><input id="pnn" type="text" style="flex:1;min-width:0;font-size:16px"><button id="pna">Apply text</button></div><div class="r" id="pn2row" style="display:none"><input id="pn2" type="text" placeholder="Manual area text (blank = automatic)" style="flex:1;min-width:0;font-size:16px"></div><div class="r" id="pflrow" style="display:none"><button id="pfl" style="flex:1">Flip label to the other side of the line</button></div><div class="r"><button id="pcl" style="flex:1">Close</button></div></div><div id="tools"><h4>Draw</h4><div class="g"><button data-t="POINT"><i>✚</i>Point</button><button data-t="LINE"><i>╱</i>Line</button><button data-t="PLINE"><i>⌇</i>Polyline</button><button data-t="POLY"><i>△</i>Polygon</button><button data-t="CURVE"><i>∿</i>Curve</button><button data-t="CIRCLE"><i>○</i>Circle</button><button data-t="CIRC3"><i>◎</i>Circle 3P</button><button data-t="ARC"><i>◠</i>Arc</button></div><h4>Select</h4><div class="g"><button data-t="SELM"><i>☑</i>Multi</button><button data-t="SELW"><i>▭</i>Window</button><button data-t="SSIM"><i>≈</i>Similar</button><button data-o="A"><i>▣</i>All</button><button data-o="C"><i>☐</i>Clear</button></div>
 <h4>Annotate</h4><div class="g"><button data-t="ALEN"><i>⟷</i>Length</button><button data-t="APOLY"><i>▢</i>Plot label</button><button data-t="TEXT"><i>T</i>Text</button></div>
@@ -70,8 +92,9 @@ canvas{position:absolute;left:0;top:0;touch-action:none}
 <p id="pr">Pick a tool</p>
 <p id="st">Tap the canvas or type a point: 100,200 / @10,5 / @25&lt;45. Tap an object with no tool to select it.</p>
 <div class="row" style="padding:0;background:none;border:0">
-<input id="in" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="x,y  @dx,dy  @dist&lt;angle  or a number">
+<input id="in" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="command (L PL C ?) or x,y  @dx,dy  @dist&lt;angle">
 <button id="pl" style="display:none">Place</button><button id="ent">Enter</button></div>
+<div id="strip"><button data-t="POINT"><i>✚</i>Point</button><button data-t="LINE"><i>╱</i>Line</button><button data-t="PLINE"><i>⌇</i>Pline</button><button data-t="POLY"><i>△</i>Polygon</button><button data-t="CIRCLE"><i>○</i>Circle</button><button data-t="ARC"><i>◠</i>Arc</button><button data-t="CURVE"><i>∿</i>Curve</button><button data-t="MOVE"><i>✥</i>Move</button><button data-t="COPY"><i>❐</i>Copy</button><button data-t="TRIM"><i>✂</i>Trim</button><button data-t="OFFSET"><i>⫽</i>Offset</button><button data-t="MEAS"><i>↔</i>Distance</button><button data-t="ALEN"><i>⟷</i>Label</button><button data-t="TEXT"><i>T</i>Text</button></div>
 </div>
 <script>
 (function(){
@@ -138,6 +161,7 @@ ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle=PL?'#fff':css('--bg');ctx.fillRe
 if(CR2){ctx.save();ctx.beginPath();ctx.rect(CR2[0],CR2[1],CR2[2],CR2[3]);ctx.clip()}
 var s=v.s,SL=selList();
 var sbx=$('sb');if(sbx){var ri=sel&&sel.r;sbx.style.display=((SL.length||ri)&&!PL)?'flex':'none';$('sbt').textContent=ri?'Image selected':SL.length+' selected';var sh=ri?'none':'';$('sbp').style.display=sh;$('sbm').style.display=sh;$('ss').style.display=sh}
+if(SN.b&&!PL)drawMap();
 rs.forEach(function(r){if(!rv(r))return;ctx.setTransform(DPR*s*r.a,-DPR*s*r.b,DPR*s*r.b,DPR*s*r.a,DPR*(s*(r.t[0]-v.x)+W/2),DPR*(H/2-s*(r.t[1]-v.y)));ctx.globalAlpha=r.al==null?.85:r.al;ctx.drawImage(r.img,0,0);ctx.globalAlpha=1});
 ctx.setTransform(DPR,0,0,DPR,0,0);
 if(!PL){var g=1;while(g*s<40)g*=10;
@@ -175,7 +199,7 @@ function r2w(r,u){return[r.a*u[0]-r.b*u[1]+r.t[0],r.b*u[0]+r.a*u[1]+r.t[1]]}
 function w2r(r,w){var z0=w[0]-r.t[0],z1=w[1]-r.t[1],d=r.a*r.a+r.b*r.b;return[(z0*r.a+z1*r.b)/d,(z1*r.a-z0*r.b)/d]}
 function say(m){$('st').textContent=m}
 function ask(){$('pr').textContent=tool?PR[tool][Math.min(step,PR[tool].length-1)]:'Pick a tool'}
-function setTool(t){tool=t;step=0;tmp=[];jl=[];vh=null;wc=null;exI=-1;offi=-1;gp=[];var b=document.querySelectorAll('#tools [data-t]');for(var i=0;i<b.length;i++)b[i].className=b[i].getAttribute('data-t')==t?'on':'';ask();$('tb').textContent=(t&&document.querySelector('#tools [data-t="'+t+'"]')?document.querySelector('#tools [data-t="'+t+'"]').textContent.slice(1):'Tools')+' \u25BE';$('tb').className=t?'on':'';draw()}
+function setTool(t){tool=t;step=0;tmp=[];jl=[];vh=null;wc=null;exI=-1;offi=-1;gp=[];var b=document.querySelectorAll('[data-t]');for(var i=0;i<b.length;i++)b[i].className=b[i].getAttribute('data-t')==t?'on':'';ask();$('tb').textContent=(t&&document.querySelector('#tools [data-t="'+t+'"]')?document.querySelector('#tools [data-t="'+t+'"]').textContent.slice(1):'Tools')+' \u25BE';$('tb').className=t?'on':'';draw()}
 function parse(s){
 s=s.replace(/\s+/g,'');if(!s)return null;
 var m=/^(@?)(-?[\d.]+)<(-?[\d.]+)$/.exec(s);
@@ -318,7 +342,7 @@ var n=tool;setTool(null);save();draw();say(n=='ALIGN'?'Aligned.':'Image georefer
 if(last&&tool!='MEAS'&&tool!='MAREA'&&tool!='MANG')say((tool=='POINT'?'Point '+ents[ents.length-1].n+' at ':'Last point: ')+f3(last[0])+', '+f3(last[1])+(SK?'  (snapped to '+SK+')':''));
 ask();save();draw()}
 function kp(e){return e.t=='L'?[e.a,e.b]:(e.t=='P'||e.t=='S')?e.p:e.t=='T'?[e.p]:e.t=='X'?[e.p]:e.t=='D'?[e.a,e.b]:e.t=='N'?[]:[e.c]}
-var SN={e:1,m:1,c:1,i:1,n:0,h:1,x:0,k:1,o:0},SK='',hv=null,raf=0;
+var SN={e:1,m:1,c:1,i:1,n:0,h:1,x:0,k:1,o:0,a:1,b:0,q:1},SK='',hv=null,raf=0;
 function req(){if(!raf)raf=requestAnimationFrame(function(){raf=0;draw()})}
 function prim(e){var q,o=[],i;
 if(e.t=='L')return{s:[[e.a,e.b]]};
@@ -331,9 +355,10 @@ function cc(c1,c2){var d=dist(c1.c,c2.c),o=[];if(d<1e-12||d>c1.r+c2.r||d<Math.ab
 function kpts(e){var o=[];function a(q,k){o.push({q:q,k:k})}
 if(SN.e){if(e.t=='T')a(e.p,'endpoint');else if(e.t=='L'){a(e.a,'endpoint');a(e.b,'endpoint')}else if(e.t=='P'||e.t=='S')e.p.forEach(function(q){a(q,'endpoint')});else if(e.t=='A'){a([e.c[0]+e.r*Math.cos(e.s),e.c[1]+e.r*Math.sin(e.s)],'endpoint');a([e.c[0]+e.r*Math.cos(e.e),e.c[1]+e.r*Math.sin(e.e)],'endpoint')}}
 if(SN.c&&e.c)a(e.c,'center');
+if(SN.q&&(e.t=='C'||e.t=='A'))[0,90,180,270].forEach(function(d){var g=d*Math.PI/180;if(e.t=='A'&&!inArc(e,g))return;a([e.c[0]+e.r*Math.cos(g),e.c[1]+e.r*Math.sin(g)],'quadrant')});
 if(SN.m&&(e.t=='L'||e.t=='P'))(prim(e).s||[]).forEach(function(g){a([(g[0][0]+g[1][0])/2,(g[0][1]+g[1][1])/2],'midpoint')});
 return o}
-function snapAll(p,t){var C=[],ne=[];
+function snapAll(p,t){var C=[],ne=[];if(!SN.a)return C;
 function add(q,k,w){var d=dist(p,q);if(d<t)C.push({q:q,k:k,d:d*w})}
 ents.forEach(function(e){var L=layers[e.l];if(!L||!L.on)return;
 kpts(e).forEach(function(c){add(c.q,c.k,c.k=='midpoint'?1.15:1)});
@@ -350,7 +375,7 @@ ents.forEach(function(e){var L=layers[e.l];if(!L||!L.on)return;var k=kpts(e),h=h
 snapAll(p,40/v.s).forEach(function(c){if(c.k=='intersection'||c.k=='nearest')m.push(c)});
 if(SN.k)rs.forEach(function(r){if(!rv(r))return;var u=w2r(r,p),mg=t*1.5;if(u[0]>=-mg&&u[0]<=r.img.width+mg&&u[1]<=mg&&u[1]>=-r.img.height-mg)rcor(r).forEach(function(q){m.push({q:q,k:'corner'})})});
 var b=snap(p);return{m:m,b:SK?b:null,k:SK}}
-function mark(q,k,big,sm){var z=S(q),r=big?11:sm?5:7,col={endpoint:'#30a46c',corner:'#0a7ea4',midpoint:'#f5a524',center:'#3e63dd',intersection:'#e5484d',nearest:'#ab4aba'}[k]||'#888';
+function mark(q,k,big,sm){var z=S(q),r=big?11:sm?5:7,col={endpoint:'#30a46c',corner:'#0a7ea4',quadrant:'#e879f9',midpoint:'#f5a524',center:'#3e63dd',intersection:'#e5484d',nearest:'#ab4aba'}[k]||'#888';
 ctx.strokeStyle=col;ctx.lineWidth=big?3:2;ctx.beginPath();
 if(k=='endpoint')ctx.rect(z[0]-r,z[1]-r,2*r,2*r);
 else if(k=='midpoint'){ctx.moveTo(z[0],z[1]-r);ctx.lineTo(z[0]+r,z[1]+r);ctx.lineTo(z[0]-r,z[1]+r);ctx.closePath()}
@@ -641,7 +666,51 @@ function pref(){if(tool=='GEOREF')return step>=2?gp[step-2]:null;if(tool=='ALIGN
 function polar(p){var o=pref();if(!SN.o||!o)return p;var dx=p[0]-o[0],dy=p[1]-o[1],d=Math.sqrt(dx*dx+dy*dy);if(d<1e-9)return p;
 var st=+$('pi').value||15,a=Math.atan2(dy,dx)*180/Math.PI,na=Math.round(a/st)*st;if(Math.abs(a-na)>Math.min(st/2,6))return p;
 SK='polar '+(((na%360)+360)%360)+'\u00b0';var r=na*Math.PI/180;return[o[0]+d*Math.cos(r),o[1]+d*Math.sin(r)]}
+
+var TC={};
+function lonx(lon,z){return(lon+180)/360*Math.pow(2,z)}
+function laty(lat,z){var r=lat*Math.PI/180;return(1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*Math.pow(2,z)}
+function xlon(x,z){return x/Math.pow(2,z)*360-180}
+function ylat(y,z){var n=Math.PI-2*Math.PI*y/Math.pow(2,z);return 180/Math.PI*Math.atan(.5*(Math.exp(n)-Math.exp(-n)))}
+function drawMap(){
+var pc=$('pc').value;if(pc=='loc'||pc=='ll')return;
+var cs=[Wd(0,0),Wd(W,0),Wd(0,H),Wd(W,H)].map(function(q){return tf(pc,'ll',q)});
+if(cs.some(function(q){return !(isFinite(q[0])&&isFinite(q[1]))}))return;
+var lo=cs.map(function(q){return q[0]}),la=cs.map(function(q){return q[1]}),x0=Math.min.apply(null,lo),x1=Math.max.apply(null,lo),y0=Math.min.apply(null,la),y1=Math.max.apply(null,la),
+z=Math.round(Math.log(156543.03*Math.cos((y0+y1)/2*Math.PI/180)*v.s/UL[U.b][1])/Math.LN2),ta,tb,tc,td;
+z=Math.max(1,Math.min(19,z));
+for(;;){ta=Math.floor(lonx(x0,z));tb=Math.floor(lonx(x1,z));tc=Math.floor(laty(y1,z));td=Math.floor(laty(y0,z));if((tb-ta+1)*(td-tc+1)<=60||z<=1)break;z--}
+var n=Math.pow(2,z),tx,ty;ctx.globalAlpha=.8;
+for(tx=ta;tx<=tb;tx++)for(ty=tc;ty<=td;ty++){if(ty<0||ty>=n)continue;
+var wx=((tx%n)+n)%n,key=z+'/'+wx+'/'+ty,im=TC[key];
+if(!im){if(Object.keys(TC).length>300)TC={};im=new Image();im.crossOrigin='anonymous';im.onload=req;im.onerror=function(){this.bad=1};im.src='https://tile.openstreetmap.org/'+key+'.png';TC[key]=im}
+if(!im.complete||im.bad||!im.naturalWidth)continue;
+var NW=S(tf('ll',pc,[xlon(tx,z),ylat(ty,z)])),NE=S(tf('ll',pc,[xlon(tx+1,z),ylat(ty,z)])),SW=S(tf('ll',pc,[xlon(tx,z),ylat(ty+1,z)]));
+ctx.setTransform(DPR*(NE[0]-NW[0])/256,DPR*(NE[1]-NW[1])/256,DPR*(SW[0]-NW[0])/256,DPR*(SW[1]-NW[1])/256,DPR*NW[0],DPR*NW[1]);
+ctx.drawImage(im,0,0,256,256)}
+ctx.globalAlpha=1;ctx.setTransform(DPR,0,0,DPR,0,0);
+ctx.font='10px sans-serif';ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillText('\u00a9 OpenStreetMap contributors',6,H-18)}
+function snapSet(k,val){SN[k]=val;var q=document.querySelectorAll('[data-s="'+k+'"]');for(var j=0;j<q.length;j++)q[j].className=(q[j].className.indexOf('tg')>=0?'tg ':'')+(val?'on':'');$('pl').style.display=SN.x?'':'none';draw()}
+var CMD={L:'LINE',LINE:'LINE',PL:'PLINE',PLINE:'PLINE',PG:'POLY',POLY:'POLY',POLYGON:'POLY',C:'CIRCLE',CIRCLE:'CIRCLE',C3:'CIRC3',A:'ARC',ARC:'ARC',SPL:'CURVE',CURVE:'CURVE',PT:'POINT',POINT:'POINT',M:'MOVE',MOVE:'MOVE',CO:'COPY',COPY:'COPY',RO:'ROT',ROTATE:'ROT',SC:'SCALE',SCALE:'SCALE',AL:'ALIGN',ALIGN:'ALIGN',TR:'TRIM',TRIM:'TRIM',EX:'EXTEND',EXTEND:'EXTEND',EXO:'EXTO',OF:'OFFSET',OFFSET:'OFFSET',J:'JOIN',JOIN:'JOIN',D:'MEAS',DIST:'MEAS',AREA:'MAREA',ANG:'MANG',T:'TEXT',TEXT:'TEXT',DL:'ALEN',LEN:'ALEN',PN:'APOLY',VM:'VMOVE',VA:'VADD',VD:'VDEL',SELM:'SELM',SW:'SELW',SS:'SSIM',EP:'EPICK'};
+function cmd(w){var u=w.toUpperCase(),free=u=='DONE'||u=='ESC'||u=='CANCEL';
+if(!free&&(tool=='TEXT'||tool=='APOLY'))return false;
+if(u=='?'||u=='HELP'){say('Commands: L PL PG C C3 A SPL PT | M CO RO SC AL TR EX EXO OF J X | D AREA ANG | T DL PN | U E Z ALL CLEAR | ORTHO POLAR SNAP MAP DONE');return true}
+if(CMD[u]){setTool(CMD[u]);return true}
+if(u=='X'||u=='EXPLODE'){explode();return true}
+if(u=='U'||u=='UNDO'){$('undo').onclick();return true}
+if(u=='E'||u=='ERASE'||u=='DEL'){ord('x');return true}
+if(u=='Z'||u=='ZE'||u=='FIT'||u=='ZOOM'){$('fit').onclick();return true}
+if(free){$('done').onclick();return true}
+if(u=='ALL'){ord('A');return true}
+if(u=='CLEAR'){ord('C');return true}
+if(u=='ORTHO'){snapSet('o',1);$('pi').value='90';say('Ortho on (polar snap every 90 degrees).');return true}
+if(u=='POLAR'){snapSet('o',SN.o?0:1);say('Polar snap '+(SN.o?'on.':'off.'));return true}
+if(u=='SNAP'){snapSet('a',SN.a?0:1);say('Object snaps '+(SN.a?'on.':'off.'));return true}
+if(u=='MAP'){if($('pc').value=='loc'){say('Set a project coordinate system first (Menu).');return true}snapSet('b',SN.b?0:1);say('Base map '+(SN.b?'on (needs internet).':'off.'));return true}
+return false}
 function submit(){var i=$('in'),x=i.value;SK='';
+if(!x.trim()){if(tool=='PLINE'||tool=='POLY'||tool=='CURVE'||tool=='JOIN')$('done').onclick();return}
+if(/^[A-Za-z?]+[0-9]?$/.test(x.trim())&&cmd(x.trim())){i.value='';return}
 if(tool=='TEXT'||tool=='APOLY'){ptx=x.trim();say((tool=='TEXT'?'Text':'Plot name')+' set to "'+ptx+'". Now tap '+(tool=='TEXT'?'where it goes.':'inside the polygon.'));i.value='';return}
 if(tool=='POINT'){var m=/^([A-Za-z][\w-]*)[\s:]+(\S.*)$/.exec(x.trim());if(m){pnm=m[1];x=m[2]}}feed(parse(x));i.value=''}
 $('ent').onclick=submit;
@@ -676,12 +745,12 @@ ents.forEach(function(e){if(e.c){add(e.c[0]-e.r,e.c[1]-e.r);add(e.c[0]+e.r,e.c[1
 rs.forEach(function(r){[[0,0],[r.img.width,0],[r.img.width,-r.img.height],[0,-r.img.height]].forEach(function(u){var q=r2w(r,u);add(q[0],q[1])})});
 if(x0>x1){v={x:0,y:0,s:10};draw();return}
 var sp=Math.max(x1-x0,y1-y0,1e-6);v.x=(x0+x1)/2;v.y=(y0+y1)/2;v.s=Math.min(W,H)*0.85/sp;draw()};
-function fillLy(){var s=$('ly');s.innerHTML='';layers.forEach(function(L,i){var o=document.createElement('option');o.value=i;o.textContent=(L.lock?'\uD83D\uDD12 ':'')+L.n+(L.on?'':' (hidden)');s.appendChild(o)});s.value=cur;$('vis').textContent=layers[cur].on?'Hide':'Show';try{$('lc').value=layers[cur].c}catch(x){}}
+function fillLy(){var s=$('ly');s.innerHTML='';layers.forEach(function(L,i){var o=document.createElement('option');o.value=i;o.textContent=(L.lock?'\uD83D\uDD12 ':'')+L.n+(L.on?'':' (hidden)');s.appendChild(o)});s.value=cur;$('vis').textContent=layers[cur].on?'Hide':'Show';try{$('lc').value=layers[cur].c}catch(x){}try{$('pn0').textContent=(layers[cur].lock?'\uD83D\uDD12 ':'')+layers[cur].n;document.querySelector('#pill .dot').style.background=layers[cur].c}catch(x){}}
 $('ly').onchange=function(){cur=+this.value;fillLy();save();say('New objects go on layer '+layers[cur].n+'.')};
 $('addl').onclick=function(){var n=$('ln').value.trim();if(!n){say('Type a layer name first.');return}layers.push({n:n,c:newColor(),on:1});cur=layers.length-1;$('ln').value='';fillLy();save();say('Layer added. New objects go on layer '+n+'.')};
 $('vis').onclick=function(){layers[cur].on=layers[cur].on?0:1;fillLy();save();draw()};
 $('mb').onclick=function(){var m=$('menu');m.className=m.className?'':'open';setTimeout(resize,0)};
-$('pc').onchange=save;
+$('pc').onchange=function(){save();draw()};
 $('geo').onclick=function(){if(!tgt()){say('Add an image first.');return}setTool('GEOREF');$('menu').className='';setTimeout(resize,0)};
 $('rvis').onclick=function(){var r=tgt();if(r){r.on=r.on?0:1;$('rvis').textContent=r.on?'Hide image':'Show image';save();draw()}};
 $('del').onclick=function(){if(!sel){say('Nothing selected.');return}
@@ -749,7 +818,7 @@ $('llk').onclick=function(){var Ly=layers[cur];if(Ly.imp){say('Import layers are
 var Pt={},cnt=0,mv=0,sp0=null,pd=0;
 function pos(e){var r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]}
 cv.addEventListener('pointerdown',function(e){try{cv.setPointerCapture(e.pointerId)}catch(x){}
-Pt[e.pointerId]=pos(e);cnt=Object.keys(Pt).length;if(cnt==1){mv=0;sp0=pos(e);hv=Wd(sp0[0],sp0[1]);draw()}if(cnt==2){mv=1;var k=Object.keys(Pt);pd=dist(Pt[k[0]],Pt[k[1]])||1}});
+var hn=$('hint');if(hn)hn.style.display='none';Pt[e.pointerId]=pos(e);cnt=Object.keys(Pt).length;if(cnt==1){mv=0;sp0=pos(e);hv=Wd(sp0[0],sp0[1]);draw()}if(cnt==2){mv=1;var k=Object.keys(Pt);pd=dist(Pt[k[0]],Pt[k[1]])||1}});
 cv.addEventListener('pointermove',function(e){
 if(!Pt[e.pointerId]){if(e.pointerType!='touch'){var q1=pos(e);hv=Wd(q1[0],q1[1]);req()}return}var n=pos(e),o=Pt[e.pointerId];
 if(cnt==1){v.x-=(n[0]-o[0])/v.s;v.y+=(n[1]-o[1])/v.s;if(dist(n,sp0)>8){mv=1;hv=null}Pt[e.pointerId]=n;draw()}
@@ -766,7 +835,14 @@ $('bu').onchange=function(){U.b=this.value;usave()};$('ul').onchange=function(){
 $('um').onclick=function(){U.l='m';U.a='m2';usave()};$('ui').onclick=function(){U.l='ft';U.a='ac';usave()};uset();
 try{var as0=JSON.parse(localStorage.getItem('scadA')||'null');if(as0){$('ad').value=as0.d;$('aa').value=as0.a;$('au').value=as0.u;$('as').value=as0.s}}catch(x){}
 ['ad','aa','au','as'].forEach(function(k){$(k).onchange=function(){try{localStorage.setItem('scadA',JSON.stringify({d:$('ad').value,a:$('aa').value,u:$('au').value,s:$('as').value}))}catch(x){}draw()}});
-(function(){var b=document.querySelectorAll('[data-s]');for(var i=0;i<b.length;i++){(function(x){var k=x.getAttribute('data-s');x.className=SN[k]?'on':'';x.onclick=function(){SN[k]=SN[k]?0:1;x.className=SN[k]?'on':'';say('Snap '+x.textContent+(SN[k]?' on':' off')+(k=='x'&&SN.x?'. Pan so the crosshair sits near a feature, then tap Place.':''));$('pl').style.display=SN.x?'':'none';draw()}})(b[i])}})();
+(function(){function sy(k){var q=document.querySelectorAll('[data-s="'+k+'"]');for(var j=0;j<q.length;j++)q[j].className=(q[j].className.indexOf('tg')>=0?'tg ':'')+(SN[k]?'on':'')}
+var b=document.querySelectorAll('[data-s]');for(var i=0;i<b.length;i++){(function(x){var k=x.getAttribute('data-s');sy(k);x.onclick=function(){if(k=='b'&&!SN.b&&$('pc').value=='loc'){say('Set a project coordinate system first (Menu), then turn the map on.');return}SN[k]=SN[k]?0:1;sy(k);if(k=='b'){say(SN.b?'Base map on. It needs internet and works in the hosted app copy.':'Base map off.');draw();return}say('Snap '+x.textContent.trim()+(SN[k]?' on':' off')+(k=='x'&&SN.x?'. Pan so the crosshair sits near a feature, then tap Place.':''));$('pl').style.display=SN.x?'':'none';draw()}})(b[i])}})();
+function zb(f){v.s=Math.max(0.0001,Math.min(1e7,v.s*f));draw()}
+$('zi').onclick=function(){zb(1.5)};$('zo').onclick=function(){zb(1/1.5)};$('zf').onclick=function(){$('fit').onclick()};
+$('strip').onclick=function(e){var b=e.target.closest?e.target.closest('button'):e.target;if(!b)return;var t=b.getAttribute('data-t');if(t){setTool(t);$('tools').classList.remove('open')}};
+$('mclose').onclick=function(){$('menu').className=''};
+$('pill').onclick=function(){$('mb').onclick()};
+$('dlay').onclick=function(){$('ldel').onclick()};
 $('pj').onchange=function(){put();openP(this.value)};
 $('pnew').onclick=function(){if(!db){say('Projects need browser storage, which is not available.');return}var n=$('pn').value.trim()||'Project '+(plist.length+1);$('pn').value='';newP(n)};
 $('prn').onclick=function(){var n=$('pn').value.trim();if(!n||!pid){say('Type the new name in the project name box.');return}plist.forEach(function(x){if(x.id==pid)x.name=n});$('pn').value='';putIdx();fillP();say('Renamed to '+n)};
